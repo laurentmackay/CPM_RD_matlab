@@ -1,0 +1,9 @@
+diffusing_species=2:7;
+
+ij_diffuse=cell([1,size(jump,2)]);
+diffuse_mask=zeros(N*N,4)
+for drx=1:size(jump,2)
+diffuse_mask(:,:,drx)=reshape(x(1,jump(:,drx))&x(1,:),N);
+
+ij_diffuse{drx}=ij0(x(1,jump(:,drx))&x(1,:));
+end
