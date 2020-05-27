@@ -10,4 +10,6 @@ Currently, the chemical reactions are based on the model found in [1]. However, 
 
 
 References:
+
+
 [1] Kaixi Tang,Colton G. Boudreau, Claire M. Brown ,Anmar Khadra. Paxillin phosphorylation at serine 273 and its effects on Rac, Rho and adhesion dynamic. PLOS Comp. Bio. 2018.
