@@ -9,19 +9,19 @@ function [x,diffusing_species_sum,D,h,alpha_rx,num_diffuse,...
     alpha,PAKtot,nrx,A,numDiff,numReac)
 
 
-N_instantaneous=50; % the number of steady reaction itterated at a moment in time 
+N_instantaneous=50; % the number of steady reaction itterated at a moment in time
 sz=size(x,1)*size(x,2);
 
-%variables declared so that the c encoder is happy 
+%variables declared so that the c encoder is happy
 i=1;
 p=1;
 i2=1;
 rx=1;
 xi0=x(id0+i(1));
-I_changed=[i i2];
+i_update=[i i2];
 
 for kk=1:nrx
-%      alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
+    %      alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
     
     %total propensity to diffuse for all species
     alpha_diff=sum(diffusing_species_sum).*D/(h*h);
@@ -36,17 +36,17 @@ for kk=1:nrx
     diffused=false;
     neg=false;
     RN=rand();
-
+    
     if RN*a_total <= sum(alpha_diff(:))
         
-        diffused=true; 
-
+        diffused=true;
+        
         %-------------diffusion-----------
         p=find((RN*a_total<=cumsum(alpha_diff)),1); %which protein diffuses
-        p=p(1); %for encoder 
-        i0=(p-1)*sz; % the vectorized location of the appropriate proteins 
-
-        %adding all previous reactions to the propensity 
+        p=p(1); %for encoder
+        i0=(p-1)*sz; % the vectorized location of the appropriate proteins
+        
+        %adding all previous reactions to the propensity
         if p==1
             temp=0;
         else
@@ -62,7 +62,7 @@ for kk=1:nrx
                 i(1)=ij_diffuse(drx,ii);
                 %find the point they diffuses to
                 i2=jump(i,drx);
-                I_changed=[i i2];
+                i_update=[i i2];
                 
                 %carry out the diffusion reaction
                 x(i0+i) = x(i0+i)-1;
@@ -87,15 +87,15 @@ for kk=1:nrx
         end
         numDiff=numDiff+1;%ellie
     else% ---------- Reaction Time -------------
-        reacted=false;      
+        reacted=false;
         temp=sum(alpha_diff(:));
-        %determing where the reaction happens 
+        %determing where the reaction happens
         for rx=1:size(alpha_chem,3)
             i0=(rx-1)*sz;
             if temp+alpha_rx(rx)>=RN*a_total&&~reacted
                 ii=find(cumsum(alpha_chem(i0+cell_inds(1:A)))>=RN*a_total-temp,1);
                 i=cell_inds(ii(1));
-                I_changed=i;
+                i_update=i;
                 xi0=x(id0+i(1));
                 reacted = true;
             elseif ~reacted
@@ -152,12 +152,11 @@ for kk=1:nrx
         %         neg=x(i+(rx-1)*sz)<0;
     end
     
-    %-----------recalculating value that would have changed-------------- 
-    %the reaction trees are seprate as 2 cells change when diffusion
-    %happens
-        if ~diffused 
-        %deal with complexing and decomplexing
+    %-----------recalculating value that would have changed--------------
 
+    if ~diffused
+        %deal with complexing and decomplexing
+        
         if rx==2||rx==4%Rac
             K_R=(1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(i))*alpha*PAKtot*K_is(i);
             for j=1:N_instantaneous
@@ -186,54 +185,41 @@ for kk=1:nrx
         neg=x(i+(rx-1)*sz)<0;
     end
     
-%     [x,A,sz,diffusing_species_sum,alpha_rx,...
-%     alpha_chem,diffuse_mask,PaxRatio,RhoRatio,K_is,K,...
-%     RacRatio,RbarRatio,I_Ks,N_instantaneous,reaction,ir0,id0,cell_inds,...
-%     k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-%     alpha,PAKtot,rx,diffused,i,I,xi0,neg]=update_alpha_chem(x,A,sz,diffusing_species_sum,alpha_rx,...
-%     alpha_chem,diffuse_mask,PaxRatio,RhoRatio,K_is,K,...
-%     RacRatio,RbarRatio,I_Ks,N_instantaneous,reaction,ir0,id0,cell_inds,...
-%     k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-%     alpha,PAKtot,rx,diffused,i,I,xi0,neg);
 
-%     update_alpha_chem
-
-%to properly locate in alpha_chem(ir0+I)
-% [tmp,tmp2]=meshgrid(ir0,I);
-for j=1:length(I_changed)
-    j=I_changed(j);
-    i_rx=ir0+j;
-
-    a_c_0=alpha_chem(i_rx);
-
-%update Ratios
-RacRatio(j)=nan2zero(x(j+(4-1)*sz)./(x(j+(4-1)*sz)+x(j+(2-1)*sz)+x(j+(7-1)*sz)));
-RbarRatio(j)=nan2zero(x(j+(7-1)*sz)./(x(j+(4-1)*sz)+x(j+(2-1)*sz)+x(j+(7-1)*sz)));
-RhoRatio(j)=nan2zero(x(j+(3-1)*sz)./(x(j+(3-1)*sz)+x(j+(1-1)*sz)));
-PaxRatio(j)=nan2zero(x(j+(6-1)*sz)./(x(j+(6-1)*sz)+x(j+(5-1)*sz)+x(j+(8-1)*sz)));
-
-if sum([nnz(isnan(RhoRatio)), nnz(isnan(RacRatio)), nnz(isnan(PaxRatio))])~=0
-    disp("woah")
-end
-
-
-
-%update other parameters    
-K_is(j)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(j)).*(1+alpha_R*RacRatio(j))+k_G*k_X*GIT*PIX);
-K(j)=alpha_R*RacRatio(j).*K_is(j).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(j));%RbarRatio(j)/gamma;         %changed from paper
-I_Ks(j)=I_K*(1-K_is(j).*(1+alpha_R*RacRatio(j)));
-
-reaction(j+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(j)+RbarRatio(j)).^m));            %From inactive rho to active rho changed from model
-reaction(j+(2-1)*sz) = (I_R+I_Ks(j)).*(L_rho^m./(L_rho^m+RhoRatio(j).^m));                %From inactive Rac to active Rac
-reaction(j+(5-1)*sz) = B_1*(K(j).^m./(L_K^m+K(j).^m));
-
-
-alpha_chem(i_rx) = reaction(i_rx).*x(i_rx); %chemical reaction
-alpha_rx=alpha_rx+alpha_chem(i_rx)-a_c_0;
-
-
-end
-
+    for j=1:length(i_update)
+        j=i_update(j);
+        i_chem=ir0+j;
+        
+        a_c_0=alpha_chem(i_chem);
+        
+        %update Ratios
+        RacRatio(j)=nan2zero(x(j+(4-1)*sz)./(x(j+(4-1)*sz)+x(j+(2-1)*sz)+x(j+(7-1)*sz)));
+        RbarRatio(j)=nan2zero(x(j+(7-1)*sz)./(x(j+(4-1)*sz)+x(j+(2-1)*sz)+x(j+(7-1)*sz)));
+        RhoRatio(j)=nan2zero(x(j+(3-1)*sz)./(x(j+(3-1)*sz)+x(j+(1-1)*sz)));
+        PaxRatio(j)=nan2zero(x(j+(6-1)*sz)./(x(j+(6-1)*sz)+x(j+(5-1)*sz)+x(j+(8-1)*sz)));
+        
+        if sum([nnz(isnan(RhoRatio)), nnz(isnan(RacRatio)), nnz(isnan(PaxRatio))])~=0
+            disp("woah")
+        end
+        
+        
+        
+        %update other parameters
+        K_is(j)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(j)).*(1+alpha_R*RacRatio(j))+k_G*k_X*GIT*PIX);
+        K(j)=alpha_R*RacRatio(j).*K_is(j).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(j));%RbarRatio(j)/gamma;         %changed from paper
+        I_Ks(j)=I_K*(1-K_is(j).*(1+alpha_R*RacRatio(j)));
+        
+        reaction(j+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(j)+RbarRatio(j)).^m));            %From inactive rho to active rho changed from model
+        reaction(j+(2-1)*sz) = (I_R+I_Ks(j)).*(L_rho^m./(L_rho^m+RhoRatio(j).^m));                %From inactive Rac to active Rac
+        reaction(j+(5-1)*sz) = B_1*(K(j).^m./(L_K^m+K(j).^m));
+        
+        
+        alpha_chem(i_chem) = reaction(i_chem).*x(i_chem); %chemical reaction
+        alpha_rx=alpha_rx+alpha_chem(i_chem)-a_c_0;
+        
+        
+    end
+    
     
     if neg
         error('Oh no! D: (negtive numbers)')

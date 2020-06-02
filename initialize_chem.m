@@ -9,30 +9,6 @@ D = [D_1 D_1 D_2 D_2 D_3 D_3];
 N_instantaneous=50;
 
 %Parameters from (Tang et al., 2018) 
-% B_1=4.26;  
-% gamma = 0.3;
-% L_R=0.34;
-% delta_rho=0.016;
-% 
-% m=4;                                    %More commonly known as 'n' in literature
-% L_K=5.77;
-% delta_P=0.00041;
-% k_X=41.7;
-% k_G=5.71;
-% k_C=5;
-% GIT=0.11;
-% PIX=0.069;
-% Paxtot=2.3;
-% alpha_R=15;
-% Rtot=7.5; % from Suplemental 1
-% alpha=alpha_R/Rtot;
-% delta_R = 0.025;
-% PAKtot = gamma*Rtot;
-% 
-% I_R = 0.003;
-% I_K = 0.009;
-% I_rho = 0.016;
-
 B_1=4.5;
 
 I_rho=0.016; L_rho=0.34; delta_rho=0.016;
@@ -43,6 +19,7 @@ L_K=5.77;
 k_X=41.7; k_G=5.71; k_C=5;
 GIT=0.11; PIX=0.069; Paxtot=2.3;
 n=4; m=4; gamma=0.3;
+PAKtot = gamma*Rtot;
 
 h=len;
 
@@ -107,7 +84,7 @@ alpha_rx=zeros(1,6);
 alpha_diff=zeros(6,1);
 ir0=((1:size(alpha_chem,3))-1)*sz;
 
-I=1:N*N;
+I=cell_inds(1:A);
 
 % RacRatio(I)=x(I+(4-1)*sz)./(x(I+(4-1)*sz)+x(I+(2-1)*sz)+x(I+(7-1)*sz));
 % RbarRatio(I)=x(I+(7-1)*sz)./(x(I+(4-1)*sz)+x(I+(2-1)*sz)+x(I+(7-1)*sz));
@@ -119,9 +96,9 @@ I=1:N*N;
 %%
 %to properly locate in alpha_chem(ir0+I)
 [tmp,tmp2]=meshgrid(ir0,I);
-I_rx=tmp+tmp2;
+I_chem=tmp+tmp2;
 
-a_c_0=alpha_chem(I_rx);
+a_c_0=alpha_chem(I_chem);
 
 %update Ratios
 RacRatio(I)=x(I+(4-1)*sz)./(x(I+(4-1)*sz)+x(I+(2-1)*sz)+x(I+(7-1)*sz));
@@ -144,7 +121,7 @@ reaction(I+(2-1)*sz) = (I_R+I_Ks(I)).*(L_rho^m./(L_rho^m+RhoRatio(I).^m));      
 reaction(I+(5-1)*sz) = B_1*(K(I).^m./(L_K^m+K(I).^m));
 
 
-alpha_chem(I_rx) = reaction(I_rx).*x(I_rx);
+alpha_chem(I_chem) = reaction(I_chem).*x(I_chem);
 alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
 
 
