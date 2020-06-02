@@ -83,9 +83,9 @@ reaction(:,:,4) = delta_R;                                               %From a
 reaction(:,:,6) = delta_P;                                               %From phosphorylated Pax to unphosphorylated Pax
 
 
-alpha_chem=zeros([shape 6]);
+alpha_chem=zeros([shape N_rx]);
 alpha_rx=zeros(1,N_rx);
-alpha_diff=zeros(6,1);
+alpha_diff=zeros(6,1); %the 6 here is not the same as N_rx...need to figure out a system
 ir0=((1:N_rx)-1)*sz;
 
 RhoRatio=zeros(shape);
@@ -95,19 +95,19 @@ PaxRatio=zeros(shape);
 K=zeros(shape);
 K_is=zeros(shape);
 I_Ks=zeros(shape);
-%%
-I=cell_inds(1:A);
+%% this should exactly match what is at the end of CPM_chem_func.m
+i=cell_inds(1:A);
 
-[tmp,tmp2]=meshgrid(ir0,I);
-I_chem=tmp+tmp2;
+[tmp,tmp2]=meshgrid(ir0,i);
+i_chem=tmp+tmp2;
 
-a_c_0=alpha_chem(I_chem);
+a_c_0=alpha_chem(i_chem);
 
 %update Ratios
-RacRatio(I)=x(I+(4-1)*sz)./(x(I+(4-1)*sz)+x(I+(2-1)*sz)+x(I+(7-1)*sz));
-RbarRatio(I)=x(I+(7-1)*sz)./(x(I+(4-1)*sz)+x(I+(2-1)*sz)+x(I+(7-1)*sz));
-RhoRatio(I)=x(I+(3-1)*sz)./(x(I+(3-1)*sz)+x(I+(1-1)*sz));
-PaxRatio(I)=x(I+(6-1)*sz)./(x(I+(6-1)*sz)+x(I+(5-1)*sz)+x(I+(8-1)*sz));
+RacRatio(i)=x(i+(4-1)*sz)./(x(i+(4-1)*sz)+x(i+(2-1)*sz)+x(i+(7-1)*sz));
+RbarRatio(i)=x(i+(7-1)*sz)./(x(i+(4-1)*sz)+x(i+(2-1)*sz)+x(i+(7-1)*sz));
+RhoRatio(i)=x(i+(3-1)*sz)./(x(i+(3-1)*sz)+x(i+(1-1)*sz));
+PaxRatio(i)=x(i+(6-1)*sz)./(x(i+(6-1)*sz)+x(i+(5-1)*sz)+x(i+(8-1)*sz));
 
 RacRatio(isnan(RacRatio))=0;
 RbarRatio(isnan(RbarRatio))=0;
@@ -115,16 +115,16 @@ RhoRatio(isnan(RhoRatio))=0;
 PaxRatio(isnan(PaxRatio))=0;
 
 %update other parameters    
-K_is(I)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(I)).*(1+alpha_R*RacRatio(I))+k_G*k_X*GIT*PIX);
-K(I)=alpha_R*RacRatio(I).*K_is(I).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(I));%RbarRatio(I)/gamma;         %changed from paper
-I_Ks(I)=I_K*(1-K_is(I).*(1+alpha_R*RacRatio(I)));
+K_is(i)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(i)).*(1+alpha_R*RacRatio(i))+k_G*k_X*GIT*PIX);
+K(i)=alpha_R*RacRatio(i).*K_is(i).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(i));%RbarRatio(I)/gamma;         %changed from paper
+I_Ks(i)=I_K*(1-K_is(i).*(1+alpha_R*RacRatio(i)));
 
-reaction(I+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(I)+RbarRatio(I)).^m));            %From inactive rho to active rho changed from model
-reaction(I+(2-1)*sz) = (I_R+I_Ks(I)).*(L_rho^m./(L_rho^m+RhoRatio(I).^m));                %From inactive Rac to active Rac
-reaction(I+(5-1)*sz) = B_1*(K(I).^m./(L_K^m+K(I).^m));
+reaction(i+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(i)+RbarRatio(i)).^m));            %From inactive rho to active rho changed from model
+reaction(i+(2-1)*sz) = (I_R+I_Ks(i)).*(L_rho^m./(L_rho^m+RhoRatio(i).^m));                %From inactive Rac to active Rac
+reaction(i+(5-1)*sz) = B_1*(K(i).^m./(L_K^m+K(i).^m));
 
 
-alpha_chem(I_chem) = reaction(I_chem).*x(I_chem);
-alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
+alpha_chem(i_chem) = reaction(i_chem).*x(i_chem);
+alpha_rx=sum(alpha_chem(i_chem));
 
 
