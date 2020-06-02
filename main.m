@@ -10,15 +10,17 @@ mkdir 'results'
 %open(vid);
 
 N_species=8; %number of chemical species
-finaltime=2e4; %time the simulation end
+N_rx=6; %number of reactions (this should determined automatically)
+Ttot=2e4; %time the simulation end
 SF=10; % speed factor I divide molecule number by this for speed
 Gsize=100; %length of the grid in um
 N=20; % number of points used to discretize the grid
-sz=N^2;
+shape=[N,N];
+sz=prod(shape);
 len=Gsize/N; %length of a latice square
-[j, i,] = meshgrid(1:N,1:N); %the i and j need to be reversed for some reason (\_(:0)_/)
+[j, i,] = meshgrid(1:shape(2),1:shape(1)); %the i and j need to be reversed for some reason (\_(:0)_/)
 
-x=zeros(N,N,N_species); % where the chemical information is stored
+x=zeros(shape(1),shape(2),N_species); % where the chemical information is stored
 
 initialize_cell_geometry
 initialize_cellular_potts
@@ -29,10 +31,10 @@ tic
 picstep=(len)/vmax; %timepoints where we take a frame for the video
 z=1;
 
-center=zeros(floor(finaltime/picstep)+1,2); %an array where we store the COM
+center=zeros(floor(Ttot/picstep)+1,2); %an array where we store the COM
 center(z,:)=com(cell_mask);
 
-Results=zeros(N,N,N_species+1,floor(finaltime/picstep)+1); %an array where we store results
+Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
 
 %pic %takes a frame for the video
 
@@ -75,7 +77,7 @@ TPax=[];
 
 last_time=time; %used to time the CMP_step
 tic
-while time<finaltime
+while time<Ttot
     A=nnz(cell_mask); %current area
     cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s
     

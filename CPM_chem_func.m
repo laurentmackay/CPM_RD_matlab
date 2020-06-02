@@ -154,7 +154,7 @@ for kk=1:nrx
     
     %-----------recalculating value that would have changed--------------
 
-    if ~diffused
+    if ~diffused %this is a hack to prevent errors, but it is technically wrong...complexation should always be run
         %deal with complexing and decomplexing
         
         if rx==2||rx==4%Rac
