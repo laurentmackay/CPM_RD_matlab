@@ -21,6 +21,8 @@ GIT=0.11; PIX=0.069; Paxtot=2.3;
 n=4; m=4; gamma=0.3;
 PAKtot = gamma*Rtot;
 
+alpha=alpha_R/Rtot;
+
 h=len;
 
 %%%
@@ -37,10 +39,12 @@ Pax_Square = totalPax/(A);    %Average number of Pax per square
 R_eq=0; % i seet the equillbirum values to 0 so the Rac always causes exansion Rho always causes retraction
 rho_eq=0;
 
+% rough estimate of uninduced state
 RhoRatio = 0.3;
 RacRatio = 0.13;
 PaxRatio = 0.05;
-% 
+
+% rough estimate of the induced state 
 RhoRatio = 0.13;
 RacRatio = 0.63;
 PaxRatio = 0.35;
@@ -79,22 +83,21 @@ reaction(:,:,4) = delta_R;                                               %From a
 reaction(:,:,6) = delta_P;                                               %From phosphorylated Pax to unphosphorylated Pax
 
 
-alpha_chem=zeros(N,N,6);
-alpha_rx=zeros(1,6);
+alpha_chem=zeros([shape 6]);
+alpha_rx=zeros(1,N_rx);
 alpha_diff=zeros(6,1);
-ir0=((1:size(alpha_chem,3))-1)*sz;
+ir0=((1:N_rx)-1)*sz;
 
+RhoRatio=zeros(shape);
+RacRatio=zeros(shape);
+RbarRatio=zeros(shape);
+PaxRatio=zeros(shape);
+K=zeros(shape);
+K_is=zeros(shape);
+I_Ks=zeros(shape);
+%%
 I=cell_inds(1:A);
 
-% RacRatio(I)=x(I+(4-1)*sz)./(x(I+(4-1)*sz)+x(I+(2-1)*sz)+x(I+(7-1)*sz));
-% RbarRatio(I)=x(I+(7-1)*sz)./(x(I+(4-1)*sz)+x(I+(2-1)*sz)+x(I+(7-1)*sz));
-% RhoRatio(I)=x(I+(3-1)*sz)./(x(I+(3-1)*sz)+x(I+(1-1)*sz));
-% PaxRatio(I)=x(I+(6-1)*sz)./(x(I+(6-1)*sz)+x(I+(5-1)*sz)+x(I+(8-1)*sz));
-
-% 
-% update_alpha_chem
-%%
-%to properly locate in alpha_chem(ir0+I)
 [tmp,tmp2]=meshgrid(ir0,I);
 I_chem=tmp+tmp2;
 
@@ -125,29 +128,3 @@ alpha_chem(I_chem) = reaction(I_chem).*x(I_chem);
 alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
 
 
-%         ai20=alpha_chem(ir0+i2(1));
-
-
-% alpha_chem(I_rx) = reaction(I_rx).*x(I_rx); %chemical reaction
-% alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0);
-%%
-
-
-% % determining fractional expression per grid point
-% RhoRatio=x(:,:,3)./(x(:,:,3)+x(:,:,1));
-% RhoRatio(isnan(RhoRatio))=0;
-% RacRatio=x(:,:,4)./(x(:,:,4)+x(:,:,2)+x(:,:,7));
-% RacRatio(isnan(RacRatio))=0;
-% PaxRatio=x(:,:,6)./(x(:,:,6)+x(:,:,5)+x(:,:,8));
-% PaxRatio(isnan(PaxRatio))=0;
-% RbarRatio=x(:,:,7)./(x(:,:,4)+x(:,:,2)+x(:,:,7));  % this is gamma*K    
-% RbarRatio(isnan(RbarRatio))=0;
-% 
-% %----reactions propensites that vary lattice ot lattice 
-% K_is=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio).*(1+alpha_R*RacRatio)+k_G*k_X*GIT*PIX);
-% K=alpha_R*RacRatio.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);%RbarRatio/gamma;         %changed from paper
-% I_Ks=I_K*(1-K_is.*(1+alpha_R*RacRatio));
-% reaction(:,:,1) = I_rho*(L_R^m./(L_R^m +(RacRatio+RbarRatio).^m));            %From inactive rho to active rho changed from model
-% reaction(:,:,2) = (I_R+I_Ks).*(L_rho^m./(L_rho^m+RhoRatio.^m));
-% reaction(:,:,5) = B_1*(K.^m./(L_K^m+K.^m));
-% alpha_chem=reaction(:,:,1:6).*x(:,:,1:6);
