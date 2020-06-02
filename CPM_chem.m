@@ -67,8 +67,8 @@ else% ---------- Reaction Time! -------------
     for rx=1:size(alpha_chem,3)
         i0=(rx-1)*sz;
         if temp+alpha_rx(rx)>=RN*a_total&&~reacted
-            ii=find(cumsum(alpha_chem(i0+cell_inds))>=RN*a_total-temp,1);
-            i=cell_inds(ii);
+            ii=find(cumsum(alpha_chem(i0+cell_inds))>=RN*a_total-temp,1);%find the spatial location in the linear reference frame of the cell
+            i=cell_inds(ii);%convert it back to the grid frame of reference
             reacted = true;
         elseif ~reacted
             temp=temp+alpha_rx(rx);

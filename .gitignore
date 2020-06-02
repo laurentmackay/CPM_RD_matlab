@@ -1,3 +1,6 @@
 *.m~
 *.mp4
+*.asv
+*.bak
 results
+codegen
