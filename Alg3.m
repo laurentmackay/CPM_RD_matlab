@@ -4,7 +4,7 @@ sz=size(x0,1)*size(x0,2);
 x=x0;
 
 
-for chem=1:size(x0,3)
+for chem=1:length(D)
     ic0=(chem-1)*sz;
     for i=1:A
         vox=cell_inds(i);

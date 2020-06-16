@@ -1,13 +1,12 @@
 function m = Alg5(M,pT,xi)
-f=@(i) betainc(pT,i,M-i+1)-xi;
 l=0;u=M;
-fl=f(l);
-fu=f(u);
+fl=betainc(pT,l,M-l+1)-xi;
+fu=betainc(pT,u,M-u+1)-xi;
 
 
 while abs(l-u)>1
 r=round((l+u)/2);
-fr=f(r);
+fr=betainc(pT,r,M-r+1)-xi;
 if sign(fl)==sign(fr)
     l=r;
     fl=fr;
