@@ -222,7 +222,7 @@ for kk=1:nrx
     
     
     if neg
-        error('Oh no! D: (negtive numbers)')
+        error(['Oh no! D: (negtive numbers): ' sprintf("%d",find(x<0)) ])
     end
     
 end

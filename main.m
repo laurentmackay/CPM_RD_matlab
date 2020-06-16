@@ -4,44 +4,45 @@
 % set(0,'DefaultFIgureVisible','on');
 %restarting the environment
 
-mkdir 'results'
+% mkdir 'results'
 %vid = VideoWriter(['results'],'MPEG-4'); % this saves videos to mp4 change to whatever's convenient
 
+figure(1);
 %open(vid);
 
 N_species=8; %number of chemical species
 N_rx=6; %number of reactions (this should determined automatically)
-Ttot=2e4; %time the simulation end
-SF=10; % speed factor I divide molecule number by this for speed
-Gsize=100; %length of the grid in um
-N=20; % number of points used to discretize the grid
+Ttot=2e1; %time the simulation end
+SF=1; % speed factor I divide molecule number by this for speed
+Gsize=10; %length of the grid in um
+N=30; % number of points used to discretize the grid
 shape=[N,N];
 sz=prod(shape);
 len=Gsize/N; %length of a latice square
-[j, i,] = meshgrid(1:shape(2),1:shape(1)); %the i and j need to be reversed for some reason (\_(:0)_/)
+[j, i] = meshgrid(1:shape(2),1:shape(1)); %the i and j need to be reversed for some reason (\_(:0)_/)
 
-x=zeros(shape(1),shape(2),N_species); % where the chemical information is stored
+div=0.2;
 
 initialize_cell_geometry
 initialize_cellular_potts
 initialize_chem %all reaction-diffusion parameter are getting initialized
 
-timecheck=0;
+lastplot=0;
 tic
-picstep=(len)/vmax; %timepoints where we take a frame for the video
+picstep=0.05;(len)/vmax; %timepoints where we take a frame for the video
 z=1;
 
 center=zeros(floor(Ttot/picstep)+1,2); %an array where we store the COM
 center(z,:)=com(cell_mask);
 
-Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
+% Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
 
 %pic %takes a frame for the video
 
-nrx=3e4; %number of times reactions are carried out in a chem_func loop
+nrx=1e5; %number of times reactions are carried out in a chem_func loop
 reactions=0; %intializing a reaction counter
 
-%intializing variables for enumerate_diffusion.m making sure there size is
+%intializing variables for enumerate_diffusion.m making sure their size is
 %constant
 ij0=(1:(sz))';
 diffuse_mask=false(size(jump,2),sz);
@@ -98,19 +99,19 @@ while time<Ttot
         
         reactions=reactions+nrx; %reaction counter
         
-        if time>=timecheck+picstep % takes video frames
-            %pic
-            Timeseries=[Timeseries time];
-            
-            TRac=[TRac sum(sum(x(:,:,4)))/sum(sum(sum(x(:,:,[4 2 7]))))];
-            TRho=[TRho sum(sum(x(:,:,3)))/sum(sum(sum(x(:,:,[1 3]))))];
-            TPax=[TPax sum(sum(x(:,:,6)))/sum(sum(sum(x(:,:,[6 5 8]))))];
-
-            z=z+1;
-            center(z,:)=com(cell_mask);
-            timecheck=timecheck+picstep;
-            time
-            reactions
+        if time>=lastplot+picstep % takes video frames
+            pic
+%             Timeseries=[Timeseries time];
+%             
+%             TRac=[TRac sum(sum(x(:,:,4)))/sum(sum(sum(x(:,:,[4 2 7]))))];
+%             TRho=[TRho sum(sum(x(:,:,3)))/sum(sum(sum(x(:,:,[1 3]))))];
+%             TPax=[TPax sum(sum(x(:,:,6)))/sum(sum(sum(x(:,:,[6 5 8]))))];
+% 
+%             z=z+1;
+%             center(z,:)=com(cell_mask);
+            lastplot=time;
+%             time
+%             reactions
             toc
         end
         
@@ -122,7 +123,7 @@ while time<Ttot
 %         CPM_step
 %     end
     
-    enumerate_diffusion %recaucluates diffusable cites
+    enumerate_diffusion %recaucluates diffusable sites
 end
 
 
