@@ -11,11 +11,8 @@ len=Gsize/N; %length of a lattice square
 dx=len;
 [j, i] = meshgrid(1:shape(2),1:shape(1)); %the i and j need to be reversed for some reason (\_(:0)_/)
 
-<<<<<<< HEAD
 div=0.2;%fraction of the cell in the induced state
-=======
-div=0.2;
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
+
 
 initialize_cell_geometry
 initialize_cellular_potts
@@ -30,27 +27,18 @@ ij_diffuse=zeros(4,(N)*(N));
 
 enumerate_diffusion
 
-<<<<<<< HEAD
+
 pmax=0.5;%max allowed pT for one cell
 
-dt=pmax*(h^2)/(max(D)*size(diffuse_mask,1));
+dt=pmax*(h^2)/(max(D)*size(diffuse_mask,1));%aut-determine timestep
 
-
-=======
-pmax=0.5;
-
-dt=pmax*(h^2)/(max(D)*size(diffuse_mask,1));
-
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
 % dt=0.01;
 imagesc(x(:,:,2))
 
 jumpp=jump';
-<<<<<<< HEAD
 %pre-compute single molecule diffusion probabilities for the timestep of
 %length dt
-=======
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
+
 pT = zeros(size(num_vox_diff,2),size(x,3));
 pi = zeros(size(diffuse_mask,1),sz);
 for i=1:A
@@ -59,18 +47,14 @@ for i=1:A
     pi(:,vox)=diffuse_mask(:,vox)'./sum(diffuse_mask(:,vox));
 end
 max(max(pT))
-<<<<<<< HEAD
 
-=======
-% pi=diffuse_mask/sum(diffuse_mask)
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
 while true
 tic;
 x=Alg3_mex(x,dt,D,dx,jumpp,diffuse_mask,pT,pi,cell_inds,A,1);
 toc
 
 imagesc(x(:,:,2));
-% sum(sum(x(:,:,2)))
+
 colorbar
 drawnow;
 end
