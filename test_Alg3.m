@@ -18,7 +18,6 @@ initialize_cell_geometry
 initialize_cellular_potts
 initialize_chem 
 
-D=[D 0 0];
 
 ij0=(1:(sz))';
 diffuse_mask=false(size(jump,2),sz);
@@ -30,27 +29,31 @@ enumerate_diffusion
 
 pmax=0.5;%max allowed pT for one cell
 
-dt=pmax*(h^2)/(max(D)*size(diffuse_mask,1));%aut-determine timestep
+dt=pmax*(h^2)/(max(D)*size(diffuse_mask,1));%auto-determine timestep
 
 % dt=0.01;
 imagesc(x(:,:,2))
 
-jumpp=jump';
-%pre-compute single molecule diffusion probabilities for the timestep of
-%length dt
+jumpp=jump';%this may speed up things, but probably not
 
-pT = zeros(size(num_vox_diff,2),size(x,3));
+
+
+pT = zeros(size(num_vox_diff,2),length(D));
 pi = zeros(size(diffuse_mask,1),sz);
+
+%pre-compute single molecule diffusion probabilities for the timestep of
+%length dt, as well as the directional probabilities
+%this must be re-run everytime cell-geometry changes
 for i=1:A
     vox=cell_inds(i);
     pT(vox,:) = num_vox_diff(vox)*D*dt/(h^2);
     pi(:,vox)=diffuse_mask(:,vox)'./sum(diffuse_mask(:,vox));
 end
-max(max(pT))
+
 
 while true
 tic;
-x=Alg3_mex(x,dt,D,dx,jumpp,diffuse_mask,pT,pi,cell_inds,A,1);
+x=Alg3_mex(x,dt,D,dx,jumpp,diffuse_mask,pT,pi,cell_inds,A);
 toc
 
 imagesc(x(:,:,2));
