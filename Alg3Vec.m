@@ -1,16 +1,9 @@
 function x =  Alg3(x0,dt,D,h,jump,diffuse_mask,pT,pi,cell_inds,A)
-
-% pT = zeros(size(num_vox_diff,2),size(x0,3));
 sz=size(x0,1)*size(x0,2);
-
-
-
-% dx=zeros(size(x0));
 x=x0;
 
 Nchem=size(x0,3);
 ic0=((1:Nchem)-1)*sz;
-
     
     for i=1:A
         vox=cell_inds(i);
@@ -26,7 +19,5 @@ ic0=((1:Nchem)-1)*sz;
                 x(vox+ic)=x(vox+ic)-m;
             end
         end
-
-
     end
 end
