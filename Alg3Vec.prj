@@ -1,9 +1,5 @@
 <deployment-project plugin="plugin.coder" plugin-version="R2016a">
-<<<<<<< HEAD
-  <configuration build-checksum="1156935682" file="C:\Users\User\git\CPM_RD_matlab\Alg3.prj" location="C:\Users\User\git\CPM_RD_matlab" name="Alg3" target="target.unifiedcoder" target-name="MATLAB Coder">
-=======
-  <configuration build-checksum="1422916521" file="C:\Users\User\git\CPM_RD_matlab\Alg3.prj" location="C:\Users\User\git\CPM_RD_matlab" name="Alg3" target="target.unifiedcoder" target-name="MATLAB Coder">
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
+  <configuration build-checksum="2678424286" file="C:\Users\User\git\CPM_RD_matlab\Alg3Vec.prj" location="C:\Users\User\git\CPM_RD_matlab" name="Alg3Vec" target="target.unifiedcoder" target-name="MATLAB Coder">
     <profile key="profile.mex">
       <param.BuiltInstrumentedMex>false</param.BuiltInstrumentedMex>
       <param.RanInstrumentedMex>false</param.RanInstrumentedMex>
@@ -35,7 +31,7 @@
       <param.DefaultTestFile />
       <param.MergeInstrumentationResults>false</param.MergeInstrumentationResults>
       <param.VerificationMode>option.VerificationMode.None</param.VerificationMode>
-      <param.VerificationStatus>option.VerificationStatus.FailedTest</param.VerificationStatus>
+      <param.VerificationStatus>option.VerificationStatus.Inactive</param.VerificationStatus>
       <param.EnableMexProfiling>false</param.EnableMexProfiling>
       <var.BuiltWithMexProfiling>false</var.BuiltWithMexProfiling>
       <param.CustomSourceCode />
@@ -52,7 +48,7 @@
       <param.EnableRuntimeRecursion>true</param.EnableRuntimeRecursion>
       <param.PreserveVariableNames>option.PreserveVariableNames.None</param.PreserveVariableNames>
       <param.TargetLang>option.TargetLang.C</param.TargetLang>
-      <param.EchoExpressions>false</param.EchoExpressions>
+      <param.EchoExpressions>true</param.EchoExpressions>
       <param.InlineThreshold>10</param.InlineThreshold>
       <param.InlineThresholdMax>200</param.InlineThresholdMax>
       <param.InlineStackLimit>4000</param.InlineStackLimit>
@@ -96,6 +92,7 @@
         <param.DefaultTestFile />
         <param.MergeInstrumentationResults />
         <param.VerificationMode />
+        <param.VerificationStatus />
         <param.EnableMexProfiling />
         <var.BuiltWithMexProfiling />
         <param.CustomSourceCode />
@@ -112,6 +109,7 @@
         <param.EnableRuntimeRecursion />
         <param.PreserveVariableNames />
         <param.TargetLang />
+        <param.EchoExpressions />
         <param.InlineThreshold />
         <param.InlineThresholdMax />
         <param.InlineStackLimit />
@@ -180,7 +178,7 @@
       <param.MergeInstrumentationResults>false</param.MergeInstrumentationResults>
       <param.RanPilSilVerification>false</param.RanPilSilVerification>
       <param.VerificationMode>option.VerificationMode.None</param.VerificationMode>
-      <param.VerificationStatus />
+      <param.VerificationStatus>option.VerificationStatus.Inactive</param.VerificationStatus>
       <param.CustomSourceCode />
       <param.CustomHeaderCode />
       <param.CustomInitializer />
@@ -189,15 +187,9 @@
       <param.CustomSource />
       <param.CustomLibrary />
       <param.PostCodeGenCommand />
-<<<<<<< HEAD
       <param.TargetLangStandard />
       <param.CodeReplacementLibrary />
       <param.DeprecatedCRLFlag />
-=======
-      <param.TargetLangStandard>C89/C90 (ANSI)</param.TargetLangStandard>
-      <param.CodeReplacementLibrary>None</param.CodeReplacementLibrary>
-      <param.DeprecatedCRLFlag>false</param.DeprecatedCRLFlag>
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
       <param.SameHardware>true</param.SameHardware>
       <param.Toolchain>Automatically locate an installed toolchain</param.Toolchain>
       <param.BuildConfiguration />
@@ -278,11 +270,7 @@
       <param.CustomFFTCallback />
       <param.GenerateDefaultInSwitch />
       <param.EnableTraceability />
-<<<<<<< HEAD
       <param.UseECoderFeatures />
-=======
-      <param.UseECoderFeatures>true</param.UseECoderFeatures>
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
       <param.psCustomPrjState>false</param.psCustomPrjState>
       <param.psCustomProjectFile />
       <param.psCheckConfValue>option.psCheckConfValue.onWarnCheckConfDlg</param.psCheckConfValue>
@@ -292,6 +280,7 @@
       <param.psQuickConfValue>option.psQuickConfValue.proj</param.psQuickConfValue>
       <param.psOutputFolder>results_$codegenName$</param.psOutputFolder>
       <unset>
+        <param.grt.GenCodeOnly />
         <param.WorkingFolder />
         <param.SpecifiedWorkingFolder />
         <param.BuildFolder />
@@ -786,7 +775,7 @@
     <param.DefaultImportExportVariable>config</param.DefaultImportExportVariable>
     <param.ExternalFcnMajority>column</param.ExternalFcnMajority>
     <param.UseGlobals>option.UseGlobals.No</param.UseGlobals>
-    <param.outputfile>${PROJECT_ROOT}\Alg3_mex.mexw64</param.outputfile>
+    <param.outputfile>${PROJECT_ROOT}\Alg3Vec_mex.mexw64</param.outputfile>
     <param.version>R2012a</param.version>
     <param.HasECoderFeatures>true</param.HasECoderFeatures>
     <param.HasGpuCoder>true</param.HasGpuCoder>
@@ -800,46 +789,33 @@
     <param.AutoInferUnboundedSizeThreshold>2048</param.AutoInferUnboundedSizeThreshold>
     <param.EnableFixedPointStep>false</param.EnableFixedPointStep>
     <param.EnableScreener>true</param.EnableScreener>
-<<<<<<< HEAD
-    <param.AnnotationChecksum>1773707510</param.AnnotationChecksum>
-=======
-    <param.AnnotationChecksum>921877678</param.AnnotationChecksum>
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
+    <param.AnnotationChecksum>1377452794</param.AnnotationChecksum>
     <var.LegacyTarget />
     <var.MirrorOnOpen>false</var.MirrorOnOpen>
     <param.FixedPointEnabled>false</param.FixedPointEnabled>
     <var.redirectedInputTypeData />
     <var.DismissScreener>false</var.DismissScreener>
     <param.unifiedParamStorage />
-    <var.gc.lastOutputRoot>codegen\mex\Alg3</var.gc.lastOutputRoot>
+    <var.gc.lastOutputRoot>codegen\mex\Alg3Vec</var.gc.lastOutputRoot>
     <var.gc.lastOutputType>MEX_FILE</var.gc.lastOutputType>
-<<<<<<< HEAD
-    <var.gc.preBuildChecksum>1037546767</var.gc.preBuildChecksum>
-=======
-    <var.gc.preBuildChecksum>1422916521</var.gc.preBuildChecksum>
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
-    <var.cfi.lastOutputRoot>codegen\mex\Alg3</var.cfi.lastOutputRoot>
-    <var.cfi.preBuildChecksum>1265817678</var.cfi.preBuildChecksum>
-    <var.lastCfiTestSnippet>test_Alg3</var.lastCfiTestSnippet>
+    <var.gc.preBuildChecksum>2678424286</var.gc.preBuildChecksum>
+    <var.cfi.lastOutputRoot />
+    <var.cfi.preBuildChecksum />
     <var.outdatedOnRestore>false</var.outdatedOnRestore>
-<<<<<<< HEAD
-    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg3.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg5.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\sample_mi.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;4275088514&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
-=======
-    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg3.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg5.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\sample_mi.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;2561173170&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
-    <var.sourceSetState>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;sourceModel&gt;&lt;primarySourceFiles&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg3.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg5.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\sample_mi.m&lt;/file&gt;&lt;/primarySourceFiles&gt;&lt;fixedPointSourceFiles/&gt;&lt;fixedPointSourceRegistered&gt;false&lt;/fixedPointSourceRegistered&gt;&lt;fixedPointSourceSelected&gt;false&lt;/fixedPointSourceSelected&gt;&lt;/sourceModel&gt;</var.sourceSetState>
+    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg3Vec.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg5.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\sample_mi.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;1047270040&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
+    <var.sourceSetState>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;sourceModel&gt;&lt;primarySourceFiles&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg3Vec.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\Alg5.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\sample_mi.m&lt;/file&gt;&lt;/primarySourceFiles&gt;&lt;fixedPointSourceFiles/&gt;&lt;fixedPointSourceRegistered&gt;false&lt;/fixedPointSourceRegistered&gt;&lt;fixedPointSourceSelected&gt;false&lt;/fixedPointSourceSelected&gt;&lt;/sourceModel&gt;</var.sourceSetState>
     <param.forceMexBuild>false</param.forceMexBuild>
     <param.configImportActive>false</param.configImportActive>
     <var.isGpuCoder>false</var.isGpuCoder>
     <var.notGpuCoder>true</var.notGpuCoder>
     <var.boundToGui>true</var.boundToGui>
-    <param.mex.outputfile>Alg3_mex</param.mex.outputfile>
-    <param.grt.outputfile>Alg3</param.grt.outputfile>
+    <param.mex.outputfile>Alg3Vec_mex</param.mex.outputfile>
+    <param.grt.outputfile>Alg3Vec</param.grt.outputfile>
     <param.artifact>option.target.artifact.mex</param.artifact>
-    <param.outputfile>${PROJECT_ROOT}\Alg3_mex.mexw64</param.outputfile>
+    <param.outputfile>${PROJECT_ROOT}\Alg3Vec_mex.mexw64</param.outputfile>
     <param.EnableAutoExtrinsicCalls>true</param.EnableAutoExtrinsicCalls>
     <param.UsePreconditions>false</param.UsePreconditions>
-    <param.FeatureFlags>O3</param.FeatureFlags>
+    <param.FeatureFlags />
     <param.FixedPointMode>option.FixedPointMode.None</param.FixedPointMode>
     <param.AutoScaleLoopIndexVariables>false</param.AutoScaleLoopIndexVariables>
     <param.ComputedFixedPointData />
@@ -923,6 +899,8 @@
       <var.redirectedInputTypeData />
       <var.DismissScreener />
       <param.unifiedParamStorage />
+      <var.cfi.lastOutputRoot />
+      <var.cfi.preBuildChecksum />
       <var.outdatedOnRestore />
       <param.forceMexBuild />
       <param.configImportActive />
@@ -933,6 +911,7 @@
       <param.artifact />
       <param.EnableAutoExtrinsicCalls />
       <param.UsePreconditions />
+      <param.FeatureFlags />
       <param.FixedPointMode />
       <param.AutoScaleLoopIndexVariables />
       <param.ComputedFixedPointData />
@@ -992,20 +971,16 @@
       <var.hasGpu />
     </unset>
     <fileset.entrypoints>
-      <file custom-data-expanded="false" value="${PROJECT_ROOT}\Alg3.m">
-<<<<<<< HEAD
-        <Marker>1592337907214</Marker>
-=======
-        <Marker>1592333526479</Marker>
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\Alg3Vec.m">
+        <Marker>1592330490327</Marker>
       </file>
     </fileset.entrypoints>
     <fileset.testbench>
       <file>${PROJECT_ROOT}\test_Alg3.m</file>
     </fileset.testbench>
     <fileset.inputtypes>
-      <file custom-data-expanded="false" value="${PROJECT_ROOT}\Alg3.m">
-        <Inputs fileName="Alg3.m" functionName="Alg3" nargout="1">
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\Alg3Vec.m">
+        <Inputs fileName="Alg3Vec.m" functionName="Alg3" nargout="1">
           <Input Name="x0" typeId="0" />
           <Input Name="dt" typeId="1" />
           <Input Name="D" typeId="2" />
@@ -1016,17 +991,13 @@
           <Input Name="pi" typeId="3" />
           <Input Name="cell_inds" typeId="6" />
           <Input Name="A" typeId="1" />
-<<<<<<< HEAD
-=======
-          <Input Name="nrep" typeId="7" />
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
           <idpTable>
             <type typeId="0">
               <Class>double</Class>
-              <Size>:inf x :inf x 8</Size>
+              <Size>30 x 30 x 8</Size>
               <Value />
               <InitialValue />
-              <UserDefined>true</UserDefined>
+              <UserDefined>false</UserDefined>
               <Complex>false</Complex>
               <Sparse>false</Sparse>
             </type>
@@ -1050,57 +1021,45 @@
             </type>
             <type typeId="3">
               <Class>double</Class>
-              <Size>4 x :inf</Size>
+              <Size>4 x 900</Size>
               <Value />
               <InitialValue />
-              <UserDefined>true</UserDefined>
+              <UserDefined>false</UserDefined>
               <Complex>false</Complex>
               <Sparse>false</Sparse>
             </type>
             <type typeId="4">
               <Class>logical</Class>
-              <Size>4 x :inf</Size>
+              <Size>4 x 900</Size>
               <Value />
               <InitialValue />
-              <UserDefined>true</UserDefined>
+              <UserDefined>false</UserDefined>
               <Sparse>false</Sparse>
             </type>
             <type typeId="5">
               <Class>double</Class>
-              <Size>:inf x 8</Size>
+              <Size>900 x 8</Size>
               <Value />
               <InitialValue />
-              <UserDefined>true</UserDefined>
+              <UserDefined>false</UserDefined>
               <Complex>false</Complex>
               <Sparse>false</Sparse>
             </type>
             <type typeId="6">
               <Class>double</Class>
-              <Size>:inf x 1</Size>
+              <Size>900 x 1</Size>
               <Value />
               <InitialValue />
-              <UserDefined>true</UserDefined>
+              <UserDefined>false</UserDefined>
               <Complex>false</Complex>
               <Sparse>false</Sparse>
             </type>
-<<<<<<< HEAD
-=======
-            <type typeId="7">
-              <Class>double</Class>
-              <Size>1 x 1</Size>
-              <Value />
-              <InitialValue />
-              <UserDefined>true</UserDefined>
-              <Complex>false</Complex>
-              <Sparse>false</Sparse>
-            </type>
->>>>>>> f97891902ca8a3bc3ad20acaf34593c39421e13f
           </idpTable>
         </Inputs>
       </file>
     </fileset.inputtypes>
     <build-deliverables>
-      <file location="C:\Users\User\git\CPM_RD_matlab" name="Alg3_mex.mexw64" optional="false">C:\Users\User\git\CPM_RD_matlab\Alg3_mex.mexw64</file>
+      <file location="C:\Users\User\git\CPM_RD_matlab" name="Alg3Vec_mex.mexw64" optional="false">C:\Users\User\git\CPM_RD_matlab\Alg3Vec_mex.mexw64</file>
     </build-deliverables>
     <workflow />
     <matlab>
