@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.coder" plugin-version="R2016a">
-  <configuration build-checksum="2603494462" file="C:\Users\User\git\CPM_RD_matlab\CPM_chem_func.prj" location="C:\Users\User\git\CPM_RD_matlab" name="CPM_chem_func" target="target.unifiedcoder" target-name="MATLAB Coder">
+  <configuration build-checksum="1662094449" file="C:\Users\User\git\CPM_RD_matlab\CPM_chem_func.prj" location="C:\Users\User\git\CPM_RD_matlab" name="CPM_chem_func" target="target.unifiedcoder" target-name="MATLAB Coder">
     <profile key="profile.mex">
       <param.BuiltInstrumentedMex>false</param.BuiltInstrumentedMex>
       <param.RanInstrumentedMex>false</param.RanInstrumentedMex>
@@ -765,7 +765,7 @@
       </unset>
     </profile>
     <param.objective>option.objective.c</param.objective>
-    <param.WorkflowStep>workflowSummary</param.WorkflowStep>
+    <param.WorkflowStep>generateCode</param.WorkflowStep>
     <param.TestSnippets>
       <item>main</item>
     </param.TestSnippets>
@@ -786,7 +786,7 @@
     <param.AutoInferUnboundedSizeThreshold>2048</param.AutoInferUnboundedSizeThreshold>
     <param.EnableFixedPointStep>false</param.EnableFixedPointStep>
     <param.EnableScreener>true</param.EnableScreener>
-    <param.AnnotationChecksum>1675693132</param.AnnotationChecksum>
+    <param.AnnotationChecksum>3118759560</param.AnnotationChecksum>
     <var.LegacyTarget />
     <var.MirrorOnOpen>false</var.MirrorOnOpen>
     <param.FixedPointEnabled>false</param.FixedPointEnabled>
@@ -795,12 +795,12 @@
     <param.unifiedParamStorage />
     <var.gc.lastOutputRoot>codegen\mex\CPM_chem_func</var.gc.lastOutputRoot>
     <var.gc.lastOutputType>MEX_FILE</var.gc.lastOutputType>
-    <var.gc.preBuildChecksum>2008671086</var.gc.preBuildChecksum>
+    <var.gc.preBuildChecksum>1449542837</var.gc.preBuildChecksum>
     <var.cfi.lastOutputRoot>codegen\mex\CPM_chem_func</var.cfi.lastOutputRoot>
     <var.cfi.preBuildChecksum>2603494462</var.cfi.preBuildChecksum>
     <var.lastCfiTestSnippet>main</var.lastCfiTestSnippet>
     <var.outdatedOnRestore>false</var.outdatedOnRestore>
-    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\CPM_chem_func.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\nan2zero.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;83790660&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
+    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\CPM_chem_func.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\nan2zero.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;3265571868&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
     <var.sourceSetState>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;sourceModel&gt;&lt;primarySourceFiles&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\CPM_chem_func.m&lt;/file&gt;&lt;file&gt;C:\Users\User\git\CPM_RD_matlab\nan2zero.m&lt;/file&gt;&lt;/primarySourceFiles&gt;&lt;fixedPointSourceFiles/&gt;&lt;fixedPointSourceRegistered&gt;false&lt;/fixedPointSourceRegistered&gt;&lt;fixedPointSourceSelected&gt;false&lt;/fixedPointSourceSelected&gt;&lt;/sourceModel&gt;</var.sourceSetState>
     <param.forceMexBuild>false</param.forceMexBuild>
     <param.configImportActive>false</param.configImportActive>
@@ -816,8 +816,12 @@
     <param.FeatureFlags />
     <param.FixedPointMode>option.FixedPointMode.None</param.FixedPointMode>
     <param.AutoScaleLoopIndexVariables>false</param.AutoScaleLoopIndexVariables>
-    <param.ComputedFixedPointData />
-    <param.UserFixedPointData />
+    <param.ComputedFixedPointData>
+      <ComputedEntities />
+    </param.ComputedFixedPointData>
+    <param.UserFixedPointData>
+      <UserEntities />
+    </param.UserFixedPointData>
     <param.DefaultWordLength>16</param.DefaultWordLength>
     <param.DefaultFractionLength>4</param.DefaultFractionLength>
     <param.FixedPointSafetyMargin>0</param.FixedPointSafetyMargin>
@@ -836,7 +840,9 @@
     <param.InstrumentedMexFile />
     <param.FixedPointValidationChecksum />
     <param.FixedPointSourceCodeChecksum />
-    <param.FixedPointFunctionReplacements />
+    <param.FixedPointFunctionReplacements>
+      <FunctionReplacements />
+    </param.FixedPointFunctionReplacements>
     <param.OptimizeWholeNumbers>true</param.OptimizeWholeNumbers>
     <param.ContainerTypes>false</param.ContainerTypes>
     <param.GeneratedFixedPointFileSuffix>_fixpt</param.GeneratedFixedPointFileSuffix>
@@ -909,8 +915,6 @@
       <param.FeatureFlags />
       <param.FixedPointMode />
       <param.AutoScaleLoopIndexVariables />
-      <param.ComputedFixedPointData />
-      <param.UserFixedPointData />
       <param.DefaultWordLength />
       <param.DefaultFractionLength />
       <param.FixedPointSafetyMargin />
@@ -929,7 +933,6 @@
       <param.InstrumentedMexFile />
       <param.FixedPointValidationChecksum />
       <param.FixedPointSourceCodeChecksum />
-      <param.FixedPointFunctionReplacements />
       <param.OptimizeWholeNumbers />
       <param.ContainerTypes />
       <param.GeneratedFixedPointFileSuffix />
@@ -967,7 +970,7 @@
     </unset>
     <fileset.entrypoints>
       <file custom-data-expanded="false" value="${PROJECT_ROOT}\CPM_chem_func.m">
-        <Marker>1591111564790</Marker>
+        <Marker>1592077053640</Marker>
       </file>
     </fileset.entrypoints>
     <fileset.testbench>
@@ -989,15 +992,15 @@
           <Input Name="RhoRatio" typeId="7" />
           <Input Name="K_is" typeId="7" />
           <Input Name="K" typeId="7" />
-          <Input Name="RacRatio" typeId="8" />
+          <Input Name="RacRatio" typeId="7" />
           <Input Name="RbarRatio" typeId="7" />
           <Input Name="I_Ks" typeId="7" />
-          <Input Name="reaction" typeId="9" />
-          <Input Name="ij_diffuse" typeId="10" />
-          <Input Name="jump" typeId="11" />
+          <Input Name="reaction" typeId="8" />
+          <Input Name="ij_diffuse" typeId="9" />
+          <Input Name="jump" typeId="10" />
           <Input Name="ir0" typeId="2" />
           <Input Name="id0" typeId="2" />
-          <Input Name="cell_inds" typeId="12" />
+          <Input Name="cell_inds" typeId="11" />
           <Input Name="k_X" typeId="3" />
           <Input Name="PIX" typeId="3" />
           <Input Name="k_G" typeId="3" />
@@ -1023,7 +1026,7 @@
           <idpTable>
             <type typeId="0">
               <Class>double</Class>
-              <Size>20 x 20 x 8</Size>
+              <Size>:50 x :50 x 8</Size>
               <Value />
               <InitialValue />
               <UserDefined>false</UserDefined>
@@ -1068,7 +1071,7 @@
             </type>
             <type typeId="5">
               <Class>double</Class>
-              <Size>20 x 20 x 6</Size>
+              <Size>:50 x :50 x 6</Size>
               <Value />
               <InitialValue />
               <UserDefined>false</UserDefined>
@@ -1077,7 +1080,7 @@
             </type>
             <type typeId="6">
               <Class>logical</Class>
-              <Size>4 x 400</Size>
+              <Size>4 x :2500</Size>
               <Value />
               <InitialValue />
               <UserDefined>false</UserDefined>
@@ -1085,25 +1088,25 @@
             </type>
             <type typeId="7">
               <Class>double</Class>
-              <Size>20 x 20</Size>
+              <Size>:50 x :50</Size>
               <Value />
               <InitialValue />
-              <UserDefined>true</UserDefined>
+              <UserDefined>false</UserDefined>
               <Complex>false</Complex>
               <Sparse>false</Sparse>
             </type>
             <type typeId="8">
               <Class>double</Class>
-              <Size>20 x 20</Size>
-              <Value>20</Value>
+              <Size>:50 x :50 x 9</Size>
+              <Value />
               <InitialValue />
-              <UserDefined>true</UserDefined>
+              <UserDefined>false</UserDefined>
               <Complex>false</Complex>
               <Sparse>false</Sparse>
             </type>
             <type typeId="9">
               <Class>double</Class>
-              <Size>20 x 20 x 9</Size>
+              <Size>4 x :2500</Size>
               <Value />
               <InitialValue />
               <UserDefined>false</UserDefined>
@@ -1112,7 +1115,7 @@
             </type>
             <type typeId="10">
               <Class>double</Class>
-              <Size>4 x 400</Size>
+              <Size>:2500 x 4</Size>
               <Value />
               <InitialValue />
               <UserDefined>false</UserDefined>
@@ -1121,16 +1124,7 @@
             </type>
             <type typeId="11">
               <Class>double</Class>
-              <Size>400 x 4</Size>
-              <Value />
-              <InitialValue />
-              <UserDefined>false</UserDefined>
-              <Complex>false</Complex>
-              <Sparse>false</Sparse>
-            </type>
-            <type typeId="12">
-              <Class>double</Class>
-              <Size>400 x 1</Size>
+              <Size>:2500 x 1</Size>
               <Value />
               <InitialValue />
               <UserDefined>false</UserDefined>

@@ -1,3 +1,6 @@
+x=zeros([shape ,N_species]); % where the chemical information is stored
+
+
 % vectorizing the diffusion direction for grid points (periodic)
 up = sub2ind([N,N],circshift(i,1,1),j);
 down = sub2ind([N,N],circshift(i,-1,1),j);
@@ -19,6 +22,12 @@ com = @(x) [sum(sum(i.*x)),sum(sum(j.*x))]/nnz(x);
 % setting the initial shape of the cell to a circle of radius r
 R=20;
 cell_mask=(i-N/2).^2 +(j-N/2).^2 < (R/len)^2;
+cell_mask=true(shape);
+cell_mask=(i>1&i<N)&(j>1&j<N);
+induced_mask=i<=div*N;
+% induced_mask=induced_mask&cell_mask;
+
+
 
 Per=perim(cell_mask); %current lattice permiter
 A=nnz(cell_mask); %current lattice area
