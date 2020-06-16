@@ -53,7 +53,11 @@ end
 
 while true
 tic;
+<<<<<<< HEAD
 x=Alg3(x,dt,D,dx,jumpp,diffuse_mask,pT,pi,cell_inds,A);
+=======
+x=Alg3_mex(x,dt,D,dx,jumpp,diffuse_mask,pT,pi,cell_inds,A);
+>>>>>>> 41a0bb7be32cad866ac8707cb1d4cc57abf5d882
 toc
 
 imagesc(x(:,:,2));

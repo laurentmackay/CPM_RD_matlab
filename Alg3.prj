@@ -809,7 +809,11 @@
     <var.cfi.lastOutputRoot />
     <var.cfi.preBuildChecksum />
     <var.outdatedOnRestore>false</var.outdatedOnRestore>
+<<<<<<< HEAD
     <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/Alg3.m&lt;/file&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/Alg5.m&lt;/file&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/sample_mi.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;2450354749&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
+=======
+    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/Alg3.m&lt;/file&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/Alg5.m&lt;/file&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/sample_mi.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;308154786&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
+>>>>>>> 41a0bb7be32cad866ac8707cb1d4cc57abf5d882
     <var.sourceSetState>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;sourceModel&gt;&lt;primarySourceFiles&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/Alg3.m&lt;/file&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/Alg5.m&lt;/file&gt;&lt;file&gt;/home/lmackay/git/CPM_RD_matlab/sample_mi.m&lt;/file&gt;&lt;/primarySourceFiles&gt;&lt;fixedPointSourceFiles/&gt;&lt;fixedPointSourceRegistered&gt;false&lt;/fixedPointSourceRegistered&gt;&lt;fixedPointSourceSelected&gt;false&lt;/fixedPointSourceSelected&gt;&lt;/sourceModel&gt;</var.sourceSetState>
     <param.forceMexBuild>false</param.forceMexBuild>
     <param.NoDefaultJIT>false</param.NoDefaultJIT>
@@ -840,8 +844,13 @@
     <var.isDeepLearningForMatlabCoderEnabled>true</var.isDeepLearningForMatlabCoderEnabled>
     <param.deeplearning.TargetLib>option.deeplearning.targetlibrary.none</param.deeplearning.TargetLib>
     <var.hideTensorRT>false</var.hideTensorRT>
+<<<<<<< HEAD
     <var.hasMatlabDeepLearningSupportPackage>false</var.hasMatlabDeepLearningSupportPackage>
     <var.hasGpuDeepLearningSupportPackage>false</var.hasGpuDeepLearningSupportPackage>
+=======
+    <var.hasMatlabDeepLearningSupportPackage>true</var.hasMatlabDeepLearningSupportPackage>
+    <var.hasGpuDeepLearningSupportPackage>true</var.hasGpuDeepLearningSupportPackage>
+>>>>>>> 41a0bb7be32cad866ac8707cb1d4cc57abf5d882
     <param.tensorrt.DataType>option.tensorrt.datatype.fp32</param.tensorrt.DataType>
     <param.tensorrt.DataPath />
     <param.tensorrt.NumCalibrationBatches>1</param.tensorrt.NumCalibrationBatches>
@@ -949,6 +958,11 @@
       <var.isDeepLearningForMatlabCoderEnabled />
       <param.deeplearning.TargetLib />
       <var.hideTensorRT />
+<<<<<<< HEAD
+=======
+      <var.hasMatlabDeepLearningSupportPackage />
+      <var.hasGpuDeepLearningSupportPackage />
+>>>>>>> 41a0bb7be32cad866ac8707cb1d4cc57abf5d882
       <param.tensorrt.DataType />
       <param.tensorrt.DataPath />
       <param.tensorrt.NumCalibrationBatches />
