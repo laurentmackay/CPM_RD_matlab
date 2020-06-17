@@ -54,7 +54,7 @@ end
 while true
 tic;
 
-x=Alg3(x,dt,D,dx,jumpp,diffuse_mask,pT,pi,cell_inds,A);
+x=Alg3_mex(x,dt,D,dx,jumpp,diffuse_mask,pT,pi,cell_inds,A);
 
 toc
 

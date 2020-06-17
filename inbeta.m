@@ -20,17 +20,20 @@ function [f B]=inbeta(z,a,b,N)
 % The maximum error in the derivative is returned as a test
 
 B = beta(a,b);
+if B~=0
+    f=0;
+    for k=N:-1:1
+      f = k*(b-k)*z./((a+2*k-1).*(a+2*k).*(1+f));
+      j=k-1;
+      f = -(a+j)*(a+b+j)*z./((a+2*j).*(a+2*j+1).*(1+f));
+    end
+    f=z.^a.*(1-z).^b./(a.*(1+f));
 
-f=0;
-for k=N:-1:1
-  f = k*(b-k)*z./((a+2*k-1).*(a+2*k).*(1+f));
-  j=k-1;
-  f = -(a+j)*(a+b+j)*z./((a+2*j).*(a+2*j+1).*(1+f));
+    if z>(a+1)/(a+b+2)
+        f = B-f;
+    end
+    f=f/B;
+else
+    f=0;
 end
-f=z.^a.*(1-z).^b./(a.*(1+f));
-
-if z>(a+1)/(a+b+2)
-    f = B-f;
-end
-f=f/B;
 return;
