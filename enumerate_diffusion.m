@@ -19,3 +19,14 @@ for drx=1:size(jump,2)
     diffusing_species_sum(drx,:)=sum(x(id0 + ij_diffuse(drx,1:num_diffuse(drx))')); 
     %sums the number of proteins that can diffuse in each direction per latice square 
 end
+
+
+
+%pre-compute single molecule diffusion probabilities for the timestep of
+%length dt, as well as the directional probabilities
+%this must be re-run everytime cell-geometry changes
+for i=1:A
+    vox=cell_inds(i);
+    pT0(vox,:) = num_vox_diff(vox)*D/(h^2);
+    pi(:,vox)=diffuse_mask(:,vox)'./sum(diffuse_mask(:,vox));
+end

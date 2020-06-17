@@ -3,7 +3,7 @@
 % stops some bugs
 % figure('Position', [200 200 1000 900]) 
 fs=14; %axis font size 
-
+figure(1);
 subplot(2,2,1)
 % imagesc(cell_mask,[0 1]);
 % % colorbar;
