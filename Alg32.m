@@ -1,7 +1,7 @@
-function x =  Alg3(x0,dt,D,h,jump,diffuse_mask,pT0,pi,cell_inds,A,inds)
+function x =  Alg3(x,dt,D,h,jump,diffuse_mask,pT0,pi,cell_inds,A,inds)
 
-sz=size(x0,1)*size(x0,2);
-x=x0;
+sz=size(x,1)*size(x,2);
+% x=x0;
 
 m_avg=0;
 counter=0;
@@ -13,7 +13,7 @@ for chem=1:length(inds)
             
             vox=cell_inds(i);
             pT_curr=pT0(vox,chem);
-            x0_curr=x0(vox+ic0);
+            x0_curr=x(vox+ic0);
             neighbors=jump(:,vox)+ic0;
             
             if pT_curr>0 && x0_curr>0

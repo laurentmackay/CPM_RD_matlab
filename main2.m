@@ -7,13 +7,28 @@
 % mkdir 'results'
 %vid = VideoWriter(['results'],'MPEG-4'); % this saves videos to mp4 change to whatever's convenient
 
-figure(1);
+figure(1);clf();
+set(gcf,'defaultaxesfontsize',14)
+panelA=subplot(2,2,1);
+panelB=subplot(2,2,2);
+panelC=subplot(2,2,3);
+panelD=subplot(2,2,4);
+Results=[];
+Times=[];
+
+% panelB.FontSize = fs;
+% title(panelB,'Rho', 'Fontsize', 24)
+% panelC.FontSize = fs;
+% title(panelC,'Rac', 'Fontsize', 24)
+% panelD.FontSize = fs;
+% title(panelD,'Pax', 'Fontsize', 24)
+
 %open(vid);
 
 N_species=8; %number of chemical species
 N_rx=6; %number of reactions (this should determined automatically)
 Ttot=2e4; %time the simulation end
-SF=10; % speed factor I divide molecule number by this for speed
+SF=1; % speed factor I divide molecule number by this for speed
 Gsize=20; %length of the grid in um
 N=30; % number of points used to discretize the grid
 shape=[N,N];
@@ -21,7 +36,7 @@ sz=prod(shape);
 len=Gsize/N; %length of a latice square
 [j, i] = meshgrid(1:shape(2),1:shape(1)); %the i and j need to be reversed for some reason (\_(:0)_/)
 
-div=0.2;
+div=0.1;
 
 initialize_cell_geometry
 initialize_cellular_potts
@@ -36,8 +51,7 @@ center=zeros(floor(Ttot/picstep)+1,2); %an array where we store the COM
 center(z,:)=com(cell_mask);
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
-
-%pic %takes a frame for the video
+pic_WP %takes a frame for the video
 
 nrx=1e5; %number of times reactions are carried out in a chem_func loop
 reactions=0; %intializing a reaction counter
@@ -47,7 +61,7 @@ reactions=0; %intializing a reaction counter
 eps=0.00005
 pmax=0.004;%0.5;%max allowed pT for one cell
 
-dt=pmax*(h^2)/(max(D)*size(diffuse_mask,1));%auto-determine timestep
+dt=pmax*(h^2)/(max(D)*size(jump,1));%auto-determine timestep
 
 %intializing variables for enumerate_diffusion.m making sure their size is
 %constant
@@ -59,6 +73,7 @@ diffusing_species_sum=zeros(size(jump,2),6);
 num_vox_diff=zeros(1,sz);
 pT0 = zeros(sz,length(D));
 pi = zeros(size(jump,2),sz);
+dt_diff=zeros(size(D));
 
 enumerate_diffusion %determines the possible diffusion reactions in a way that be convereted to c
 
@@ -88,17 +103,17 @@ TPax=[];
 
 last_time=time; %used to time the CMP_step
 tic
-
+rx_speedup=2;
 rx_count=zeros(shape);
 dt_diff=zeros(size(D));
 while time<Ttot
     A=nnz(cell_mask); %current area
     cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s
     
-    while (time-last_time)<5
+    while (time-last_time)<Ttot
         
         alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
-        dt_diff=zeros(size(D));
+        
         % has to be a function to be put under a c wrapper (slow part)
         [x,diffusing_species_sum,D,h,alpha_rx,num_diffuse,...
             alpha_chem,time,diffuse_mask,PaxRatio,RhoRatio,K_is,K,...
@@ -108,19 +123,13 @@ while time<Ttot
             alpha_chem,time,diffuse_mask,PaxRatio,RhoRatio,K_is,K,...
             RacRatio,RbarRatio,I_Ks,reaction,jump,ir0,id0,cell_inds,...
             k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,gamma,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-            alpha,PAKtot,nrx,A,num_vox_diff,pi,pT0,dt_diff,rx_count,0.5);
+            alpha,PAKtot,nrx,A,num_vox_diff,pi,pT0,dt_diff,rx_count,0.5,rx_speedup);
         
         reactions=reactions+nrx; %reaction counter
         
         if time>=lastplot+picstep % takes video frames
-            pic
+            pic_WP
             
-            figure(2);
-            subplot(1,2,1);
-            imagesc(rx_count);
-            subplot(1,2,2);
-            imagesc(sum(alpha_chem,3));
-            drawnow
 %             Timeseries=[Timeseries time];
 %             
 %             TRac=[TRac sum(sum(x(:,:,4)))/sum(sum(sum(x(:,:,[4 2 7]))))];

@@ -25,6 +25,7 @@ cell_mask=(i-N/2).^2 +(j-N/2).^2 < (R/len)^2;
 cell_mask=true(shape);
 cell_mask=(i>1&i<N)&(j>1&j<N);
 induced_mask=i<=div*N;
+% induced_mask=(i<=div*N&j<=N/2)|(i>(1-div)*N&j>N/2);
 % induced_mask=induced_mask&cell_mask;
 
 
