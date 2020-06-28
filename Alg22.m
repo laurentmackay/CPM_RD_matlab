@@ -8,5 +8,5 @@ while xi>=b
     b=b+p(i);
 end
 
-end
+
 

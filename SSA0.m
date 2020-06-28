@@ -11,6 +11,7 @@ vox0=id0+vox;
 xi0=x(id0+vox);
 i_update=[vox i2];
 neg=any(x<0);
+update_all=false;
 
 diff_err=0.01;
 dt_max=sqrt(diff_err)*(h^2)/max(D);
@@ -141,8 +142,11 @@ for kk=1:nrx
         diffusing_species_sum = diffusing_species_sum - (diffuse_mask(:,vox)*dxi);
         neg=x(vox+(rx-1)*sz)<0;
         
+       
         
         update_alpha_chem0
+        
+
         
         a_total_new=sum(alpha_rx);
         
@@ -161,9 +165,13 @@ for kk=1:nrx
         x=Alg322(x,dt_diff,D,h,jump',diffuse_mask,pT0,pi,cell_inds,A,ind_diff);
         
         dt_diff(ind_diff)=0;
-        i=cell_inds(1:A);
-
+        vox=cell_inds(1:A);
+        
+        update_all=true;
+        
         update_alpha_chem0
+        
+        update_all=false;
         
         a_total_new=sum(alpha_rx);
         

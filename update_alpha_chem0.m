@@ -1,6 +1,6 @@
 %to properly locate in alpha_chem(ir0+I)
 if length(vox)>1
-[tmp,tmp2]=meshgrid(ir0,vox);
+[tmp,tmp2]=meshgrid(ir0,cell_inds(1:A));
     I_rx=tmp+tmp2;
 else
     I_rx=vox+ir0;
@@ -9,10 +9,20 @@ end
 a_c_0=alpha_chem(I_rx);
 
 %update Ratios
-RacRatio(vox)=nan2zero(x(vox+(4-1)*sz)./(x(vox+(4-1)*sz)+x(vox+(2-1)*sz)+x(vox+(7-1)*sz)));
-RbarRatio(vox)=nan2zero(x(vox+(7-1)*sz)./(x(vox+(4-1)*sz)+x(vox+(2-1)*sz)+x(vox+(7-1)*sz)));
-RhoRatio(vox)=nan2zero(x(vox+(3-1)*sz)./(x(vox+(3-1)*sz)+x(vox+(1-1)*sz)));
-PaxRatio(vox)=nan2zero(x(vox+(6-1)*sz)./(x(vox+(6-1)*sz)+x(vox+(5-1)*sz)+x(vox+(8-1)*sz)));
+% RacRatio(vox)=nan2zero(x(vox+(4-1)*sz)./(x(vox+(4-1)*sz)+x(vox+(2-1)*sz)+x(vox+(7-1)*sz)));
+
+% RhoRatio(vox)=nan2zero(x(vox+(3-1)*sz)./(x(vox+(3-1)*sz)+x(vox+(1-1)*sz)));
+% PaxRatio(vox)=nan2zero(x(vox+(6-1)*sz)./(x(vox+(6-1)*sz)+x(vox+(5-1)*sz)+x(vox+(8-1)*sz)));
+
+% RacRatio(vox)=x(vox+(4-1)*sz)./(x(vox+(4-1)*sz)+x(vox+(2-1)*sz)+x(vox+(7-1)*sz));
+% RhoRatio(vox)=x(vox+(3-1)*sz)./(x(vox+(3-1)*sz)+x(vox+(1-1)*sz));
+% PaxRatio(vox)=x(vox+(6-1)*sz)./(x(vox+(6-1)*sz)+x(vox+(5-1)*sz)+x(vox+(8-1)*sz));
+
+
+RacRatio(vox)=x(vox+(4-1)*sz)./Rac_Square;
+RhoRatio(vox)=x(vox+(3-1)*sz)./Rho_Square;
+PaxRatio(vox)=x(vox+(6-1)*sz)./Pax_Square;
+
 
 gamma=0.3;
 
@@ -21,9 +31,9 @@ gamma=0.3;
 % RhoRatio(vox)=nan2zero(x(vox+(3-1)*sz)./1.434948979591837e+03);
 % PaxRatio(vox)=nan2zero(x(vox+(6-1)*sz)./1.077806122448980e+03);
 
-if sum([nnz(isnan(RhoRatio)), nnz(isnan(RacRatio)), nnz(isnan(PaxRatio))])~=0
-    disp("woah")
-end
+% if sum([nnz(isnan(RhoRatio)), nnz(isnan(RacRatio)), nnz(isnan(PaxRatio))])~=0
+%     disp("woah")
+% end
 
 % RacRatio(isnan(RacRatio))=0;
 % RbarRatio(isnan(RbarRatio))=0;
@@ -32,7 +42,7 @@ end
 
 %update other parameters    
 K_is(vox)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox)).*(1+alpha_R*RacRatio(vox))+k_G*k_X*GIT*PIX);
-K(vox)=alpha_R*RacRatio(vox).*K_is(vox).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(vox));%RbarRatio(I)/gamma;         %changed from paper
+K(vox)=alpha_R*RacRatio(vox).*K_is(vox).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(vox));         %changed from paper
 I_Ks(vox)=I_K*(1-K_is(vox).*(1+alpha_R*RacRatio(vox)));
 
 reaction(vox+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m));            %From inactive rho to active rho changed from model

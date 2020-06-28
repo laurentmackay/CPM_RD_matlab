@@ -24,6 +24,8 @@ RbarRatio(i)=nan2zero(x(i+(7-1)*sz)./(x(i+(4-1)*sz)+x(i+(2-1)*sz)+x(i+(7-1)*sz))
 RhoRatio(i)=nan2zero(x(i+(3-1)*sz)./(x(i+(3-1)*sz)+x(i+(1-1)*sz)));
 PaxRatio(i)=nan2zero(x(i+(6-1)*sz)./(x(i+(6-1)*sz)+x(i+(5-1)*sz)+x(i+(8-1)*sz)));
 
+
+
 gamma=0.3;
 
 % RacRatio(i)=nan2zero(x(i+(4-1)*sz)./1.434948979591837e+03);

@@ -37,6 +37,20 @@ i_thin=unique(i_thin);
 else
     i_thick=[];
 end
+rmin=min(Results);
+rmax=max(Results);
+
+thresh=(rmin+rmax)/2;
+above=Results>thresh;
+
+pin=zeros(size(Results,2),1);
+for i=1:size(above,2)
+    ind=find(~above(2:end,i),1);
+    
+    
+    pin(i)=ind+(thresh(i)-Results(ind+1,i))/(Results(ind+1,i)-Results(ind,i));
+    
+end
 %%
 
 yaxis=(0:N-1)*h;
@@ -79,14 +93,15 @@ end
 %     hold(panelA,'off')
 % end
 % imagesc(panelB,RhoRatio);
-imagesc(panelB,RhoRatio);
-colorbar(panelB);
-caxis(panelB,[0, 0.6])
+% imagesc(panelB,RhoRatio);
+% colorbar(panelB);
+% caxis(panelB,[0, 0.6])
 
 % panelB.FontSize = fs;
+plot(panelB,Times,pin,'-k')
 title(panelB,'Rho', 'Fontsize', 24)
-% xlabel('X')
-% ylabel('Y')
+ylabel(panelB,'Wave Front')
+xlabel(panelB,'Time')
 
 imagesc(panelC,RacRatio);
 % imagesc(panelC,x(:,:,2));

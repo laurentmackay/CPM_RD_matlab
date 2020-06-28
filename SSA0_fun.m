@@ -1,3 +1,11 @@
+function [A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
+PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,a_total,alpha,...
+alpha_R,alpha_chem,alpha_rx,cell_inds,diffuse_mask,diffusing_species_sum,dt_diff,...
+gamma,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,reaction,rx_count,rx_speedup,time,...
+x] = SSA0_fun(A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
+PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,a_total,alpha,alpha_R,...
+alpha_chem,alpha_rx,cell_inds,diffuse_mask,diffusing_species_sum,dt_diff,gamma,h,id0,...
+ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,reaction,rx_count,rx_speedup,time,x)
 
 N_instantaneous=50; % the number of steady reaction itterated at a moment in time
 sz=size(x,1)*size(x,2);
@@ -11,6 +19,7 @@ vox0=id0+vox;
 xi0=x(id0+vox);
 i_update=[vox i2];
 neg=any(x<0);
+update_all=false;
 
 diff_err=0.01;
 dt_max=sqrt(diff_err)*(h^2)/max(D);
@@ -141,43 +150,47 @@ for kk=1:nrx
         diffusing_species_sum = diffusing_species_sum - (diffuse_mask(:,vox)*dxi);
         neg=x(vox+(rx-1)*sz)<0;
         
+       
         
-if length(vox)>1
-[tmp,tmp2]=meshgrid(ir0,vox);
-    I_rx=tmp+tmp2;
-else
-    I_rx=vox+ir0;
-end
+        if length(vox)>1
+        [tmp,tmp2]=meshgrid(ir0,cell_inds(1:A));
+            I_rx=tmp+tmp2;
+        else
+            I_rx=vox+ir0;
+        end
+        
+        a_c_0=alpha_chem(I_rx);
+        
+        
+        
+        
+        
+        RacRatio(vox)=x(vox+(4-1)*sz)./Rac_Square;
+        RhoRatio(vox)=x(vox+(3-1)*sz)./Rho_Square;
+        PaxRatio(vox)=x(vox+(6-1)*sz)./Pax_Square;
+        
+        
+        gamma=0.3;
+        
+        
+        
+        
+        K_is(vox)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox)).*(1+alpha_R*RacRatio(vox))+k_G*k_X*GIT*PIX);
+        K(vox)=alpha_R*RacRatio(vox).*K_is(vox).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(vox));         %changed from paper
+        I_Ks(vox)=I_K*(1-K_is(vox).*(1+alpha_R*RacRatio(vox)));
+        
+        reaction(vox+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m));            %From inactive rho to active rho changed from model
+        reaction(vox+(2-1)*sz) = (I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m));                %From inactive Rac to active Rac
+        reaction(vox+(5-1)*sz) = B_1*(K(vox).^m./(L_K^m+K(vox).^m));
+        
+        
+        
+        
+        
+        alpha_chem(I_rx) = reaction(I_rx).*x(I_rx); %chemical reaction
+        alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
+        
 
-a_c_0=alpha_chem(I_rx);
-
-RacRatio(vox)=nan2zero(x(vox+(4-1)*sz)./(x(vox+(4-1)*sz)+x(vox+(2-1)*sz)+x(vox+(7-1)*sz)));
-RbarRatio(vox)=nan2zero(x(vox+(7-1)*sz)./(x(vox+(4-1)*sz)+x(vox+(2-1)*sz)+x(vox+(7-1)*sz)));
-RhoRatio(vox)=nan2zero(x(vox+(3-1)*sz)./(x(vox+(3-1)*sz)+x(vox+(1-1)*sz)));
-PaxRatio(vox)=nan2zero(x(vox+(6-1)*sz)./(x(vox+(6-1)*sz)+x(vox+(5-1)*sz)+x(vox+(8-1)*sz)));
-
-gamma=0.3;
-
-
-if sum([nnz(isnan(RhoRatio)), nnz(isnan(RacRatio)), nnz(isnan(PaxRatio))])~=0
-    disp("woah")
-end
-
-
-K_is(vox)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox)).*(1+alpha_R*RacRatio(vox))+k_G*k_X*GIT*PIX);
-K(vox)=alpha_R*RacRatio(vox).*K_is(vox).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(vox));%RbarRatio(I)/gamma;         %changed from paper
-I_Ks(vox)=I_K*(1-K_is(vox).*(1+alpha_R*RacRatio(vox)));
-
-reaction(vox+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m));            %From inactive rho to active rho changed from model
-reaction(vox+(2-1)*sz) = (I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m));                %From inactive Rac to active Rac
-reaction(vox+(5-1)*sz) = B_1*(K(vox).^m./(L_K^m+K(vox).^m));
-
-
-
-
-
-alpha_chem(I_rx) = reaction(I_rx).*x(I_rx); %chemical reaction
-alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
         
         a_total_new=sum(alpha_rx);
         
@@ -196,44 +209,49 @@ alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
         x=Alg322(x,dt_diff,D,h,jump',diffuse_mask,pT0,pi,cell_inds,A,ind_diff);
         
         dt_diff(ind_diff)=0;
-        i=cell_inds(1:A);
-
-if length(vox)>1
-[tmp,tmp2]=meshgrid(ir0,vox);
-    I_rx=tmp+tmp2;
-else
-    I_rx=vox+ir0;
-end
-
-a_c_0=alpha_chem(I_rx);
-
-RacRatio(vox)=nan2zero(x(vox+(4-1)*sz)./(x(vox+(4-1)*sz)+x(vox+(2-1)*sz)+x(vox+(7-1)*sz)));
-RbarRatio(vox)=nan2zero(x(vox+(7-1)*sz)./(x(vox+(4-1)*sz)+x(vox+(2-1)*sz)+x(vox+(7-1)*sz)));
-RhoRatio(vox)=nan2zero(x(vox+(3-1)*sz)./(x(vox+(3-1)*sz)+x(vox+(1-1)*sz)));
-PaxRatio(vox)=nan2zero(x(vox+(6-1)*sz)./(x(vox+(6-1)*sz)+x(vox+(5-1)*sz)+x(vox+(8-1)*sz)));
-
-gamma=0.3;
-
-
-if sum([nnz(isnan(RhoRatio)), nnz(isnan(RacRatio)), nnz(isnan(PaxRatio))])~=0
-    disp("woah")
-end
-
-
-K_is(vox)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox)).*(1+alpha_R*RacRatio(vox))+k_G*k_X*GIT*PIX);
-K(vox)=alpha_R*RacRatio(vox).*K_is(vox).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(vox));%RbarRatio(I)/gamma;         %changed from paper
-I_Ks(vox)=I_K*(1-K_is(vox).*(1+alpha_R*RacRatio(vox)));
-
-reaction(vox+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m));            %From inactive rho to active rho changed from model
-reaction(vox+(2-1)*sz) = (I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m));                %From inactive Rac to active Rac
-reaction(vox+(5-1)*sz) = B_1*(K(vox).^m./(L_K^m+K(vox).^m));
-
-
-
-
-
-alpha_chem(I_rx) = reaction(I_rx).*x(I_rx); %chemical reaction
-alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
+        vox=cell_inds(1:A);
+        
+        update_all=true;
+        
+        if length(vox)>1
+        [tmp,tmp2]=meshgrid(ir0,cell_inds(1:A));
+            I_rx=tmp+tmp2;
+        else
+            I_rx=vox+ir0;
+        end
+        
+        a_c_0=alpha_chem(I_rx);
+        
+        
+        
+        
+        
+        RacRatio(vox)=x(vox+(4-1)*sz)./Rac_Square;
+        RhoRatio(vox)=x(vox+(3-1)*sz)./Rho_Square;
+        PaxRatio(vox)=x(vox+(6-1)*sz)./Pax_Square;
+        
+        
+        gamma=0.3;
+        
+        
+        
+        
+        K_is(vox)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox)).*(1+alpha_R*RacRatio(vox))+k_G*k_X*GIT*PIX);
+        K(vox)=alpha_R*RacRatio(vox).*K_is(vox).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(vox));         %changed from paper
+        I_Ks(vox)=I_K*(1-K_is(vox).*(1+alpha_R*RacRatio(vox)));
+        
+        reaction(vox+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m));            %From inactive rho to active rho changed from model
+        reaction(vox+(2-1)*sz) = (I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m));                %From inactive Rac to active Rac
+        reaction(vox+(5-1)*sz) = B_1*(K(vox).^m./(L_K^m+K(vox).^m));
+        
+        
+        
+        
+        
+        alpha_chem(I_rx) = reaction(I_rx).*x(I_rx); %chemical reaction
+        alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
+        
+        update_all=false;
         
         a_total_new=sum(alpha_rx);
         
@@ -241,4 +259,5 @@ alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
     end
     
     
+end
 end
