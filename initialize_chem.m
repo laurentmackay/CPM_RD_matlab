@@ -41,14 +41,22 @@ rho_eq=0;
 
 % rough estimate of uninduced state
 RhoRatio_u = 0.44;
-RacRatio_u = 0.085;
-PaxRatio_u = 0.22;
+RacRatio_u = 0.085;%0.085
+PaxRatio_u = 0.22;%0.22
 
 
 % rough estimate of the induced state 
-RhoRatio_i = 0.21;
-RacRatio_i = 0.4; %0.215;
-PaxRatio_i = 0.33;
+RhoRatio_i = 0.41;
+RacRatio_i = 0.215; %0.215;
+PaxRatio_i = 0.33; %0.33
+
+% RhoRatio_i = 0.35;
+% RacRatio_i = 0.12; %0.215;
+% PaxRatio_i = 0.27; %0.33
+% 
+% RhoRatio_i = 0.2;
+% RacRatio_i = 0.2; %0.215;
+% PaxRatio_i = 0.31; %0.33
 
 RhoRatio=[RhoRatio_u; RhoRatio_i];
 RacRatio=[RacRatio_u; RacRatio_i];
@@ -111,36 +119,20 @@ PaxRatio=zeros(shape);
 K=zeros(shape);
 K_is=zeros(shape);
 I_Ks=zeros(shape);
-%% this should exactly match what is at the end of CPM_chem_func.m
-i=cell_inds(1:A);
 
-[tmp,tmp2]=meshgrid(ir0,i);
-i_chem=tmp+tmp2;
+vox=cell_inds(1:A);
 
-a_c_0=alpha_chem(i_chem);
+% [x,sz,alpha_rx,...
+%     alpha_chem,PaxRatio,RhoRatio,K_is,K,...
+%     RacRatio,RbarRatio,I_Ks,reaction,ir0,...
+%     k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
+%     PAKtot,i]=update_alpha_chem(x,sz,alpha_rx,...
+%     alpha_chem,PaxRatio,RhoRatio,K_is,K,...
+%     RacRatio,RbarRatio,I_Ks,reaction,ir0,...
+%     k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
+%     PAKtot,i);
 
-%update Ratios
-RacRatio(i)=x(i+(4-1)*sz)./(x(i+(4-1)*sz)+x(i+(2-1)*sz)+x(i+(7-1)*sz));
-RbarRatio(i)=x(i+(7-1)*sz)./(x(i+(4-1)*sz)+x(i+(2-1)*sz)+x(i+(7-1)*sz));
-RhoRatio(i)=x(i+(3-1)*sz)./(x(i+(3-1)*sz)+x(i+(1-1)*sz));
-PaxRatio(i)=x(i+(6-1)*sz)./(x(i+(6-1)*sz)+x(i+(5-1)*sz)+x(i+(8-1)*sz));
-
-RacRatio(isnan(RacRatio))=0;
-RbarRatio(isnan(RbarRatio))=0;
-RhoRatio(isnan(RhoRatio))=0;
-PaxRatio(isnan(PaxRatio))=0;
-
-%update other parameters    
-K_is(i)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(i)).*(1+alpha_R*RacRatio(i))+k_G*k_X*GIT*PIX);
-K(i)=alpha_R*RacRatio(i).*K_is(i).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(i));%RbarRatio(I)/gamma;         %changed from paper
-I_Ks(i)=I_K*(1-K_is(i).*(1+alpha_R*RacRatio(i)));
-
-reaction(i+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(i)+RbarRatio(i)).^m));            %From inactive rho to active rho changed from model
-reaction(i+(2-1)*sz) = (I_R+I_Ks(i)).*(L_rho^m./(L_rho^m+RhoRatio(i).^m));                %From inactive Rac to active Rac
-reaction(i+(5-1)*sz) = B_1*(K(i).^m./(L_K^m+K(i).^m));
-
-
-alpha_chem(i_chem) = reaction(i_chem).*x(i_chem);
-alpha_rx=sum(alpha_chem(i_chem));
+% update_all=true;
+update_alpha_chem0
 
 

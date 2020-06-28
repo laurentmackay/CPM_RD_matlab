@@ -7,7 +7,6 @@ function mi = sample_mi(m,pi)
 %  mi = (1xk) vector of integers sampled from pi. sum(mi)=m.
 
 mi=histc(rand(1,m),[0 cumsum(pi)],2);
-% mi(:,end)=[];%delete last (empty) bin
-mi=mi(1:end-1);
+mi=mi(1:end-1);% delete last (empty) bin
 end
 
