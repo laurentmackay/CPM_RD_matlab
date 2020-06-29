@@ -2,7 +2,11 @@ function out = mk_fun(script)
     function bool = isScript(f)
         fid = fopen(f);
         
+        try
         l1=fgetl(fid);
+        catch e
+            disp(e);
+        end
         while isempty(l1)&&~isnumeric(l1)
             l1=fgetl(fid);
         end
@@ -25,9 +29,9 @@ end
 
 clean = @(x) strrep(x,"%","%%");
 
-
-mfiles=strtrim(string(ls("*.m")));
-inds=arrayfun(@(f) isScript(f), mfiles);
+listing=dir('*.m');
+mfiles= {listing.name}';
+inds=cellfun(@(f) isScript(f), mfiles);
 scripts=strrep(mfiles(inds),".m","");
 matches=strjoin(scripts,"|");
 reg=strcat("[\s]?(" ,matches, ")[\s]?");

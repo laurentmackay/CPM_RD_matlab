@@ -23,7 +23,7 @@ PAKtot = gamma*Rtot;
 
 alpha=alpha_R/Rtot;
 
-h=len;
+
 
 %%%
 
@@ -135,4 +135,4 @@ vox=cell_inds(1:A);
 % update_all=true;
 update_alpha_chem0
 
-
+RacRatio0=RacRatio;
