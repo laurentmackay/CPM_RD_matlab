@@ -8,27 +8,21 @@
 %vid = VideoWriter(['results'],'MPEG-4'); % this saves videos to mp4 change to whatever's convenient
 
 figure(1);clf();
-set(gcf,'defaultaxesfontsize',14)
-panelA=subplot(2,2,1);
-panelB=subplot(2,2,2);
-panelC=subplot(2,2,3);
-panelD=subplot(2,2,4);
+set(gcf,'defaultaxesfontsize',14);
+d=[0.04, 0.04];
+panelA=subplot(2,2,1); annotatePlot('A',22,d);
+panelB=subplot(2,2,2); annotatePlot('B',22,d);
+panelC=subplot(2,2,3); annotatePlot('C',22,d);
+panelD=subplot(2,2,4); annotatePlot('D',22,d);
 Results=[];
 Times=[];
-
-% panelB.FontSize = fs;
-% title(panelB,'Rho', 'Fontsize', 24)
-% panelC.FontSize = fs;
-% title(panelC,'Rac', 'Fontsize', 24)
-% panelD.FontSize = fs;
-% title(panelD,'Pax', 'Fontsize', 24)
 
 %open(vid);
 
 N_species=8; %number of chemical species
 N_rx=6; %number of reactions (this should determined automatically)
-Ttot=2e4; %time the simulation end
-SF=4; % speed factor I divide molecule number by this for speed
+Ttot=3.2e3; %time the simulation end
+SF=1; % speed factor I divide molecule number by this for speed
 Gsize=20; %length of the grid in um
 N=30; % number of points used to discretize the grid
 shape=[N,N];
@@ -53,7 +47,7 @@ center(z,:)=com(cell_mask);
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
 pic_WP %takes a frame for the video
 
-nrx=1e5; %number of times reactions are carried out in a chem_func loop
+nrx=4e5; %number of times reactions are carried out in a chem_func loop
 reactions=0; %intializing a reaction counter
 
 
