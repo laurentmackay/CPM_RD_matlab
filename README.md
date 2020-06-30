@@ -9,6 +9,8 @@ Due to the way MATLAB handles functions (pass by value), it is computationally i
 
 The template for the SSSA is kept in a script called `SSA0.m`. This template is a fully functional MATLAB script, but it is written in a "covenient" manner and is not the most efficient implementation as it is a script calling scripts. Therefore, the template/script can be converted into a function automatically using mk_fun('SSA0'). This will create a new/overwrite the file `SSA0_fun.m` where any scripts called inside `SSA0.m` will be inlined for computational efficiency.
 
+The generation of the function is fast enough that it can be run everytime a simulation is started. See line 115 of main2.m
+
 ## Chemical Reactions
 Currently, the chemical reactions are based on the model found in [1] (see Tang2018.pdf). However, we aim to make the chemical model modular so that it can be modified to arbitrary chemical models without touching the SSSA algorithm files.
 
