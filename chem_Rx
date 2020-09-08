@@ -1,0 +1,8 @@
+1 omega + 1 gam + Raci <->  1 Rac + 1 alpha; I_rho*(L_R^m./(L_R^m +(RacRatio+gamma*K).^m)), delta_Rho;
+ Paxi <-> Pax; B, delta_P;
+ Rac + PAK <-> Rac-PAK; Belta;
+
+
+%reaction(vox+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio+gamma*K).^m));            %From inactive rho to active rho changed from model
+%reaction(vox+(2-1)*sz) = (I_R+I_Ks).*(L_rho^m./(L_rho^m+RhoRatio.^m));                %From inactive Rac to active Rac
+%reaction(vox+(5-1)*sz) = B_1*(K.^m./(L_K^m+K.^m));
