@@ -1,4 +1,4 @@
-function out = mk_fun(script)
+function mk_fun(script)
     function bool = isScript(f)
         fid = fopen(f);
         
@@ -27,7 +27,7 @@ if ~isScript(strcat(script,".m"))
    error('the file provided is not a script') ;
 end
 
-clean = @(x) strrep(x,"%","%%");
+clean = @(x) regexprep(x,{'%','\\','\t'},{'%%','\\\\','\\t'});
 
 listing=dir('*.m');
 mfiles= {listing.name}';
@@ -37,15 +37,27 @@ matches=strjoin(scripts,"|");
 reg=strcat("[\s]?(" ,matches, ")[\s]?");
 
 source = fileread(strcat(script,".m"));
-matched_scripts = scripts(~cellfun('isempty',regexp(source,scripts,'match')));
+source=regexprep(source,"%[^\n]*\n","\n"); %remove block comments
 
-deps=getScriptDep(strcat(script,".m"));
-init=getInitialized(strcat(script,".m"));
+[matched_scripts, starts ] = regexp(source,strcat(scripts,'[^a-zA-Z_$0-9]'),'match','start');
+inds=~cellfun('isempty',matched_scripts);
+matched_scripts = scripts(inds);
+[~,foo]=sort(cellfun(@(x) x(1),starts(inds)));
+matched_scripts = matched_scripts(foo);
+
+deps0=getVars(strcat(script,".m"));
+deps={};
+init0=getInitialized(strcat(script,".m"));
+init=init0;
 for s=matched_scripts'
-    new_deps=setdiff(getScriptDep(strcat(s,".m")),init);
-    deps=[deps, new_deps];
+    script_name=strcat(s,".m");
+    new_deps=getScriptDep(script_name);
+    new_deps=setdiff(new_deps,init);
+    init=union(init,getInitialized(script_name));
+    deps=union(deps, new_deps);
+    
 end
-deps=unique(deps);
+deps=unique([deps' setdiff(deps0,init)]);
 
 maxwidth=80;
 
@@ -93,9 +105,11 @@ out = fopen(strcat(script,append,".m"),'wt');
 fprintf(out,header);
 
 line=fgetl(in);
+script_match=strcat("(",scripts, ")[ \f\t\r\n]");
+
 while ~isnumeric(line)
-    
-    match=regexp(line,scripts,'match');
+    %
+    match=regexp(line,script_match,'tokens');
     i_match=~cellfun('isempty',match);
     match=match(i_match);
     
@@ -106,10 +120,15 @@ while ~isnumeric(line)
         
         offset=regexp(line,scripts(i_match));
         indent=string(line(1:offset-1));
-        
+        try
         mid=fopen(strcat(string(match{1}),'.m'));
-        
+
+            
         line=fgetl(mid);
+        catch err
+            disp(err)
+        end
+        %inline script calls
         while ~isnumeric(line)
             if isempty(line) || ~(first(char(line))=='%')
                 fprintf(out,strcat(indent,clean(line),'\n'));

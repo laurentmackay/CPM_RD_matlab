@@ -14,6 +14,7 @@ panelA=subplot(2,2,1); annotatePlot('A',22,d);
 panelB=subplot(2,2,2); annotatePlot('B',22,d);
 panelC=subplot(2,2,3); annotatePlot('C',22,d);
 panelD=subplot(2,2,4); annotatePlot('D',22,d);
+
 Results=[];
 Times=[];
 
@@ -27,7 +28,7 @@ Gsize=20; %length of the grid in um
 N=30; % number of points used to discretize the grid
 shape=[N,N];
 sz=prod(shape);
-len=Gsize/N; %length of a latice square
+h=Gsize/N; %length of a latice square
 [j, i] = meshgrid(1:shape(2),1:shape(1)); %the i and j need to be reversed for some reason (\_(:0)_/)
 
 div=0.1;
@@ -38,16 +39,16 @@ initialize_chem %all reaction-diffusion parameter are getting initialized
 
 lastplot=0;
 tic
-picstep=0.05;(len)/vmax; %timepoints where we take a frame for the video
+picstep=0.05;h/vmax; %timepoints where we take a frame for the video
 z=1;
 
 center=zeros(floor(Ttot/picstep)+1,2); %an array where we store the COM
 center(z,:)=com(cell_mask);
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
-pic_WP %takes a frame for the video
+pic %takes a frame for the video
 
-nrx=4e5; %number of times reactions are carried out in a chem_func loop
+nrx=1e5; %number of times reactions are carried out in a chem_func loop
 reactions=0; %intializing a reaction counter
 
 
@@ -82,7 +83,7 @@ alpha_rx2=alpha_rx;
 a_total=sum(alpha_diff)+sum(alpha_rx(:));
 
 
-if (1/a_total)*nrx>(len)/(4*vmax) %makes sure that you don't stay in the CPM__chem func loop for to long
+if (1/a_total)*nrx>h/(4*vmax) %makes sure that you don't stay in the CPM__chem func loop for to long
     error('cell moving to fast consider lowering nrx')
 end
 
@@ -123,19 +124,28 @@ while time<Ttot
 %             k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,gamma,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
 %             alpha,PAKtot,nrx,A,num_vox_diff,pi,pT0,dt_diff,rx_count,0.5,rx_speedup);
 
-        [A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
-        PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,a_total,alpha,...
-        alpha_R,alpha_chem,alpha_rx,cell_inds,diffuse_mask,diffusing_species_sum,dt_diff,...
-        gamma,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,reaction,rx_count,rx_speedup,time,...
-        x] = SSA0_fun(A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
-        PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,a_total,alpha,alpha_R,...
-        alpha_chem,alpha_rx,cell_inds,diffuse_mask,diffusing_species_sum,dt_diff,gamma,h,id0,...
-        ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,reaction,rx_count,rx_speedup,time,x);
+%         [A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
+%         PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,a_total,alpha,...
+%         alpha_R,alpha_chem,alpha_rx,cell_inds,diffuse_mask,diffusing_species_sum,dt_diff,...
+%         gamma,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,reaction,rx_count,rx_speedup,time,...
+%         x] = SSA0_fun(A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
+%         PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,a_total,alpha,alpha_R,...
+%         alpha_chem,alpha_rx,cell_inds,diffuse_mask,diffusing_species_sum,dt_diff,gamma,h,id0,...
+%         ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,reaction,rx_count,rx_speedup,time,x);
+[A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
+PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha,alpha_R,...
+alpha_chem,alpha_rx,cell_inds,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,...
+ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,reaction,rx_count,rx_speedup,time,x] = SSA0_fun(...
+A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,PaxRatio,Pax_Square,...
+Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha,alpha_R,alpha_chem,alpha_rx,cell_inds,...
+diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,...
+reaction,rx_count,rx_speedup,time,x);
+
         
         reactions=reactions+nrx; %reaction counter
         
         if time>=lastplot+picstep % takes video frames
-            pic_WP
+            pic
             
 %             Timeseries=[Timeseries time];
 %             

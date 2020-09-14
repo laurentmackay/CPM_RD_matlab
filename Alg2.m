@@ -1,7 +1,6 @@
-function i = Alg2(p)
+function i = Alg2(p,xi,p0)
 i=0;
-b=0;
-xi=rand();
+b=p0;
 
 while xi>=b
     i=i+1;
@@ -9,4 +8,3 @@ while xi>=b
 end
 
 end
-

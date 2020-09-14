@@ -14,70 +14,66 @@ ij = bndry(randi(length(bndry)));
 r=randi(4);
 cell_maskp(ij) = cell_mask(jump(sub2ind([sz,4],ij,r)));% make a new trial configuration
 
-Per=perim(cell_maskp); % perimter
+Per=perim(cell_maskp); % perimeter
 A=nnz(cell_maskp); % area
 HA=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; % the hamiltonian after the possible change
 dH=HA-H0;
 Ncell_mask=squeeze(sum(sum(x))); %for a sanity check 
 
-if getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 %makes sure the cell stays connected 
+%set the equilibrium point as the overall Ratio such that in the selected boundary point ij:
+%higher RacRatio contributes to protrusion
+%higher RhoRatio contributes to retraction
+%vice versa
+rho_eq=sum(sum(x(:,:,3))/(sum(sum(sum(x(:,:,[3 1]))))));
+R_eq=sum(sum(x(:,:,4))/(sum(sum(sum(x(:,:,[4 2 7]))))));
+
+if getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 && getfield(bwconncomp(~cell_maskp,4),'NumObjects')==1 %makes sure the cell stays connected and no hole    
     grow= cell_maskp(ij) & ~cell_mask(ij);
     shrink= ~cell_maskp(ij) & cell_mask(ij);
     if grow
         dH=dH+B_rho*(RhoRatio(jump(sub2ind([sz,4],ij,r)))-rho_eq)-B_R*(RacRatio(jump(sub2ind([sz,4],ij,r)))-R_eq);
-        if rand<exp(-(dH+Hb)/T) %step raises energy boltzman prob forward
+        if rand<exp(-(dH+Hb)/T) 
             cell_mask=cell_maskp; %changing cell shape
             
             for j=0:(N_species-1) %splitting the molecules with the new lattice
                 x(ij+j*sz)=floor(x(jump(sub2ind([sz,4],ij,r))+j*sz)/2);
                 x(jump(sub2ind([sz,4],ij,r))+j*sz)=ceil(x(jump(sub2ind([sz,4],ij,r))+j*sz)/2);
             end
+            %{
+            %Before we found a way to do bulk diffusion, this somewhat works better
+            for j=0:(N_species-1) %copy the ratios to the new square
+                x(ij+j*sz)=x(jump(sub2ind([sz,4],ij,r))+j*sz);
+            end
+            %}
             
-            
-            
-            i=[ij jump(sub2ind([sz,4],ij,r))]; %places where molecule number has changed
-            
+            I=[ij jump(sub2ind([sz,4],ij,r))]; %places where molecule number has changed
             H0=HA; %changing the hamiltonn to the new one
             
-            %similar idea now to the CPM_chem_func dependence tree
+            %recalculate parameters
+            Per=perim(cell_mask); 
+            A=nnz(cell_mask);
+            cell_inds(1:A)=find(cell_mask);
+            [x,A,sz,...
+            alpha_chem,PaxRatio,RhoRatio,K_is,K,RacRatio,I_Ks,reaction,ir0,cell_inds,...
+            k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
+            I,Rac_Square,Pax_Square,Rho_Square]=update_SSA(x,A,sz,...
+            alpha_chem,PaxRatio,RhoRatio,K_is,K,RacRatio,I_Ks,reaction,ir0,cell_inds,...
+            k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
+            I,Rac_Square,Pax_Square,Rho_Square,gamma);
             
-            RacRatio(i)=x(i+(4-1)*sz)./(x(i+(4-1)*sz)+x(i+(2-1)*sz)+x(i+(7-1)*sz));
-            RbarRatio(i)=x(i+(7-1)*sz)./(x(i+(4-1)*sz)+x(i+(2-1)*sz)+x(i+(7-1)*sz));
-            RhoRatio(i)=x(i+(3-1)*sz)./(x(i+(3-1)*sz)+x(i+(1-1)*sz));
-            PaxRatio(i)=x(i+(6-1)*sz)./(x(i+(6-1)*sz)+x(i+(5-1)*sz)+x(i+(8-1)*sz));
-            if any(isnan(PaxRatio(i)))
-                PaxRatio(isnan(PaxRatio))=0;
-            end
-            if any(isnan(RhoRatio(i)))
-                RhoRatio(isnan(RhoRatio))=0;
-            end
-            if any(isnan(RacRatio(i)))
-                RacRatio(isnan(RacRatio))=0;
-                RbarRatio(isnan(RbarRatio))=0;
-            end
+            alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
             
-            %----reactions that vary lattice to lattice
-            K_is(i)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(i)).*(1+alpha_R*RacRatio(i))+k_G*k_X*GIT*PIX);
-            K(i)=RbarRatio(i)/gamma;         %changed from paper
-            I_Ks(i)=I_K*(1-K_is(i).*(1+alpha_R*RacRatio(i)));
-            reaction(i+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(i)+RbarRatio(i)).^m));            %From inactive rho to active rho changed from model
-            reaction(i+(2-1)*sz) = (I_R+I_Ks(i)).*(L_rho^m./(L_rho^m+RhoRatio(i).^m));                %From inactive Rac to active Rac
-            reaction(i+(5-1)*sz) = B_1*(K(i).^m./(L_K^m+K(i).^m));
-            
-            
-            for ip=i
-                ai=alpha_chem(ir0+ip(1));
-                alpha_chem(ir0+ip) = reaction(ip+ir0).*x(ip+ir0);
-                alpha_rx=alpha_rx+(alpha_chem(ir0+ip)-ai);
-            end
             
         else
+            %no grow
             cell_maskp=cell_mask;
+            Per=perim(cell_maskp); % perimeter
+            A=nnz(cell_maskp); % area
         end
     elseif shrink
         dH=dH-B_rho*(RhoRatio(ij)-rho_eq)+B_R*(RacRatio(ij)-R_eq);
         
-        if rand<exp(-(dH+Hb)/T)%step raises energy
+        if rand<exp(-(dH+Hb)/T)
             cell_mask=cell_maskp;  %changing cell shape 
             
             neighbors=[jump(ij,1) jump(ij,2) jump(ij,3) jump(ij,4)]; %finding places the molecules will go to
@@ -87,57 +83,47 @@ if getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 %makes sure the cell stays
                 x(neighbors+j*sz)=x(neighbors +j*sz)+diff(round(linspace(0,x(ij+j*sz),length(neighbors)+1)));
                 x(ij+j*sz)=0;
             end
+            %{
+            %Before we found a way to do bulk diffusion, this somewhat works better
+            for j=0:(N_species-1) %completely remove the molecules
+                x(ij+j*sz)=0;
+            end
+            %}
             
-            i=[ij neighbors]; %indices where molecule number changed 
-            
-            
+            I=[ij neighbors]; %indices where molecule number changed
             %Same as grow
             H0=HA;
 
+            Per=perim(cell_maskp); % perimeter
+            A=nnz(cell_mask);
+            cell_inds(1:A)=find(cell_mask);
+            [x,A,sz,...
+                alpha_chem,PaxRatio,RhoRatio,K_is,K,RacRatio,I_Ks,reaction,ir0,cell_inds,...
+                k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
+                I,Rac_Square,Pax_Square,Rho_Square]=update_SSA(x,A,sz,...
+                alpha_chem,PaxRatio,RhoRatio,K_is,K,RacRatio,I_Ks,reaction,ir0,cell_inds,...
+                k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
+                I,Rac_Square,Pax_Square,Rho_Square,gamma);
             
-            RacRatio(neighbors)=x(neighbors+(4-1)*sz)./(x(neighbors+(4-1)*sz)+x(neighbors+(2-1)*sz)+x(neighbors+(7-1)*sz));
-            RbarRatio(neighbors)=x(neighbors+(7-1)*sz)./(x(neighbors+(4-1)*sz)+x(neighbors+(2-1)*sz)+x(neighbors+(7-1)*sz));
-            RhoRatio(neighbors)=x(neighbors+(3-1)*sz)./(x(neighbors+(3-1)*sz)+x(neighbors+(1-1)*sz));
-            PaxRatio(neighbors)=x(neighbors+(6-1)*sz)./(x(neighbors+(6-1)*sz)+x(neighbors+(5-1)*sz)+x(neighbors+(8-1)*sz));
-            if any(isnan(PaxRatio(i)))
-                PaxRatio(isnan(PaxRatio))=0;
-            end
-            if any(isnan(RhoRatio(i)))
-                RhoRatio(isnan(RhoRatio))=0;
-            end
-            if any(isnan(RacRatio(i)))
-                RacRatio(isnan(RacRatio))=0;
-                RbarRatio(isnan(RbarRatio))=0;
-            end
-            RacRatio(ij)=0;
-            RbarRatio(ij)=0;
-            RhoRatio(ij)=0;
-            PaxRatio(ij)=0;
-            
-            %----reactions that vary lattice ot lattice
-            K_is(i)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(i)).*(1+alpha_R*RacRatio(i))+k_G*k_X*GIT*PIX);
-            K(i)=RbarRatio(i)/gamma;         %changed from paper
-            I_Ks(i)=I_K*(1-K_is(i).*(1+alpha_R*RacRatio(i)));
-            reaction(i+(1-1)*sz) = I_rho*(L_R^m./(L_R^m +(RacRatio(i)+RbarRatio(i)).^m));            %From inactive rho to active rho changed from model
-            reaction(i+(2-1)*sz) = (I_R+I_Ks(i)).*(L_rho^m./(L_rho^m+RhoRatio(i).^m));                %From inactive Rac to active Rac
-            reaction(i+(5-1)*sz) = B_1*(K(i).^m./(L_K^m+K(i).^m));
-            
-            
-            for ip=i
-                ai=alpha_chem(ir0+ip(1));
-                alpha_chem(ir0+ip) = reaction(ip+ir0).*x(ip+ir0);
-                alpha_rx=alpha_rx+(alpha_chem(ir0+ip)-ai);
-            end
+            alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
             
         else
-            %reaction doesn't happen
+            %no shrink
             cell_maskp=cell_mask;
+            Per=perim(cell_maskp); % perimeter
+            A=nnz(cell_maskp); % area
         end
     else
+        %no move
         cell_maskp=cell_mask;
+        Per=perim(cell_maskp); % perimter
+        A=nnz(cell_maskp); % area
     end
 else
+    %doesn't protrude or retract due to connection issue
     cell_maskp=cell_mask;
+    Per=perim(cell_maskp); % perimter
+    A=nnz(cell_maskp); % area
 end
 
 Ncell_maskp=squeeze(sum(sum(x)));
@@ -149,4 +135,3 @@ end
 if min(cell_mask(:))<0
     error('Oh no! D: (negtive numbers)')
 end
-

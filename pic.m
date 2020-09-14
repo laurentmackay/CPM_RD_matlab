@@ -1,56 +1,61 @@
-% close all
-% to make a video all frames must be the same size setting its position just
-% stops some bugs
-% figure('Position', [200 200 1000 900]) 
-
-fs=14; %axis font size 
-% figure(1);
-
-if time==0
-    rac_induced=[]
-    rac_uninduced=[];
-end
-    rac_induced=[rac_induced [time; mean(RacRatio(induced_mask&cell_mask))]];
-    rac_uninduced=[rac_uninduced [time; mean(RacRatio(~induced_mask&cell_mask))]];
+if usejava('desktop')
+    close all
+    % to make a video all frames must be the same size setting its position just
+    % stops some bugs
+    figure('Position', [200 75 1000 900])
+    fs=14; %axis font size
     
-
-htitle=suptitle(['t = ' num2str(time)]);
-set(htitle,'FontSize',28)
-
-plot(panelA,rac_induced(1,:),rac_induced(2,:),rac_uninduced(1,:),rac_uninduced(2,:))
-
-% imagesc(panelB,RhoRatio);
-imagesc(panelB,RhoRatio);
-colorbar(panelB);
-caxis(panelB,[0, 0.6])
-
-% panelB.FontSize = fs;
-title(panelB,'Rho', 'Fontsize', 24)
-% xlabel('X')
-% ylabel('Y')
-
-imagesc(panelC,RacRatio);
-% imagesc(panelC,x(:,:,2));
-colorbar(panelC)
-caxis(panelC,[0, 0.3])
-% ax = gca;
-% panelC.FontSize = fs;
-title(panelC,'Rac', 'Fontsize', 24)
-% xlabel('X')
-% ylabel('Y')
-
-
-imagesc(panelD,PaxRatio);
-% imagesc(panelD,x(:,:,4));
-colorbar(panelD)
-caxis(panelD,[0, 0.4])
-
-panelD.FontSize = fs;
-title(panelD,'Pax', 'Fontsize', 24)
-% xlabel('X')
-% ylabel('Y')
-
-%colormap jet
-%saveas(gcf,'CPM.png') %if you want a an image of a frame 
-
-drawnow
+    subplot(2,2,1)
+    imagesc(cell_mask,[0 1]);
+    % colorbar;
+    center(z,:)=com(cell_mask);
+    hold on
+    plot(center(1:z,2),center(1:z,1),'r')
+    hold off
+    ax = gca;
+    ax.FontSize = fs;
+    % title('Cell', 'Fontsize', 24)
+    % xlabel('X')
+    % ylabel('Y')
+    
+    
+    subplot(2,2,2)
+    imagesc(RhoRatio,[0.1 0.6]);
+    colorbar;
+    ax = gca;
+    ax.FontSize = fs;
+    title('Rho', 'Fontsize', 24)
+    % xlabel('X')
+    % ylabel('Y')
+    
+    subplot(2,2,3)
+    imagesc(RacRatio,[0 0.3]);
+    colorbar
+    ax = gca;
+    ax.FontSize = fs;
+    title('Rac', 'Fontsize', 24)
+    % xlabel('X')
+    % ylabel('Y')
+    
+    subplot(2,2,4)
+    imagesc(PaxRatio,[0 0.4]);
+    colorbar
+    ax = gca;
+    ax.FontSize = fs;
+    title('Pax', 'Fontsize', 24)
+    % xlabel('X')
+    % ylabel('Y')
+    
+    %colormap jet
+    %saveas(gcf,'CPM.png') %if you want a an image of a frame
+    
+    
+%     Results(:,:,1,z)=cell_mask;
+%     Results(:,:,2:(N_species+1),z)=x; %storing the results
+    drawnow
+    %adding videos the frame
+    
+    %frames=[frames getframe(gcf)];
+    frame=getframe(gcf);
+%     writeVideo(vid,frame);
+end

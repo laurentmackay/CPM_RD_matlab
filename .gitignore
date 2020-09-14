@@ -2,5 +2,6 @@
 *.mp4
 *.asv
 *.bak
+*.avi
 results
 codegen
