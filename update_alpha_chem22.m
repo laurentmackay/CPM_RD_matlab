@@ -16,6 +16,6 @@ I_Ks(vox)=I_K*(1-K_is(vox).*(1+alpha_R*RacRatio(vox)));
 alpha_chem(vox+0*sz)=(I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m))).*x(vox+0*sz);
 alpha_chem(vox+1*sz)=(delta_R).*x(vox+1*sz);
 alpha_chem(vox+2*sz)=((I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m))).*x(vox+2*sz);
-alpha_chem(vox+3*sz)=(delta_rho).*x(vox+3*sz);
+alpha_chem(vox+3*sz)=(delta_Rho).*x(vox+3*sz);
 
 alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);

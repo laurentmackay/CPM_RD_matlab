@@ -100,11 +100,11 @@ x(i_induced)=repmat(N0(1,:),nnz(mask),1);
 
 x=round(x);
 
-reaction=zeros(N,N,9);
-
-reaction(:,:,3) = delta_rho;                                             %From active rho to inactive rho
-reaction(:,:,4) = delta_R;                                               %From active Rac to inactive Rac
-reaction(:,:,6) = delta_P;                                               %From phosphorylated Pax to unphosphorylated Pax
+% reaction=zeros(N,N,9);
+% 
+% reaction(:,:,3) = delta_rho;                                             %From active rho to inactive rho
+% reaction(:,:,4) = delta_R;                                               %From active Rac to inactive Rac
+% reaction(:,:,6) = delta_P;                                               %From phosphorylated Pax to unphosphorylated Pax
 
 
 alpha_chem=zeros([shape N_rx]);
@@ -133,6 +133,6 @@ vox=cell_inds(1:A);
 %     PAKtot,i);
 
 % update_all=true;
-update_alpha_chem0
+update_alpha_chem
 
 RacRatio0=RacRatio;

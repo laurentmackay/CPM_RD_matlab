@@ -1,4 +1,4 @@
-function vars = getChems(f)
+function [chems,S,rates] = getChems(f)
 
     function [species,stoic,rates]=parseRxns(trans,fast)
         if nargin==1
@@ -47,7 +47,7 @@ function vars = getChems(f)
                 
                 rates=cellfun(@(x) regexprep(x(end),'[\;\n\r]',''),rates,'UniformOutput',0);
                 rates=cellfun(@(x) strsplit(x{1},','),rates,'UniformOutput',0);
-                rates=[rates{:}];
+                rates=strtrim([rates{:}]);
                 
                 species=cellfun(@(x,y) [x,y],lhs_species,rhs_species,'UniformOutput',0);
                 stoic=cellfun(@(x,y) [x,y],lhs_stoic,rhs_stoic,'UniformOutput',0);

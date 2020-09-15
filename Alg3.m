@@ -1,32 +1,34 @@
-function x =  Alg3(x0,dt,D,h,jump,diffuse_mask,pT0,pi,cell_inds,A)
+%wow diffusing
+function x =  Alg3(x,dt,jump,pT0,pi,cell_inds,A,inds)
 
-sz=size(x0,1)*size(x0,2);
-x=x0;
+sz=size(x,1)*size(x,2);
 
-m_avg=0;
-counter=0;
+m=zeros(A,1);
+vox=cell_inds(1:A);
 
-for chem=1:length(D)
-    ic0=(chem-1)*sz;
-    
-    for i=1:A
+for chem=1:length(inds)
+    if inds(chem)
+        ic0=(chem-1)*sz;
         
-        vox=cell_inds(i);
         pT_curr=pT0(vox,chem);
-        x0_curr=x0(vox+ic0);
-        neighbors=jump(:,vox)+ic0;
+        x0_curr=x(vox+ic0);
+        inds_diff=pT_curr>0 & x0_curr>0;
         
-        if pT_curr>0 && x0_curr>0
-            m=Alg5(x0_curr,pT_curr*dt,rand());
-%           disp([pT_curr*dt*x0_curr, m])
-            m_avg=m_avg+m;
-            counter=counter+1;
-            mi=sample_mi(m,pi(:,vox)')';
-            x(neighbors)=x(neighbors)+mi;
-            x(vox+ic0)=x(vox+ic0)-m;
-            
+        %determine number of molecules to be transferred
+        m(inds_diff)=Alg5(x0_curr(inds_diff),pT_curr(inds_diff)*dt(chem));
+        mi=sample_mi(m(inds_diff),pi(:,vox(inds_diff)));
+        vox_diff=vox(inds_diff);
+        
+        for j=1:length(vox_diff)
+            neighbors=jump(:,vox_diff(j))+ic0;
+            x(neighbors)=x(neighbors)+mi(:,j);
         end
+        % the following if check is necessary when there exists null
+        % molecule in a square
+        if ~isempty(vox_diff)
+            x(vox_diff+ic0)=x(vox_diff+ic0)-m(inds_diff);
+        end
+
     end
 end
-% disp(m_avg/counter);
 end
