@@ -1,4 +1,4 @@
-diffusing_species=1:6; %only the first 6 species diffuse
+diffusing_species=1:N_species; %only the first 6 species diffuse
 
 
 for drx=1:size(jump,2) %itterating over all possible directions

@@ -9,10 +9,11 @@ bndry = find( bndry_cell | bndry_empty );
 if any(cell_maskp~=cell_mask)
     error('not reseting')
 end
-ij = bndry(randi(length(bndry)));
+vox_trial = bndry(randi(length(bndry)));
 
-r=randi(4);
-cell_maskp(ij) = cell_mask(jump(sub2ind([sz,4],ij,r)));% make a new trial configuration
+r=randi(size(jump,2));
+vox_ref=jump(sub2ind([sz,4],vox_trial,r));
+cell_maskp(vox_trial) = cell_mask(vox_ref);% make a new trial configuration
 
 Per=perim(cell_maskp); % perimeter
 A=nnz(cell_maskp); % area
@@ -24,112 +25,99 @@ Ncell_mask=squeeze(sum(sum(x))); %for a sanity check
 %higher RacRatio contributes to protrusion
 %higher RhoRatio contributes to retraction
 %vice versa
-rho_eq=sum(sum(x(:,:,3))/(sum(sum(sum(x(:,:,[3 1]))))));
-R_eq=sum(sum(x(:,:,4))/(sum(sum(sum(x(:,:,[4 2 7]))))));
+rho_eq=mean(RhoRatio(find(cell_mask)));
+R_eq=mean(RacRatio(find(cell_mask)));
 
-if getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 && getfield(bwconncomp(~cell_maskp,4),'NumObjects')==1 %makes sure the cell stays connected and no hole    
-    grow= cell_maskp(ij) & ~cell_mask(ij);
-    shrink= ~cell_maskp(ij) & cell_mask(ij);
-    if grow
-        dH=dH+B_rho*(RhoRatio(jump(sub2ind([sz,4],ij,r)))-rho_eq)-B_R*(RacRatio(jump(sub2ind([sz,4],ij,r)))-R_eq);
-        if rand<exp(-(dH+Hb)/T) 
+no_holes = getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 && getfield(bwconncomp(~cell_maskp,4),'NumObjects')==1 ;%makes sure the cell stays connected and no hole   
+reacted = 0;
+if  no_holes
+    %check if growing or shrinking
+    grow= cell_maskp(vox_trial) & ~cell_mask(vox_trial);
+    shrink= ~cell_maskp(vox_trial) & cell_mask(vox_trial);
+    
+    
+    if grow 
+        f=1;
+        dH=dH+B_rho*(RhoRatio(vox_ref)-rho_eq)-B_R*(RacRatio(vox_ref)-R_eq);
+    elseif shrink
+        f=-1;
+        dH=dH-B_rho*(RhoRatio(vox_trial)-rho_eq)+B_R*(RacRatio(vox_trial)-R_eq);
+    end
+        
+        
+        if (grow || shrink) && rand<exp(-(dH+Hb)/T) 
+            reacted=1;
             cell_mask=cell_maskp; %changing cell shape
             
             for j=0:(N_species-1) %splitting the molecules with the new lattice
-                x(ij+j*sz)=floor(x(jump(sub2ind([sz,4],ij,r))+j*sz)/2);
-                x(jump(sub2ind([sz,4],ij,r))+j*sz)=ceil(x(jump(sub2ind([sz,4],ij,r))+j*sz)/2);
+%                 P1=D(j+1)*0.5*cpmstep/(h^2)
+
+            counts=x(cell_inds(1:A-1)+j*sz);
+            if grow
+                tmp=x(vox_ref+j*sz);
+            else
+                tmp=x(vox_trial+j*sz);
+                counts(cell_inds(1:A-1)==vox_trial)=0;
             end
-            %{
-            %Before we found a way to do bulk diffusion, this somewhat works better
-            for j=0:(N_species-1) %copy the ratios to the new square
-                x(ij+j*sz)=x(jump(sub2ind([sz,4],ij,r))+j*sz);
+
+                
+                Ntot=sum(counts);
+                p=counts/sum(counts);
+                
+%                 if shrink
+%                     p=1-p;
+%                 end
+                
+                for k=1:tmp
+                    l=Alg2(p,rand(),0);
+                    x(cell_inds(l)+j*sz)=x(cell_inds(l)+j*sz)-f;
+%                     counts(l)=counts(l)-1;
+                end
+                if grow
+                    x(vox_trial+j*sz)=tmp;
+                else
+                    x(vox_trial+j*sz)=0;
+                end
             end
-            %}
+
             
-            I=[ij jump(sub2ind([sz,4],ij,r))]; %places where molecule number has changed
+            I=[vox_trial vox_ref]; %places where molecule number has changed
             H0=HA; %changing the hamiltonn to the new one
             
             %recalculate parameters
             Per=perim(cell_mask); 
             A=nnz(cell_mask);
             cell_inds(1:A)=find(cell_mask);
-            [x,A,sz,...
-            alpha_chem,PaxRatio,RhoRatio,K_is,K,RacRatio,I_Ks,reaction,ir0,cell_inds,...
-            k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-            I,Rac_Square,Pax_Square,Rho_Square]=update_SSA(x,A,sz,...
-            alpha_chem,PaxRatio,RhoRatio,K_is,K,RacRatio,I_Ks,reaction,ir0,cell_inds,...
-            k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-            I,Rac_Square,Pax_Square,Rho_Square,gamma);
-            
-            alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
-            
-            
-        else
-            %no grow
-            cell_maskp=cell_mask;
-            Per=perim(cell_maskp); % perimeter
-            A=nnz(cell_maskp); % area
-        end
-    elseif shrink
-        dH=dH-B_rho*(RhoRatio(ij)-rho_eq)+B_R*(RacRatio(ij)-R_eq);
-        
-        if rand<exp(-(dH+Hb)/T)
-            cell_mask=cell_maskp;  %changing cell shape 
-            
-            neighbors=[jump(ij,1) jump(ij,2) jump(ij,3) jump(ij,4)]; %finding places the molecules will go to
-            neighbors=neighbors(find(cell_maskp(neighbors)));
-            
-            for j=0:(N_species-1) %dumping out molecules from the retracting site
-                x(neighbors+j*sz)=x(neighbors +j*sz)+diff(round(linspace(0,x(ij+j*sz),length(neighbors)+1)));
-                x(ij+j*sz)=0;
-            end
-            %{
-            %Before we found a way to do bulk diffusion, this somewhat works better
-            for j=0:(N_species-1) %completely remove the molecules
-                x(ij+j*sz)=0;
-            end
-            %}
-            
-            I=[ij neighbors]; %indices where molecule number changed
-            %Same as grow
-            H0=HA;
 
-            Per=perim(cell_maskp); % perimeter
-            A=nnz(cell_mask);
-            cell_inds(1:A)=find(cell_mask);
-            [x,A,sz,...
-                alpha_chem,PaxRatio,RhoRatio,K_is,K,RacRatio,I_Ks,reaction,ir0,cell_inds,...
-                k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-                I,Rac_Square,Pax_Square,Rho_Square]=update_SSA(x,A,sz,...
-                alpha_chem,PaxRatio,RhoRatio,K_is,K,RacRatio,I_Ks,reaction,ir0,cell_inds,...
-                k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-                I,Rac_Square,Pax_Square,Rho_Square,gamma);
+            vox=cell_inds(1:A);
+            update_alpha_chem
             
             alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
-            
-        else
-            %no shrink
-            cell_maskp=cell_mask;
-            Per=perim(cell_maskp); % perimeter
-            A=nnz(cell_maskp); % area
+            if grow 
+                disp('grow');
+                grow_count=grow_count+1;
+            else
+                disp('shrink');
+                shrink_count=shrink_count+1;
+            end
+             
         end
-    else
+end
+        
+    if ~reacted 
         %no move
         cell_maskp=cell_mask;
-        Per=perim(cell_maskp); % perimter
-        A=nnz(cell_maskp); % area
+        Per=perim(cell_mask); % perimter
+        A=nnz(cell_mask); % area
+        cell_inds(1:A)=find(cell_mask);
     end
-else
-    %doesn't protrude or retract due to connection issue
-    cell_maskp=cell_mask;
-    Per=perim(cell_maskp); % perimter
-    A=nnz(cell_maskp); % area
-end
+
+
 
 Ncell_maskp=squeeze(sum(sum(x)));
 %sanity checks 
 if any(Ncell_mask~=Ncell_maskp)
-    errror('molecule loss')
+    error('molecule loss')
 end
 
 if min(cell_mask(:))<0

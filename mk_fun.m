@@ -1,4 +1,4 @@
-function mk_fun(script)
+function fn=mk_fun(script)
     function bool = isScript(f)
         fid = fopen(f);
         
@@ -20,8 +20,8 @@ function mk_fun(script)
         end
     end
 
-append="_fun";
-
+suffix='_fun';
+fn=[script suffix '.m'];
 
 if ~isScript(strcat(script,".m"))
    error('the file provided is not a script') ;
@@ -75,7 +75,7 @@ end
 
 header=strcat(extractBetween(header,1,strlength(header)-1),"] = ");
 line_length=line_length+3;
-add=strcat(script,append,"(");
+add=strcat(script,suffix,"(");
 
 if line_length+length(add)<=maxwidth+3
     header=strcat(header,add);
@@ -100,12 +100,12 @@ in = fopen(strcat(script,".m"));
 
 
 
-out = fopen(strcat(script,append,".m"),'wt');
+out = fopen(fn,'wt');
 
 fprintf(out,header);
 
 line=fgetl(in);
-script_match=strcat("(",scripts, ")[ \f\t\r\n]");
+script_match=strcat("(",matched_scripts, ")[ \f\t\r\n]*");
 
 while ~isnumeric(line)
     %

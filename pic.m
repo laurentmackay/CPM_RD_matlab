@@ -1,8 +1,8 @@
 if usejava('desktop')
-    close all
+%     close all
     % to make a video all frames must be the same size setting its position just
     % stops some bugs
-    figure('Position', [200 75 1000 900])
+%     figure('Position', [200 75 1000 900])
     fs=14; %axis font size
     
     subplot(2,2,1)
