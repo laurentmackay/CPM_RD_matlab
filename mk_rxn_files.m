@@ -1,5 +1,5 @@
 function  mk_update_alpha_chem(f)
-[chems,S,rates] = getChemRxns(f)
+[chems,S,rates] = getChemRxns(f);
 vars=getInitialized(f);
 
 
@@ -55,9 +55,10 @@ chem_ref=cellfun(@(x) ref(x),chems,'UniformOutput',0);
 chem_rep=arrayfun(@(i) ['$<pre>x\(vox+' num2str(i-1) '*sz\)$<post>'],1:length(chems),'UniformOutput',0);
 lines=regexprep(lines,chem_ref,chem_rep);
 
-lines=cellfun(@(x) [x ';'], lines,'UniformOutput',0)
+lines=cellfun(@(x) [x ';'], lines,'UniformOutput',0);
+
 preamble={'if length(vox)>1'...
- '[tmp,tmp2]=meshgrid(ir0,cell_inds(1:A));'...
+ '[tmp,tmp2]=meshgrid(ir0,vox);'...
  '    I_rx=tmp+tmp2;'...
  'else'...
  '    I_rx=vox+ir0;'...
@@ -74,7 +75,7 @@ fclose(fid);
 
 
  tmp=arrayfun(@(i) ['x(vox+[' num2str(find(S(:,i))'-1) ']*sz)' ],1:length(rates),'UniformOutput',0);
- tmp=arrayfun(@(i) [tmp{i} '=' tmp{1} '+[' num2str(S(S(:,i)~=0,i)') '];'] ,1:length(tmp),'UniformOutput',0);
+ tmp=arrayfun(@(i) [tmp{i} '=' tmp{i} '+[' num2str(S(S(:,i)~=0,i)') '];'] ,1:length(tmp),'UniformOutput',0);
 
 out=['if rx==1' newline '    ' tmp{1} newline ....
 strjoin(arrayfun(@(i) ['elseif rx==' int2str(i)  newline '    ' tmp{i}],2:length(tmp),'UniformOutput',0),newline)...
@@ -82,6 +83,10 @@ strjoin(arrayfun(@(i) ['elseif rx==' int2str(i)  newline '    ' tmp{i}],2:length
 
 fid=fopen('perform_rx.m','w');
 fwrite(fid,out,'char');
+fclose(fid);
+
+fid=fopen('initialize_chem_params.m','w');
+fwrite(fid,['N_species = ' int2str(length(chems)) ';' newline 'N_rx = ' int2str(length(rates)) ';'],'char');
 fclose(fid);
 
 end

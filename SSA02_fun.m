@@ -1,10 +1,9 @@
-function [A,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_R,L_rho,PIX,P_diff,Paxtot,RacRatio,...
-Rac_Square,RhoRatio,Rho_Square,alpha_R,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,...
-diffuse_mask,diffusing_species_sum,dt_diff,gamma,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,...
-pT0,pi,rx_count,rx_speedup,time,x] = SSA02_fun(A,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_R,...
-L_rho,PIX,P_diff,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_R,alpha_chem,...
-alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,gamma,...
-h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,rx_count,rx_speedup,time,x)
+function [A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,...
+alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,...
+dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x] = SSA02_fun(A,D,I_R,...
+I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,...
+cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,...
+m,nrx,pT0,pi,rx_count,rx_speedup,time,x)
 
 N_instantaneous=50; % the number of steady reaction itterated at a moment in time
 sz=size(x,1)*size(x,2);
@@ -78,7 +77,15 @@ for kk=1:nrx
             error('Oh no! D: chemical reaction propensites did not sum correctly')
         end
         %             numReac=numReac+1;%ellie
-        perform_rx
+if rx==1
+    x(vox+[0  1]*sz)=x(vox+[0  1]*sz)+[-1  1];
+elseif rx==2
+    x(vox+[0  1]*sz)=x(vox+[0  1]*sz)+[1 -1];
+elseif rx==3
+    x(vox+[2  3]*sz)=x(vox+[2  3]*sz)+[-1  1];
+elseif rx==4
+    x(vox+[2  3]*sz)=x(vox+[2  3]*sz)+[1 -1];
+end
 
         %-----------recalculating value that would have changed--------------
 
@@ -112,7 +119,24 @@ for kk=1:nrx
 
 
 
-        update_alpha_chem
+if length(vox)>1
+[tmp,tmp2]=meshgrid(ir0,vox);
+    I_rx=tmp+tmp2;
+else
+    I_rx=vox+ir0;
+end
+a_c_0=alpha_chem(I_rx);
+
+
+RacRatio(vox)=x(vox+1*sz)/Rac_Square;
+RhoRatio(vox)=x(vox+3*sz)/Rho_Square;
+PaxRatio=0;
+alpha_chem(vox+0*sz)=(I_R*(L_rho^m./(L_rho^m+RhoRatio(vox).^m))).*x(vox+0*sz);
+alpha_chem(vox+1*sz)=(delta_R).*x(vox+1*sz);
+alpha_chem(vox+2*sz)=(I_rho*(L_R^m./(L_R^m +RacRatio(vox).^m))).*x(vox+2*sz);
+alpha_chem(vox+3*sz)=(delta_rho).*x(vox+3*sz);
+
+alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
 
 
 
@@ -137,7 +161,24 @@ for kk=1:nrx
 
         update_all=true;
 
-        update_alpha_chem
+if length(vox)>1
+[tmp,tmp2]=meshgrid(ir0,vox);
+    I_rx=tmp+tmp2;
+else
+    I_rx=vox+ir0;
+end
+a_c_0=alpha_chem(I_rx);
+
+
+RacRatio(vox)=x(vox+1*sz)/Rac_Square;
+RhoRatio(vox)=x(vox+3*sz)/Rho_Square;
+PaxRatio=0;
+alpha_chem(vox+0*sz)=(I_R*(L_rho^m./(L_rho^m+RhoRatio(vox).^m))).*x(vox+0*sz);
+alpha_chem(vox+1*sz)=(delta_R).*x(vox+1*sz);
+alpha_chem(vox+2*sz)=(I_rho*(L_R^m./(L_R^m +RacRatio(vox).^m))).*x(vox+2*sz);
+alpha_chem(vox+3*sz)=(delta_rho).*x(vox+3*sz);
+
+alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
 
         update_all=false;
 

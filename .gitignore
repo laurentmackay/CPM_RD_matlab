@@ -3,5 +3,6 @@
 *.asv
 *.bak
 *.avi
+*.gif
 results
 codegen

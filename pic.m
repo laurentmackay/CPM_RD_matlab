@@ -1,13 +1,13 @@
 if usejava('desktop')
-    close all
+%     close all
     % to make a video all frames must be the same size setting its position just
     % stops some bugs
-    figure('Position', [200 75 1000 900])
+%     figure('Position', [200 75 1000 900])
     fs=14; %axis font size
     
     subplot(2,2,1)
     imagesc(cell_mask,[0 1]);
-    % colorbar;
+    colorbar;
     center(z,:)=com(cell_mask);
     hold on
     plot(center(1:z,2),center(1:z,1),'r')
@@ -20,7 +20,7 @@ if usejava('desktop')
     
     
     subplot(2,2,2)
-    imagesc(RhoRatio,[0.1 0.6]);
+    plotCellIm(panelB,RhoRatio,cell_mask,i0,j0)
     colorbar;
     ax = gca;
     ax.FontSize = fs;
@@ -29,20 +29,22 @@ if usejava('desktop')
     % ylabel('Y')
     
     subplot(2,2,3)
-    imagesc(RacRatio,[0 0.3]);
+    plotCellIm(panelC,RacRatio,cell_mask,i0,j0)
     colorbar
     ax = gca;
     ax.FontSize = fs;
+    set(gca,'Color',[1 1 1]*1)
     title('Rac', 'Fontsize', 24)
+    axis tight
     % xlabel('X')
     % ylabel('Y')
-    
-    subplot(2,2,4)
-    imagesc(PaxRatio,[0 0.4]);
-    colorbar
-    ax = gca;
-    ax.FontSize = fs;
-    title('Pax', 'Fontsize', 24)
+%     
+%     subplot(2,2,4)
+%     imagesc(PaxRatio,[0 0.4]);
+%     colorbar
+%     ax = gca;
+%     ax.FontSize = fs;
+%     title('Pax', 'Fontsize', 24)
     % xlabel('X')
     % ylabel('Y')
     

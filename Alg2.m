@@ -4,7 +4,11 @@ b=p0;
 
 while xi>=b
     i=i+1;
+    try
     b=b+p(i);
+    catch e
+        disp(e)
+    end
 end
 
 end
