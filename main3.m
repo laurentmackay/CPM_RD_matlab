@@ -31,6 +31,7 @@ N=30; % number of points used to discretize the grid
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); %length of a latice square
+
 vmax=3/60; %max speed of the cell
 picstep=5;
 cpmsteps=5;
@@ -135,6 +136,7 @@ while time<Ttot
         reactions=reactions+nrx; %reaction counter
         
 
+
         
         if time>=lastcpm+cpmstep
             
@@ -148,6 +150,7 @@ while time<Ttot
         
                 if time>=lastplot+picstep || time==lastcpm % takes video frames
             
+
 
             
             pic

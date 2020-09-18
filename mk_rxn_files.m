@@ -55,7 +55,9 @@ chem_ref=cellfun(@(x) ref(x),chems,'UniformOutput',0);
 chem_rep=arrayfun(@(i) ['$<pre>x\(vox+' num2str(i-1) '*sz\)$<post>'],1:length(chems),'UniformOutput',0);
 lines=regexprep(lines,chem_ref,chem_rep);
 
+
 lines=cellfun(@(x) [x ';'], lines,'UniformOutput',0);
+
 
 preamble={'if length(vox)>1'...
  '[tmp,tmp2]=meshgrid(ir0,vox);'...

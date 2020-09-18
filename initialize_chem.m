@@ -48,14 +48,17 @@ R_eq=0; % i seet the equillbirum values to 0 so the Rac always causes exansion R
 rho_eq=0;
 
 % rough estimate of uninduced state
+
 RhoRatio_u = 0.55;
 RacRatio_u = 0.12;%0.085
+
 % PaxRatio_u = 0.22;%0.22
 
 
 % rough estimate of the induced state 
 RhoRatio_i = 0.2;
 RacRatio_i = 0.5; %0.215;
+
 
 % RhoRatio_i = RhoRatio_u;
 % RacRatio_i = RacRatio_u;

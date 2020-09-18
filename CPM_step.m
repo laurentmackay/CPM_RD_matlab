@@ -66,6 +66,7 @@ if  no_holes
             
             for j=0:(N_species-1) %splitting the molecules with the new lattice
 %                 P1=D(j+1)*0.5*cpmstep/(h^2)
+
             if grow
                 tmp=x(vox_ref+j*sz);  
             else
@@ -89,6 +90,7 @@ if  no_holes
                 p=counts.*jdiff(inds);
                 p=p/sum(p);
                 
+
                 
 %                 if shrink
 %                     p=1-p;
@@ -107,6 +109,7 @@ if  no_holes
             end
 
 
+
             
             I=[vox_trial vox_ref]; %places where molecule number has changed
             H0=HA; %changing the hamiltonn to the new one
@@ -115,12 +118,14 @@ if  no_holes
             Per=perim(cell_mask); 
             A=nnz(cell_mask);
             cell_inds(1:A)=find(cell_mask);
+
             
             if grow
                 vox=cell_inds(1:A);
             else
                 vox=[cell_inds(1:A); vox_trial];
             end
+
             update_alpha_chem
             
             alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
