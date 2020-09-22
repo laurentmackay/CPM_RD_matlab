@@ -29,11 +29,11 @@ for chem=1:length(inds)
             x(neighbors)=x(neighbors)+mi(:,j);
 %             x(vox_diff(j)+ic0)=x(vox_diff(j)+ic0)-m(j);
         end
-        try
-        x(vox_diff+ic0)=x(vox_diff+ic0)-m;
-        catch e
-            disp(e);
-        end
+%         try
+        x(vox_diff+ic0)=x(vox_diff+ic0)-m(inds_diff);
+%         catch e
+%             throw(e);
+%         end
         %update x
         
         

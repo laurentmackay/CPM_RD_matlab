@@ -24,7 +24,7 @@ Times=[];
 nrx=1e5; %number of times reactions are carried out in a chem_func loop
 
 
-Ttot=2e3; %time the simulation end
+Ttot=3.6e3; %time the simulation end
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=100; %length of the grid in um
 N=30; % number of points used to discretize the grid
@@ -56,7 +56,7 @@ end
 lastplot=0;
 lastcpm=0;
 tic
- %timepoints where we take a frame for the video
+%timepoints where we take a frame for the video
 z=1;
 
 center=zeros(floor(Ttot/picstep)+1,2); %an array where we store the COM
@@ -124,7 +124,7 @@ P_diff=0.5;
 SSA='SSA02';
 SSA_fn=mk_fun(SSA);
 SSA_call=[getFunctionHeader(SSA_fn) ';'];
-
+d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
 while time<Ttot
     A=nnz(cell_mask); %current area
     cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s
@@ -132,58 +132,66 @@ while time<Ttot
     while (time-last_time)<Ttot
         
         alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
+%         disp('gonna do SSA')
+        if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
+            disp('molecules changed')
+        end
+        
+        x0=x;
         
         %run the SSA
-        eval(SSA_call); 
-
+%         eval(['try' newline SSA_call newline 'catch err' newline 'disp(err.stack.file);disp(err.stack.line);' newline 'end']);
+    disp('tryng SSA')        
+        try
+        [A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x] = SSA02_fun(A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x);
+        catch err
+        disp(err.stack.file);
+        disp(err.stack.line);
+        end
+        
+%        disp('just did SSA')
+        if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
+            disp('molecules changed')
+        end
+        
         reactions=reactions+nrx; %reaction counter
         
-
-
+        
+        
         
         if time>=lastcpm+cpmstep
             
             for kk=1:Per/cpmsteps %itterates CPM step Per times
+                disp('doing CPM')
                 CPM_step
+            
+                if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
+                    disp('molecules changed')
+                end
             end
             
             enumerate_diffusion %recaucluates diffusable sites
             lastcpm=time;
         end
         
-                if time>=lastplot+picstep || time==lastcpm % takes video frames
-            
-
-
-            
+        if time>=lastplot+picstep || time==lastcpm % takes video frames
             pic
             gif
-%             Timeseries=[Timeseries time];
-%             
-%             TRac=[TRac sum(sum(x(:,:,4)))/sum(sum(sum(x(:,:,[4 2 7]))))];
-%             TRho=[TRho sum(sum(x(:,:,3)))/sum(sum(sum(x(:,:,[1 3]))))];
-%             TPax=[TPax sum(sum(x(:,:,6)))/sum(sum(sum(x(:,:,[6 5 8]))))];
-% 
-%             z=z+1;
-%             center(z,:)=com(cell_mask);
-            lastplot=time;
-            time;
-%             reactions
-%             toc;
+            lastplot=time;            
         end
         
     end
     
     last_time=time;
     
-
+    
     
     enumerate_diffusion %recaucluates diffusable sites
 end
 
 
 
-%calculates speed by the distance the COM moved every 120s 
+%calculates speed by the distance the COM moved every 120s
 %thats (how they do it experimentally)
 % dx=zeros(floor(finaltime/120),1);
 % dx(1)=sqrt(sum((center(120/picstep,:)-center(1,:)).^2));
@@ -191,8 +199,8 @@ end
 %     dx(i)=sqrt(sum((center(i*120/picstep,:)-center((i-1)*120/picstep,:)).^2));
 % end
 % v=dx/120*3600;
-% 
-% %saving final results 
+%
+% %saving final results
 toc
 
 

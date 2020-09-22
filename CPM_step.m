@@ -29,6 +29,7 @@ end
 rho_eq=mean(RhoRatio(find(cell_mask)));
 R_eq=mean(RacRatio(find(cell_mask)));
 Ncell_mask=squeeze(sum(sum(x))); %for a sanity check
+A0=A;
 
 no_holes=false;
 
@@ -66,7 +67,11 @@ if  no_holes
     
     if (grow || shrink) && rand<exp(-(dH+Hb)/T)
         reacted=1;
-        cm0=cell_mask;
+        if grow
+            cm0=cell_mask;
+        else
+            cm0=cell_maskp;
+        end
         cell_mask=cell_maskp; %changing cell shape
         
         if grow
@@ -92,195 +97,195 @@ if  no_holes
 %             dvmag=exp(-dist2/lambda)/lambda;
             vi=vmag.*di;
             vj=vmag.*dj;
-        
-
+            vi(vox_trial)=0;
+            vj(vox_trial)=0;
+            
+            ju=zeros(shape);
+            jd=zeros(shape);
+            jr=zeros(shape);
+            jl=zeros(shape);
         for j=0:(N_species-1) %splitting the molecules with the new lattice
             %                 P1=D(j+1)*0.5*cpmstep/(h^2)
-            
+            u=x(:,:,j+1);
+            if any(u(:)<0)
+                disp('we were given something negative :(')
+            end
             if grow
-                tmp=x(vox_ref+j*sz);
+                tmp=u(vox_ref);
+                
                 %                 x(vox_trial+j*sz)=tmp;
             else
-                tmp=x(vox_trial+j*sz);
+                tmp=u(vox_trial);
             end
-            
-            
-            counts=x(inds+j*sz);
-            if shrink
-                counts(inds==vox_trial)=0;
-            end
-            
-            Ntot=sum(counts);
-            
-            
-            
-            %                 figure(3);imagesc(dist2)
-            %                 imagesc(panelD, );colorbar
-            w=abs(mean(x(inds+j*sz))-x(inds+j*sz))/mean(abs(mean(x(inds+j*sz))-x(inds+j*sz)));
-            
-            corr_len=sum(dist2(inds).*w/sum(w))/h;
-            
-            if isnan(corr_len)
-                disp('uh oh')
-                corr_len=N;
-            end
-            
             if grow
-                x(vox_trial+j*sz)=0;
-%             else
-%                 %                     x(vox_trial+j*sz)=0;
+                samps=randi(A0,tmp,1);
+                counts= histcounts(samps,(0:A0)+0.5)';
+            else
+                samps=randi(A,tmp,1);
+                ind_trial=find(vox_trial==cell_inds(1:A0),1);
+                samps(samps==ind_trial)=A0;
+                counts= histcounts(samps,(0:A0)+0.5)';
+
             end
+            
+            
             
             
             %                 pdiff=exp(-(dist2.^2/(4*corr_len^2*h^2)));
 %             pdiff=(tanh((dist2-2*corr_len)/2)+1)/2;
-            u=x(:,:,j+1);
-            [ux,uy]=gradient(u);
-            if grow
-                ux(vox_trial)=0;
-                uy(vox_trial)=0;
 
-            end
-            [vix,viy]=gradient(vi);
-            [vjx,vjy]=gradient(vj);
-            ux(bndry_lr)=0;
-            %                 uy(bndry_ud)=0;
-            uy(bndry_up)=(u(bndry_up)-u(down(bndry_up)))/2;
-            uy(bndry_down)=(u(up(bndry_down))-u(bndry_down))/2;
-            uy(bndry_r)=(u(bndry_r)-u(left(bndry_r)))/2;
-            uy(bndry_l)=(u(right(bndry_l))-u(bndry_l))/2;
             
-            jdiff=sqrt(ux.^2+uy.^2);
-            title(panelC,'u_y')
             
-            dudt=ux.*vj+uy.*vi;
-            ju=zeros(size(u));
-            jd=zeros(size(u));
+
+            
+
             jud = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vj(dir(~ex))+vj(~ex))/2;
-            jlr = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vi(dir(~ex))+vi(~ex))/2;
+            jlr = @(dir,ex)  -(u(dir(~ex))-u(~ex)).*(vi(dir(~ex))+vi(~ex))/2;
+%             jud = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vi(dir(~ex))+vi(~ex))/2;
+%             jlr = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vj(dir(~ex))+vj(~ex))/2;
+
             ju(~bndry_up)=ju(~bndry_up)+jud(up,bndry_up);
-            ju(~cm0)=0;
+%             ju(~cm0)=0;
             jd(~bndry_down)=jd(~bndry_down)+jud(down,bndry_down);
-            jd(~cm0)=0;
-%             sum(sum(ju+jd))
-            
-            jr=zeros(size(u));
-            jl=zeros(size(u));
+%             jd(~cm0)=0;           
+
             
             jr(~bndry_r)=jr(~bndry_r)+jlr(right,bndry_r);
-            jr(~cm0)=0;
+%             jr(~cm0)=0;
             jl(~bndry_l)=jl(~bndry_l)+jlr(left,bndry_l);
-            jl(~cm0)=0;
+%             jl(~cm0)=0;
 %             sum(sum(jr+jl))
             
             jtot=ju+jd+jl+jr;
-            %                 jtot(vox_ref)=jtot(vox_ref)+2*u(vox_ref)*lambda;
-
-            %                 colorbar(panelD);
-            drawnow;
+            jtot(~cm0)=0;
+            udot=-jtot;
+        
             if grow
                 Pa0=u(vox_ref)*lambda;
             else
-                    Pa0=u(vox_trial)*lambda;
+                Pa0=u(vox_trial)*lambda;
             end
             
 
-            ind_plus=jtot<0&isfinite(jtot);
-            ind_minus=jtot>0&isfinite(jtot);
-            Pp0=sum(-jtot(ind_plus));
-            Pm0=-sum(-jtot(ind_minus));
-            if grow
-                Pp=Pp0/(Pp0+Pa0);
-                Pm=1;
-            else
-                Pp=1;
-                Pm=Pm0/(Pm0+Pa0);
-            end
-            
-            Pa=Pa0/(Pp0+Pa0);
+            ind_plus=udot>0&isfinite(jtot);
+            ind_minus=udot<0&isfinite(jtot);
+            Pp0=sum(udot(ind_plus));
+            Pm0=-sum(udot(ind_minus));
+
+            Pa=Pa0/(Pp0+Pm0+Pa0);
             
             
             %                 jdiff=1-(pdiff).^1;
+            udot=udot*(1-Pa);
             
+            l=zeros(prod(shape),1);
+            g=zeros(prod(shape),1);
             
+            l(udot<0)=udot(udot<0);
+            g(udot>0)=udot(udot>0);
+            
+            l=[floor(-l(1)); diff(floor(cumsum(-l)))];
+            g=[floor(g(1)); diff(floor(cumsum(g)))];
+            if sum(g-l)~=0
+                disp('we done f-d up')
+            end
+            u=u+reshape(g-l,shape);
+            
+            if grow
+                u(cell_inds(1:A0))=u(cell_inds(1:A0))-counts;
+                u(vox_trial)=tmp;
+            else
+                u(cell_inds(1:A0))=u(cell_inds(1:A0))+counts;
+                u(vox_trial)=0;
+            end
             
             %                 diffw=sqrt(exp(-(dist.^2)/(4*N*h^2)));
             %                 p=jdiff(inds);
-            ind_freeze=true(size(u));
-            l=1;
-            g=l;
-            inc=true;
-            while inc
-                
-                ind_freeze([l jump(l,:)])=true;
-                ind_freeze([g jump(g,:)])=true;
-                
-                ind_minus=jtot>0&isfinite(jtot);
-                ind_plus=jtot<0&isfinite(jtot);
-                ind_minus(vox_trial)=0;
-                ind_plus(vox_trial)=0;
-                
-                
-                p=-jtot(ind_minus)/sum(-jtot(ind_minus));
-                
-                l=Alg2(p,rand(),0);
-                l=cell_inds(l);
-                ind_freeze([l jump(l,:)])=false;
-                r2=rand();
-                if r2<Pp
-                    
-                    pp=-jtot(ind_plus)/sum(-jtot(ind_plus));
-                    g=Alg2(pp,rand(),0);
-                    g=cell_inds(g);
-                    ind_freeze([g jump(g,:)])=false;
-                    u(g)=u(g)+1;
-                    updates=unique([l jump(l,:) g jump(g,:)]);
-                    
-                else
-                    if grow
-                        u(vox_trial)=u(vox_trial)+1;
-                    end
-                    %                     ll=l;
-                    updates=[l jump(l,:)];
-                end
-                if grow
-                    u(l)=u(l)-1;
-                else
-                    if r2<Pm
-                        u(l)=u(l)-1;
-                    else
-                        u(vox_trial)=u(vox_trial)-1;
-                    end
-                    
-                end
-                jvec=[jud(up,ind_freeze) jud(down,ind_freeze) jlr(left,ind_freeze) jlr(right,ind_freeze)];
-                jvec(bndrys(updates,:))=0;
-                jtot(updates)=sum(jvec,2);
-                
-                if grow
-                    inc=u(vox_trial)~=tmp;
-                else
-                    inc=u(vox_trial)~=0;
-                end
-            end
-            
-            
+%             udot0=udot;
+%             ind_freeze=true(size(u));
+%             l=1;
+%             g=l;
+%             inc=true;
+%             while inc
+%                 
+%                 ind_freeze([l jump(l,:)])=true;
+%                 ind_freeze([g jump(g,:)])=true;
+%                 
+%                 ind_minus=udot<0&isfinite(jtot)&cm0;
+%                 ind_plus=udot>0&isfinite(jtot)&cm0;
+%                 ind_minus(vox_trial)=0;
+%                 ind_plus(vox_trial)=0;
+%                 
+%                 
+%                 p=u(ind_minus).*udot(ind_minus)/sum(udot(ind_minus));
+%                 
+%                 l=Alg2(p,rand(),0);
+%                 it=find(ind_minus,l);
+%                 l=it(l);
+%                 
+%                 ind_freeze([l jump(l,:)])=false;
+%                 r2=rand();
+%                 if r2<Pp
+%                     
+%                     pp=u(ind_plus).*udot(ind_plus)/sum(udot(ind_plus));
+%                     g=Alg2(pp,rand(),0);
+%                     it=find(ind_plus,g);
+%                     g=it(g);
+%                     ind_freeze([g jump(g,:)])=false;
+%                     u(g)=u(g)+1;
+%                     updates=unique([l jump(l,:) g jump(g,:)]);
+%                     
+%                 else
+%                     if grow
+%                         u(vox_trial)=u(vox_trial)+1;
+%                     end
+%                     %                     ll=l;
+%                     updates=[l jump(l,:)];
+%                 end
+%                 if grow
+%                     u(l)=u(l)-1;
+%                 else
+%                     if r2<Pm
+%                         u(l)=u(l)-1;
+%                     else
+%                         u(vox_trial)=u(vox_trial)-1;
+%                     end
+%                     
+%                 end
+%                 jvec=[jud(up,ind_freeze) jud(down,ind_freeze) jlr(left,ind_freeze) jlr(right,ind_freeze)];
+%                 jvec(bndrys(updates,:))=0;
+%                 udot(updates)=-sum(jvec,2);
+%                 
+%                 if grow
+%                     inc=u(vox_trial)~=tmp;
+%                 else
+%                     inc=u(vox_trial)~=0;
+%                 end
+%             end
             
             plotCellIm(panelC,x(:,:,j+1),cm0,i0,j0);
+            caxis(panelC,'auto')
             title(panelC,'Old')
             
             title(panelB,'New')
             plotCellIm(panelB,u,cell_mask,i0,j0);
+            caxis(panelB,'auto')
             %                  plotCellIm(panelA,sqrt(vi.^2+vj.^2),cm0,i0,j0);
             plotCellQuiver(panelA,-vj,vi,cm0,i0,j0);
             ut= ux.*vj+uy.*vi;
             title(panelA,'velocity')
-            plotCellIm(panelD,-jtot,cm0,i0,j0);
+            plotCellIm(panelD,udot0,cm0,i0,j0);
             colorbar(panelD)
-
-           x(:,:,j+1)=u;
+            if sum(u(:))~=sum(sum(x(:,:,j+1)))
+                error('we lost or gained some molecules')
+            end
+            x(:,:,j+1)=u;
+            if any(u(:)<0)
+                disp('we made something negative :(')
+            end
+            
 %             sum(u(:))
-%             sum())
+%             
             
             %                 if shrink
             %                     p=1-p;

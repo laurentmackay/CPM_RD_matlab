@@ -10,6 +10,7 @@ D_3=0.03;                  %pax
 D = [D_1 D_1 D_2 D_2 D_3 D_3];
 
 D=[D_1 D_2 D_1 D_2];
+% D=[D_1 D_1 D_1 D_1];
 
 N_instantaneous=50;
 
@@ -18,9 +19,12 @@ B_1=5;
 
 I_rho=0.016;
 I_R=0.020;
+delta_R=0.025;
+delta_rho=0.016;
 
-L_rho=0.34; delta_rho=0.016;
-L_R=0.34;  delta_R=0.025; alpha_R=15; Rtot=7.5;
+
+L_rho=0.34; 
+L_R=0.34;   alpha_R=15; Rtot=7.5;
 delta_P=0.0004; I_K=0.009;
 L_K=5.77;
 

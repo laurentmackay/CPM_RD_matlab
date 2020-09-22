@@ -22,6 +22,7 @@ if usejava('desktop')
     
     subplot(2,2,2)
     plotCellIm(panelB,RhoRatio,cell_mask,i0,j0)
+    caxis([0 1])
     colorbar;
     ax = gca;
     ax.FontSize = fs;
@@ -31,6 +32,7 @@ if usejava('desktop')
     
     subplot(2,2,3)
     plotCellIm(panelC,RacRatio,cell_mask,i0,j0)
+    caxis([0 1])
     colorbar
     ax = gca;
     ax.FontSize = fs;
