@@ -24,7 +24,7 @@ Times=[];
 nrx=1e5; %number of times reactions are carried out in a chem_func loop
 
 
-Ttot=3.2e3; %time the simulation end
+Ttot=2e3; %time the simulation end
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=100; %length of the grid in um
 N=30; % number of points used to discretize the grid
@@ -45,10 +45,13 @@ div=0.1;
 %prepare some .m files to model the chemical reactions from the reactions specified in `chem_Rx` file
 mk_rxn_files('chem_Rx')
 
-initialize_cell_geometry
-initialize_cellular_potts
-initialize_chem %all reaction-diffusion parameter are getting initialized
+restart=false;
 
+if ~restart
+    initialize_cell_geometry
+    initialize_cellular_potts
+    initialize_chem %all reaction-diffusion parameter are getting initialized
+end
 
 lastplot=0;
 lastcpm=0;

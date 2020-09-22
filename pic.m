@@ -6,7 +6,8 @@ if usejava('desktop')
     fs=14; %axis font size
     
     subplot(2,2,1)
-    imagesc(cell_mask,[0 1]);
+%     imagesc(cell_mask,[0 1]);
+    plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
     colorbar;
     center(z,:)=com(cell_mask);
     hold on
