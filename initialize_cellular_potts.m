@@ -12,7 +12,7 @@ B_R=2e3*(.3/.13)*h^2; %chemical potential rac
 a=1308/h^2; %ideal area      values from abira
 per=128/h; %ideal permiter       values from abira 128 for perfect circle data 295
 Hb=0; %membranes resistance to movement
-T=100; %"temperture" strength of noise
+T=280; %"temperture" strength of noise
 
 
 

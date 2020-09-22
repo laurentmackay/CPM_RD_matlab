@@ -75,7 +75,6 @@ if  no_holes
             inds=cell_inds(1:A);
         end
         
-
         
         dist=sqrt(((i0(vox_trial)-i0(inds)).^2)+(j0(vox_trial)-j0(inds)).^2)*h;
             di=i0(vox_trial)-i0;
@@ -94,6 +93,7 @@ if  no_holes
             vi=vmag.*di;
             vj=vmag.*dj;
         
+
         for j=0:(N_species-1) %splitting the molecules with the new lattice
             %                 P1=D(j+1)*0.5*cpmstep/(h^2)
             
@@ -132,9 +132,6 @@ if  no_holes
             end
             
             
-
-
-            
             %                 pdiff=exp(-(dist2.^2/(4*corr_len^2*h^2)));
 %             pdiff=(tanh((dist2-2*corr_len)/2)+1)/2;
             u=x(:,:,j+1);
@@ -142,6 +139,7 @@ if  no_holes
             if grow
                 ux(vox_trial)=0;
                 uy(vox_trial)=0;
+
             end
             [vix,viy]=gradient(vi);
             [vjx,vjy]=gradient(vj);
@@ -158,8 +156,8 @@ if  no_holes
             dudt=ux.*vj+uy.*vi;
             ju=zeros(size(u));
             jd=zeros(size(u));
-            jud = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vi(dir(~ex))+vi(~ex))/2;
-            jlr = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vj(dir(~ex))+vj(~ex))/2;
+            jud = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vj(dir(~ex))+vj(~ex))/2;
+            jlr = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vi(dir(~ex))+vi(~ex))/2;
             ju(~bndry_up)=ju(~bndry_up)+jud(up,bndry_up);
             ju(~cm0)=0;
             jd(~bndry_down)=jd(~bndry_down)+jud(down,bndry_down);
@@ -186,6 +184,7 @@ if  no_holes
                     Pa0=u(vox_trial)*lambda;
             end
             
+
             ind_plus=jtot<0&isfinite(jtot);
             ind_minus=jtot>0&isfinite(jtot);
             Pp0=sum(-jtot(ind_plus));
