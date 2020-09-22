@@ -45,10 +45,13 @@ div=0.1;
 %prepare some .m files to model the chemical reactions from the reactions specified in `chem_Rx` file
 mk_rxn_files('chem_Rx')
 
-initialize_cell_geometry
-initialize_cellular_potts
-initialize_chem %all reaction-diffusion parameter are getting initialized
+restart=false;
 
+if ~restart
+    initialize_cell_geometry
+    initialize_cellular_potts
+    initialize_chem %all reaction-diffusion parameter are getting initialized
+end
 
 lastplot=0;
 lastcpm=0;
