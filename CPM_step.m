@@ -74,6 +74,16 @@ if  no_holes
         end
         cell_mask=cell_maskp; %changing cell shape
         
+        if shrink
+            bndry_up=cell_mask  & ~cell_mask(up);
+            bndry_down=cell_mask  & ~cell_mask(down);
+            bndry_l=cell_mask  & ~cell_mask(left);
+            bndry_r=cell_mask  & ~cell_mask(right);
+
+            bndry_ud= bndry_up | bndry_down;
+            bndry_lr= bndry_l | bndry_r;
+
+        end
         if grow
             inds=cell_inds(1:A-1);
         else
@@ -121,7 +131,7 @@ if  no_holes
                 samps=randi(A0,tmp,1);
                 counts= histcounts(samps,(0:A0)+0.5)';
             else
-                samps=randi(A,tmp,1);
+                samps=randi(A0,tmp,1);
                 ind_trial=find(vox_trial==cell_inds(1:A0),1);
                 samps(samps==ind_trial)=A0;
                 counts= histcounts(samps,(0:A0)+0.5)';
@@ -145,15 +155,15 @@ if  no_holes
 %             jlr = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vj(dir(~ex))+vj(~ex))/2;
 
             ju(~bndry_up)=ju(~bndry_up)+jud(up,bndry_up);
-%             ju(~cm0)=0;
+            ju(~cm0)=0;
             jd(~bndry_down)=jd(~bndry_down)+jud(down,bndry_down);
-%             jd(~cm0)=0;           
+            jd(~cm0)=0;           
 
             
             jr(~bndry_r)=jr(~bndry_r)+jlr(right,bndry_r);
-%             jr(~cm0)=0;
+            jr(~cm0)=0;
             jl(~bndry_l)=jl(~bndry_l)+jlr(left,bndry_l);
-%             jl(~cm0)=0;
+            jl(~cm0)=0;
 %             sum(sum(jr+jl))
             
             jtot=ju+jd+jl+jr;
