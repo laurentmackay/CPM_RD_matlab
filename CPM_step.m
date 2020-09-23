@@ -22,6 +22,19 @@ if any(cell_maskp~=cell_mask)
     error('not reseting')
 end
 
+%         for j=0:(N_species-1) %sanity checks
+%             %                 P1=D(j+1)*0.5*cpmstep/(h^2)
+%             u=x(:,:,j+1);
+% 
+%             if any(u(:)<0)
+%                 disp('we were given something negative :(')
+%             end
+%             if any(u(~cell_mask)~=0)
+%                 error("we got a wild ass")
+%             end
+%             disp(['species ' num2str(j) 'cjecks out!'])
+%         end
+
 %set the equilibrium point as the overall Ratio such that in the selected boundary point ij:
 %higher RacRatio contributes to protrusion
 %higher RhoRatio contributes to retraction
@@ -45,7 +58,9 @@ while ~no_holes
     HA=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; % the hamiltonian after the possible change
     dH=HA-H0;
     no_holes = getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 && getfield(bwconncomp(~cell_maskp,4),'NumObjects')==1 ;%makes sure the cell stays connected and no hole
-    
+    if ~no_holes
+        cell_maskp(vox_trial)=cell_mask(vox_trial);%revert change
+    end
 end
 
 
@@ -67,11 +82,11 @@ if  no_holes
     
     if (grow || shrink) && rand<exp(-(dH+Hb)/T)
         reacted=1;
-        if grow
+%         if grow
             cm0=cell_mask;
-        else
-            cm0=cell_maskp;
-        end
+%         else
+%             cm0=cell_mask;
+%         end
         cell_mask=cell_maskp; %changing cell shape
         
         if shrink
@@ -114,29 +129,43 @@ if  no_holes
             jd=zeros(shape);
             jr=zeros(shape);
             jl=zeros(shape);
+            
+            ind_bulk=cell_inds(1:A0);
+            if shrink
+                ind_bulk=ind_bulk(ind_bulk~=vox_trial);
+            end
+            
         for j=0:(N_species-1) %splitting the molecules with the new lattice
             %                 P1=D(j+1)*0.5*cpmstep/(h^2)
             u=x(:,:,j+1);
+            u0=u;
             if any(u(:)<0)
                 disp('we were given something negative :(')
             end
+            if any(u(~cm0)~=0)
+                error("we got a wild ass")
+            end
             if grow
                 tmp=u(vox_ref);
-                
+                if u(vox_trial)~=0
+                    error("we are expanding into a non-empty space")
+                end
                 %                 x(vox_trial+j*sz)=tmp;
             else
                 tmp=u(vox_trial);
             end
-            if grow
-                samps=randi(A0,tmp,1);
-                counts= histcounts(samps,(0:A0)+0.5)';
-            else
-                samps=randi(A,tmp,1);
-                ind_trial=find(vox_trial==cell_inds(1:A0),1);
-                samps(samps==ind_trial)=A0;
-                counts= histcounts(samps,(0:A0)+0.5)';
+%             if grow
+% %                 samps=randi(A0,tmp,1);
+%                
+%                 p=u(ind_bulk).*sqrt(vj(ind_bulk).^2+vi(ind_bulk).^2);
+%                 p=cumsum(p)/sum(p);
+%                 counts= histcounts(rand(tmp,1),[0; p])';
+%             else
+                p=u(ind_bulk).*sqrt((vj(ind_bulk).^2)+(vi(ind_bulk).^2));
+                p=cumsum(p)/sum(p);
+                counts= histcounts(rand(tmp,1),[0; p])';
 
-            end
+%             end
             
             
             
@@ -146,7 +175,11 @@ if  no_holes
 
             
             
-
+            if shrink
+                cm1=cell_mask;
+            else
+                cm1=cm0;
+            end
             
 
             jud = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vj(dir(~ex))+vj(~ex))/2;
@@ -155,25 +188,32 @@ if  no_holes
 %             jlr = @(dir,ex)  (u(dir(~ex))-u(~ex)).*(vj(dir(~ex))+vj(~ex))/2;
 
             ju(~bndry_up)=ju(~bndry_up)+jud(up,bndry_up);
-            ju(~cm0)=0;
+            ju(~cm1)=0;
             jd(~bndry_down)=jd(~bndry_down)+jud(down,bndry_down);
-            jd(~cm0)=0;           
+            jd(~cm1)=0;           
 
             
             jr(~bndry_r)=jr(~bndry_r)+jlr(right,bndry_r);
-            jr(~cm0)=0;
+            jr(~cm1)=0;
             jl(~bndry_l)=jl(~bndry_l)+jlr(left,bndry_l);
-            jl(~cm0)=0;
+            jl(~cm1)=0;
 %             sum(sum(jr+jl))
             
             jtot=ju+jd+jl+jr;
-            jtot(~cm0)=0;
+            jtot(~cm1)=0;
             udot=-jtot;
-        
+            relf=5;
+%             ind_big=abs(udot)>u/relf;
+%             udot(ind_big)=sign(udot(ind_big)).*u(ind_big)/relf;
+            
             if grow
                 Pa0=u(vox_ref)*lambda;
+%                 udot(jump(vox_trial,:))=-Pa0/nnz(cell_mask(jump(vox_trial,:)));
+%                 udot(~cm0)=0;
             else
                 Pa0=u(vox_trial)*lambda;
+%                 udot(jump(vox_trial,:))=Pa0/nnz(cell_mask(jump(vox_trial,:)));
+%                 udot(~cm0)=0;
             end
             
 
@@ -187,6 +227,9 @@ if  no_holes
             
             %                 jdiff=1-(pdiff).^1;
             udot=udot*(1-Pa);
+            if   max(udot(:)./u(:))>1/relf
+                udot=udot/(max(udot(:)./u(:)))*(1/relf);
+            end
             
             l=zeros(prod(shape),1);
             g=zeros(prod(shape),1);
@@ -202,16 +245,17 @@ if  no_holes
             u=u+reshape(g-l,shape);
             
             if grow
-                u(cell_inds(1:A0))=u(cell_inds(1:A0))-counts;
+                u(ind_bulk)=u(ind_bulk)-counts;
                 u(vox_trial)=tmp;
             else
-                u(cell_inds(1:A0))=u(cell_inds(1:A0))+counts;
+
+                u(ind_bulk)=u(ind_bulk)+counts;
                 u(vox_trial)=0;
             end
             
             %                 diffw=sqrt(exp(-(dist.^2)/(4*N*h^2)));
             %                 p=jdiff(inds);
-%             udot0=udot;
+            udot0=udot;
 %             ind_freeze=true(size(u));
 %             l=1;
 %             g=l;
@@ -273,26 +317,47 @@ if  no_holes
 %                 end
 %             end
             
+
+            
+
+            %                  plotCellIm(panelA,sqrt(vi.^2+vj.^2),cm0,i0,j0);
+            plotCellQuiver(panelA,-vj,vi,cm1,i0,j0);
+%             ut= ux.*vj+uy.*vi;
+            title(panelA,'velocity')
+            
+            du=udot0;
+            du(cell_inds(1:length(counts)))=counts;
+            plotCellIm(panelD,du+reshape(g-l,shape),cm1,i0,j0);
+            colorbar(panelD)
+            
+            title(panelB,'New')
+            plotCellIm(panelB,udot0,cm1,i0,j0);
+            caxis(panelB,'auto')
+            
             plotCellIm(panelC,x(:,:,j+1),cm0,i0,j0);
             caxis(panelC,'auto')
             title(panelC,'Old')
             
-            title(panelB,'New')
-            plotCellIm(panelB,u,cell_mask,i0,j0);
-            caxis(panelB,'auto')
-            %                  plotCellIm(panelA,sqrt(vi.^2+vj.^2),cm0,i0,j0);
-            plotCellQuiver(panelA,-vj,vi,cm0,i0,j0);
-            ut= ux.*vj+uy.*vi;
-            title(panelA,'velocity')
-            plotCellIm(panelD,udot0,cm0,i0,j0);
-            colorbar(panelD)
             if sum(u(:))~=sum(sum(x(:,:,j+1)))
                 error('we lost or gained some molecules')
             end
-            x(:,:,j+1)=u;
-            if any(u(:)<0)
-                disp('we made something negative :(')
+            if any(u(cell_inds(1:A0))==0)
+                if grow ||  any(u(ind_bulk)==0)
+                    error('a lattice cell has been completely depleaed')
+                end
             end
+            
+            if any(u(:)<0)
+                error('we made something negative :(')
+            end
+            
+            
+            if any(u(~cell_mask)~=0)
+                error("we got a wild ass")
+            end
+            
+            x(:,:,j+1)=u;
+
             
 %             sum(u(:))
 %             
@@ -319,7 +384,7 @@ if  no_holes
         Per=perim(cell_mask);
         A=nnz(cell_mask);
         cell_inds(1:A)=find(cell_mask);
-        
+
         
         if grow
             vox=cell_inds(1:A);
