@@ -131,7 +131,7 @@ if  no_holes
                 samps=randi(A0,tmp,1);
                 counts= histcounts(samps,(0:A0)+0.5)';
             else
-                samps=randi(A0,tmp,1);
+                samps=randi(A,tmp,1);
                 ind_trial=find(vox_trial==cell_inds(1:A0),1);
                 samps(samps==ind_trial)=A0;
                 counts= histcounts(samps,(0:A0)+0.5)';
