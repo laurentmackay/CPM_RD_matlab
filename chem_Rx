@@ -1,8 +1,8 @@
 Raci <->  Rac ; I_R*(L_rho^m./(L_rho^m+RhoRatio.^m)), delta_R;
 Rhoi <-> Rho; I_rho*(L_R^m./(L_R^m +RacRatio.^m)), delta_rho;
 
-%Raci <->  Rac ; I_R, delta_R;
-%Rhoi <-> Rho; I_rho, delta_rho;
+%Raci <->  Rac; I_R, delta_R
+%Rhoi <-> Rho; I_rho, delta_rho
 
 
 RacRatio=Rac/Rac_Square;
