@@ -39,6 +39,22 @@ if usejava('desktop')
     set(gca,'Color',[1 1 1]*1)
     title('Rac', 'Fontsize', 24)
     axis tight
+    
+    
+    
+     subplot(2,2,4)
+    plotCellIm(panelD,PaxRatio,cell_mask,i0,j0)
+    caxis([0 1])
+    colorbar
+    ax = gca;
+    ax.FontSize = fs;
+    set(gca,'Color',[1 1 1]*1)
+    title('Pax', 'Fontsize', 24)
+    axis tight
+    
+    
+    
+    
     % xlabel('X')
     % ylabel('Y')
 %     

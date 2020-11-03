@@ -9,7 +9,10 @@ D_2=0.02;                  %active rho/rac
 D_3=0.03;                  %pax
 D = [D_1 D_1 D_2 D_2 D_3 D_3];
 
-D=[D_1 D_2 D_1 D_2];
+D=[D_1 D_2 D_1 D_2 D_3 D_3];
+
+% D=[D_1 D_2 D_1 D_2];
+
 % D=[D_1 D_1 D_1 D_1];
 
 N_instantaneous=50;
@@ -18,19 +21,26 @@ N_instantaneous=50;
 B_1=5;
 
 I_rho=0.016;
-I_R=0.020;
+I_R=0.015;
+I_K=0.009;
+% I_K=0;
+% I_R=0.025;
 delta_R=0.025;
 delta_rho=0.016;
-
+delta_P=0.0004; 
 
 L_rho=0.34; 
-L_R=0.34;   alpha_R=15; Rtot=7.5;
-delta_P=0.0004; I_K=0.009;
+L_R=0.34;   
 L_K=5.77;
+
+
+alpha_R=15; Rtot=7.5;
+
+
 
 k_X=41.7; k_G=5.71; k_C=5;
 GIT=0.11; PIX=0.069; Paxtot=2.3;
-n=4; m=4; gamma=0.3;
+n=3; m=4; gamma=0.3;
 PAKtot = gamma*Rtot;
 
 alpha=alpha_R/Rtot;
@@ -56,7 +66,7 @@ rho_eq=0;
 RhoRatio_u = 0.55;
 RacRatio_u = 0.12;%0.085
 
-% PaxRatio_u = 0.22;%0.22
+PaxRatio_u = 0.22
 
 
 % rough estimate of the induced state 
@@ -70,7 +80,7 @@ RacRatio_i = 0.5; %0.215;
 
 
 %0.215;
-% PaxRatio_i = 0.33; %0.33
+PaxRatio_i = 0.33
 
 % RhoRatio_i = 0.35;
 % RacRatio_i = 0.12; %0.215;
@@ -82,22 +92,29 @@ RacRatio_i = 0.5; %0.215;
 
 RhoRatio=[RhoRatio_u; RhoRatio_i];
 RacRatio=[RacRatio_u; RacRatio_i];
-% PaxRatio=[PaxRatio_u; PaxRatio_i];
+PaxRatio=[PaxRatio_u; PaxRatio_i];
 
 
 Rho0 = Rho_Square*RhoRatio;           %active Rho
 Rhoi0 = Rho_Square - Rho0;               %inactive Rho that's ready to convert to active Rho
 
 Rac0 = Rac_Square*RacRatio;           %active Rac
-Raci0 = Rac_Square - Rac0;        %inactive Rac that's ready to convert to active Rac
+Raci0 = Rac_Square - (1-RacRatio-gamma*K);        %inactive Rac that's ready to convert to active Rac
+
+
+Pax0 = Pax_Square*PaxRatio;           %active Rac
+Paxi0 = Pax_Square - Pax0;        %inactive Rac that's ready to convert to active Rac
+
 
 
 
 %Setting up initial state of the cell
-N0=[Raci0 Rac0 Rhoi0 Rho0];
+N0=[Raci0 Rac0 Rhoi0 Rho0 Paxi0 Pax0];
+% N0=[Raci0 Rac0 Rhoi0 Rho0];
+
 
 %setting up intial chemcial states 
-% x=reshape(round(N0.*cell_mask(:)),[N,N,N_species]);  %puts molecules in thier places 
+% x=reshape(round(N0.*cell_mask(:)),[N,N,N_species]);  %puts molecules in their places 
 mask=induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
 i_induced=tmp+tmp2;

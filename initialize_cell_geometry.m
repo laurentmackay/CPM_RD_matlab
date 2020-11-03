@@ -20,11 +20,12 @@ perim = @(x) nnz(x&~x(up)) + nnz(x&~x(down)) + nnz(x&~x(left)) + nnz(x&~x(right)
 com = @(x) [sum(sum(i.*x)),sum(sum(j.*x))]/nnz(x);
 
 % setting the initial shape of the cell to a circle of radius r
-R=20;
-cell_mask=(i-N/2).^2 +(j-N/2).^2 < (R/h)^2;
+R=0.15*N;
+cell_mask=(i-N/2).^2 +(j-N/2).^2 < R^2;
 % cell_mask=true(shape);
 % cell_mask=(i>1&i<N)&(j>1&j<N);
 induced_mask=cell_mask & (i-min(i(cell_mask)))<=2*div*(max(i(cell_mask))-min(i(cell_mask)));
+induced_mask(:)=0;
 % induced_mask=(i<=div*N&j<=N/2)|(i>(1-div)*N&j>N/2);
 % induced_mask=induced_mask&cell_mask;
 

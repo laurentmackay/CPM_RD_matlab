@@ -1,2 +1,2 @@
-N_species = 4;
-N_rx = 4;
+N_species = 8;
+N_rx = 6;
