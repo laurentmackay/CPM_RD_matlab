@@ -13,21 +13,28 @@ code='0-9 \t\f\*\+\-\/\,\=\(\)\[\]\>\<\&\~\:\|\{\}\^\.';
 name='[a-zA-Z_$][a-zA-Z_$0-9]*';
 assignment='(?:[ \t\f]*\=[ \t\f]*)';
 seps='(:?\,| )';
+seps2='(:?\,| |\:|\(|\))';
 array_access='(:?\([^\n]*\))?';
 ref=[name array_access];
-list=['((:?[ ]*' ref '[ ]*' seps ')?(:?' ref '))[ ]*'];
-% list2=['(:?(:?[ ]*' ref '[ ]*' seps ')?(:?' ref '))[ ]*'];
+ref=[name];
+ref2=[name array_access];
+list=['((:?[ ]*' ref '[ ]*' seps ')?(:?[ ]*' ref '))[ ]*'];
+list2=['((:?[' code ']*' ref '[' code ']*(?:' code ')*)?(:?[' code ']*' ref '[' code ']*))'];
+
 
 assigned=regexp(str,['('  name  ') *\=[^\(\)\n]+\n'],"tokens"); %get simply assigned variables
 assigned=cellfun(@(x) x(1), assigned);
 assigned=unique(assigned);
 
 
-inout=regexp(str,['\[' list '\]' assignment name '\(' list '\)' ],"tokens"); %get variables assigned by a function with nargout>1
+inout=regexp(str,['\[' list  '\]' assignment name '\(' list2 '\)'],"tokens");
+
 
   
 % assigned2=cellfun(@(x) split([x{:}],',')', assigned2,'UniformOutput',0);
-rhs=cellfun(@(x) regexp([x{2}],['[ \t\f]*' seps '[ \t\f]*'],"split"), inout,'UniformOutput',0);
+% rhs=cellfun(@(x) regexp([x{2}],['(' name ')'],"tokens"), inout,'UniformOutput',0);
+% rhs=[rhs{:}];
+rhs= cellfun(@(x) regexp([x{2}],['[^a-zA-Z_$0-9]*'],"split"), inout,'UniformOutput',0);
 lhs=cellfun(@(x) regexp([x{1}],['[ \t\f]*' seps  '[ \t\f]*'],"split"), inout,'UniformOutput',0);
 
 io2=regexp(str,[ '(' name ')' assignment '(:?(:?[' code ']*)?(' name ')(:?[' code ']*)?)*' ],"tokens"); 

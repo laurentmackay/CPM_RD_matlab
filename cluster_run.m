@@ -7,9 +7,9 @@ Nrep=2e1;
 mkdir 'results'
 delete results/*.mat
 
-mk_fun('main')
+mk_fun('main3','B_1');
 % try 
-parpool()
+% parpool()
 % catch e
 % c = parcluster('local');
 % d= c.JobStorageLocation; 
@@ -20,6 +20,6 @@ parfor k=1:numel(B)*Nrep
     i=floor((k-1)/Nrep)+1;
     j=mod((k-1),Nrep)+1;
 %     
-    main_fun(B(i),j)
+    main3_fun(B(i),j)
 % disp([i,j])
 end

@@ -9,9 +9,13 @@ if usejava('desktop')
 %     imagesc(cell_mask,[0 1]);
     plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
     colorbar;
-    center(z,:)=com(cell_mask);
+
     hold on
-    plot(center(1:z,2),center(1:z,1),'r')
+    try
+    plot(center(2,1:z),center(1,1:z),'r')
+    catch e
+        disp(e)
+    end
     hold off
     ax = gca;
     ax.FontSize = fs;

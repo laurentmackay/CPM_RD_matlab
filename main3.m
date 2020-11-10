@@ -1,5 +1,6 @@
 
 if isempty(getCurrentTask()) %do not display pictures when running in parallel...i.e., on the cluster
+    
     figure(1);clf();
     set(gcf,'defaultaxesfontsize',14);
     d=[0.04, 0.04];
@@ -7,6 +8,7 @@ if isempty(getCurrentTask()) %do not display pictures when running in parallel..
     panelB=subplot(2,2,2); annotatePlot('B',22,d);
     panelC=subplot(2,2,3); annotatePlot('C',22,d);
     panelD=subplot(2,2,4); annotatePlot('D',22,d);
+    
 end
 
 
@@ -43,6 +45,7 @@ restart=false;
 if ~restart
     initialize_cell_geometry
     initialize_cellular_potts
+    initialize_chem_params
     initialize_chem %all reaction-diffusion parameter are getting initialized
 end
 
@@ -118,7 +121,7 @@ dt_diff=zeros(size(D));
 P_diff=0.5;
 
 SSA='SSA02';
-SSA_fn=mk_fun(SSA);
+SSA_fn=mk_fun(SSA,'gamma','alpha','pi');
 SSA_call=[getFunctionHeader(SSA_fn) ';'];
 d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
 while time<Ttot
@@ -194,7 +197,7 @@ end
 toc
 
 if isempty(getCurrentTask())  
-    close(vid);
+%     close(vid);
     fn=['results/final_B_' num2str(B_1) '.mat'];
     ls results
     disp(['saving to: ' fn]);

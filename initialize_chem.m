@@ -58,8 +58,7 @@ Rho_Square = totalRho/(A);    %Average number of Rho per square
 Rac_Square = totalRac/(A);    %Average number of Rac per square
 Pax_Square = totalPax/(A);    %Average number of Pax per square
 
-R_eq=0; % i seet the equillbirum values to 0 so the Rac always causes exansion Rho always causes retraction
-rho_eq=0;
+
 
 % rough estimate of uninduced state
 

@@ -1,4 +1,4 @@
-function fn=mk_fun(script)
+function fn=mk_fun(script,varargin)
     function bool = isScript(f)
         fid = fopen(f);
         
@@ -26,9 +26,11 @@ fn=[script suffix '.m'];
 if ~isScript(strcat(script,".m"))
    error('the file provided is not a script') ;
 end
-
-clean = @(x) regexprep(x,{'%','\\','\t'},{'%%','\\\\','\\t'});
-
+if nargin==2 %remove any assignments to the rep variable
+    clean = @(x) regexprep(x,{'%','\\','\t',[ varargin{1} '[ ]?=[^\n]+']},{'%%','\\\\','\\t',''});
+else
+    clean = @(x) regexprep(x,{'%','\\','\t'},{'%%','\\\\','\\t'});
+end
 listing=dir('*.m');
 mfiles= {listing.name}';
 inds=cellfun(@(f) isScript(f), mfiles);
@@ -57,7 +59,7 @@ for s=matched_scripts'
     deps=union(deps, new_deps);
     
 end
-deps=unique([deps{:} setdiff(deps0,init)]);
+deps=unique([deps{:} setdiff(deps0,init) varargin{:}]);
 
 maxwidth=80;
 
@@ -105,23 +107,23 @@ out = fopen(fn,'wt');
 fprintf(out,header);
 
 line=fgetl(in);
-script_match=strcat("(",matched_scripts, ")[ \f\t\r\n]*");
+script_match=strcat("[^\']?(",matched_scripts, ")(?:[ \f\t\r\n$]+|$)");
 
 while ~isnumeric(line)
     %
-    match=regexp(line,script_match,'tokens');
-    i_match=~cellfun('isempty',match);
-    match=match(i_match);
+    [match_script,match_start]=regexp(line,script_match,'tokens','start');
+    i_match=~cellfun('isempty',match_script);
+    match_script=match_script(i_match);
+    match_start=match_start(i_match);
     
-    
-    if isempty(match)
+    if isempty(match_script)
         fprintf(out,strcat(clean(line),'\n'));
-    elseif length(match)==1
+    elseif length(match_script)==1
         
-        offset=regexp(line,scripts(i_match));
+        offset=regexp(line,matched_scripts(i_match));
         indent=string(line(1:offset-1));
         try
-        mid=fopen(strcat(string(match{1}),'.m'));
+        mid=fopen(strcat(string(match_script{1}),'.m'));
 
             
         line=fgetl(mid);

@@ -7,9 +7,22 @@ str=regexprep(str,"\'[^\'\n\r]+\'",""); %remove hardcoded strings with single qu
 str=regexprep(str,'\"[^\"\n\r]+\"',""); %remove hardcoded strings with double quotes
 str=regexprep(str,'function[^\=]+\=[^\=]+\)',""); %remove function definition
 
+
+
+
 code=' \t\f\*\+\-\/\,\=\(\)\[\]\>\<\&\~\;\:\|\{\}\^\.';
 numer=['0-9' code(2:end)];
 name=['([a-zA-Z][a-zA-Z_0-9]*)'];
+namelist=['((?:[ ]*' name '[ ]*\,[ ]*)?(?:[ ]*' name '[ ]*))'];
+
+%remove local variables from anonymous functions as they are not defined in
+%the scope of the script/function file
+match_anon=regexp(str,['@\(?' namelist '\)?[^\n]+'],'match');
+anon_local=regexp(str,['@\(?' namelist '\)?[^\n]+'],'tokens');
+anon_rep=cellfun(@(l,v) regexprep(l,v,repmat("",size(v))),match_anon,anon_local,'UniformOutput',false);
+for i=1:length(match_anon)
+    str=strrep(str,match_anon{i},anon_rep{i});
+end
 
 assignment='(?:[ \t\f]*\=[ \t\f]*)';
 % array_access='(:?\([^\n]*\))?';
@@ -33,7 +46,7 @@ vars0=[vars0{:}];
 vars=regexp(str,{lhs,array_inds},"tokens");%cellfun(@(x) ,,'UniformOutput',0); %check for the pre-defined variable referencing scenarios
 % assigned=vars{1};
 vars=feval(@(x,y,z) [x{:} y{:} z{:}],vars{:},vars0); %flatten the cell array of cell arrays
-vars0=unique([vars0{:}],'stable');
+
 % vars=[vars{:} vars2{:} vars3{:}];
 % vars0=regexp(str,name,"match");
 vars=unique(vars,'stable');
@@ -41,20 +54,30 @@ vars=unique(vars,'stable');
 vars_bare=regexp(str,['(?:^|[' code '])(' name ')[\*\+\-\/\,]'],"tokens"); %get variables
 
 vars_bare=unique([vars_bare{:}],'stable');
-
-
-
-
-bi=cellfun(@(x) exist(x,'builtin'),vars);
-fi= cellfun(@(x) exist(x,'file'),vars);
-mask = bi~=5 & (fi~=2 & fi~=6);
-
-vars=vars(mask);
-
-
 vars=unique([vars vars_bare ],'stable');
+
+if ~isempty(vars)
+
+    bi=cellfun(@(x) exist(x,'builtin'),vars);
+    fi= cellfun(@(x) exist(x,'file'),vars);
+    mask = bi~=5 & (fi~=2 & fi~=6);
+    
+    vars=vars(mask);
+    
+    
+
+    
+    
+        isgca=cellfun(@(x) strcmp(x,'gca'),vars);
+    if any(isgca)
+        disp('gca all the way!!!')
+    end
+else
+    vars={};
+    
+end
 % mask = mask & cellfun(@(x) exist(x,'file')~=2 && exist(x,'file')~=6,vars);
 
-% vars=unique([  vars_bare ]);% vars_bare 
+% vars=unique([  vars_bare ]);% vars_bare
 end
 
