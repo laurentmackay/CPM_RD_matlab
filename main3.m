@@ -1,19 +1,13 @@
-% clc
-% clearvars
-% close all;
-% set(0,'DefaultFIgureVisible','on');
-%restarting the environment
 
-% mkdir 'results'
-%vid = VideoWriter(['results'],'MPEG-4'); % this saves videos to mp4 change to whatever's convenient
-
-figure(1);clf();
-set(gcf,'defaultaxesfontsize',14);
-d=[0.04, 0.04];
-panelA=subplot(2,2,1); annotatePlot('A',22,d);
-panelB=subplot(2,2,2); annotatePlot('B',22,d);
-panelC=subplot(2,2,3); annotatePlot('C',22,d);
-panelD=subplot(2,2,4); annotatePlot('D',22,d);
+if isempty(getCurrentTask()) %do not display pictures when running in parallel...i.e., on the cluster
+    figure(1);clf();
+    set(gcf,'defaultaxesfontsize',14);
+    d=[0.04, 0.04];
+    panelA=subplot(2,2,1); annotatePlot('A',22,d);
+    panelB=subplot(2,2,2); annotatePlot('B',22,d);
+    panelC=subplot(2,2,3); annotatePlot('C',22,d);
+    panelD=subplot(2,2,4); annotatePlot('D',22,d);
+end
 
 Results=[];
 Times=[];
@@ -26,8 +20,8 @@ nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 Ttot=4*3.6e3; %time the simulation end
 SF=2; % speed factor I divide molecule number by this for speed
-Gsize=40; %length of the grid in um
-N=50; % number of points used to discretize the grid
+Gsize=80; %length of the grid in um
+N=100; % number of points used to discretize the grid
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); %length of a latice square
@@ -189,30 +183,18 @@ while time<Ttot
     enumerate_diffusion %recaucluates diffusable sites
 end
 
-
-
-%calculates speed by the distance the COM moved every 120s
-%thats (how they do it experimentally)
-% dx=zeros(floor(finaltime/120),1);
-% dx(1)=sqrt(sum((center(120/picstep,:)-center(1,:)).^2));
-% for i=2:length(dx-1)
-%     dx(i)=sqrt(sum((center(i*120/picstep,:)-center((i-1)*120/picstep,:)).^2));
-% end
-% v=dx/120*3600;
-%
-% %saving final results
 toc
 
+if isempty(getCurrentTask())  
+    close(vid);
+    fn=['results/final_B_' num2str(B_1) '.mat'];
+    ls results
+    disp(['saving to: ' fn]);
+    save(fn);
+else
+    fn=['results/final_B_' num2str(B_1) '_copy' int2str(copyNum) '.mat'];
+    disp(['saving to: ' fn]);
+    ls results
+    save(fn);
 
-% figure(1);
-% plot(Timeseries,TRho,Timeseries,TRac,Timeseries,TPax);
-% legend('Rho','Rac','Pax','Location','Best');
-% xlabel('Time');
-% title(['B = ' num2str(B_1)]);
-
-
-%close(vid);
-% cur=pwd;
-% cd results
-% save(['final'])
-% cd(cur)
+end

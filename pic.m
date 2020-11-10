@@ -32,7 +32,7 @@ if usejava('desktop')
     
     subplot(2,2,3)
     plotCellIm(panelC,RacRatio,cell_mask,i0,j0)
-    caxis([0 1])
+    caxis([0 0.4])
     colorbar
     ax = gca;
     ax.FontSize = fs;

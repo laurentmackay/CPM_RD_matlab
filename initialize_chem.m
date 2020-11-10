@@ -9,7 +9,7 @@ D_2=0.02;                  %active rho/rac
 D_3=0.03;                  %pax
 D = [D_1 D_1 D_2 D_2 D_3 D_3];
 
-D=[D_1 D_2 D_1 D_2 D_3 D_3];
+D=[D_1 D_2 D_1 D_2 D_3 D_3 0 0];
 
 % D=[D_1 D_2 D_1 D_2];
 
@@ -17,20 +17,20 @@ D=[D_1 D_2 D_1 D_2 D_3 D_3];
 
 N_instantaneous=50;
 
-%Parameters from (Tang et al., 2018) 
+%Parameters from (Tang et al., 2018)
 B_1=5;
 
 I_rho=0.016;
-I_R=0.015;
+I_R=0.003;
 I_K=0.009;
 % I_K=0;
 % I_R=0.025;
 delta_R=0.025;
 delta_rho=0.016;
-delta_P=0.0004; 
+delta_P=0.0004;
 
-L_rho=0.34; 
-L_R=0.34;   
+L_rho=0.34;
+L_R=0.34;
 L_K=5.77;
 
 
@@ -66,10 +66,10 @@ rho_eq=0;
 RhoRatio_u = 0.55;
 RacRatio_u = 0.12;%0.085
 
-PaxRatio_u = 0.22
+PaxRatio_u = 0.22;
 
 
-% rough estimate of the induced state 
+% rough estimate of the induced state
 RhoRatio_i = 0.2;
 RacRatio_i = 0.5; %0.215;
 
@@ -80,12 +80,12 @@ RacRatio_i = 0.5; %0.215;
 
 
 %0.215;
-PaxRatio_i = 0.33
+PaxRatio_i = 0.33;
 
 % RhoRatio_i = 0.35;
 % RacRatio_i = 0.12; %0.215;
 % PaxRatio_i = 0.27; %0.33
-% 
+%
 % RhoRatio_i = 0.2;
 % RacRatio_i = 0.2; %0.215;
 % PaxRatio_i = 0.31; %0.33
@@ -94,27 +94,37 @@ RhoRatio=[RhoRatio_u; RhoRatio_i];
 RacRatio=[RacRatio_u; RacRatio_i];
 PaxRatio=[PaxRatio_u; PaxRatio_i];
 
+K_is=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio).*(1+alpha_R*RacRatio)+k_G*k_X*GIT*PIX); %intial value of some ratios
+K=alpha_R*RacRatio.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);
+P_i=1-PaxRatio.*(1+k_G*k_X*k_C*GIT*PIX*PAKtot*K_is.*(1+alpha_R*RacRatio));
+
 
 Rho0 = Rho_Square*RhoRatio;           %active Rho
 Rhoi0 = Rho_Square - Rho0;               %inactive Rho that's ready to convert to active Rho
 
 Rac0 = Rac_Square*RacRatio;           %active Rac
-Raci0 = Rac_Square - (1-RacRatio-gamma*K);        %inactive Rac that's ready to convert to active Rac
-
+if length(D)==8
+    Raci0 = Rac_Square*(1-RacRatio-gamma*K);        %inactive Rac that's ready to convert to active Rac
+else
+    Raci0 = Rac_Square*(1-RacRatio);
+end
 
 Pax0 = Pax_Square*PaxRatio;           %active Rac
-Paxi0 = Pax_Square - Pax0;        %inactive Rac that's ready to convert to active Rac
+Paxi0 = Pax_Square*P_i;        %inactive Rac that's ready to convert to active Rac
 
 
-
+RacPak0 = Rac_Square - Rac0 - Raci0;
+GPP0 = Pax_Square - Pax0 - Paxi0;
 
 %Setting up initial state of the cell
 N0=[Raci0 Rac0 Rhoi0 Rho0 Paxi0 Pax0];
+
+N0=[Raci0 Rac0 Rhoi0 Rho0 Paxi0 Pax0 RacPak0 GPP0];
 % N0=[Raci0 Rac0 Rhoi0 Rho0];
 
 
-%setting up intial chemcial states 
-% x=reshape(round(N0.*cell_mask(:)),[N,N,N_species]);  %puts molecules in their places 
+%setting up intial chemcial states
+% x=reshape(round(N0.*cell_mask(:)),[N,N,N_species]);  %puts molecules in their places
 mask=induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
 i_induced=tmp+tmp2;
@@ -131,7 +141,7 @@ x(i_induced)=repmat(N0(1,:),nnz(mask),1);
 x=round(x);
 
 % reaction=zeros(N,N,9);
-% 
+%
 % reaction(:,:,3) = delta_rho;                                             %From active rho to inactive rho
 % reaction(:,:,4) = delta_R;                                               %From active Rac to inactive Rac
 % reaction(:,:,6) = delta_P;                                               %From phosphorylated Pax to unphosphorylated Pax

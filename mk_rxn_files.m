@@ -1,5 +1,5 @@
-function  mk_update_alpha_chem(f)
-[chems,S,rates] = getChemRxns(f);
+function  mk_rxn_files(f)
+[chems,S,rates,fast_chems,fast_pair,fast_affinity] = getChemRxns(f);
 vars=getInitialized(f);
 
 
@@ -20,7 +20,7 @@ tmp=~spatial;
 
 
 
-%figure out which 
+%figure out which quantities are spatially variable
 ass=cellfun(@(x) [x '(?:[ \t\f]*)?=([^\n\r\;]+)'],vars,'UniformOutput',0);
 rhs=regexp(str,ass,'tokens');
 rhs=cellfun(@(x) x{1},rhs);
@@ -79,9 +79,22 @@ fclose(fid);
  tmp=arrayfun(@(i) ['x(vox+[' num2str(find(S(:,i))'-1) ']*sz)' ],1:length(rates),'UniformOutput',0);
  tmp=arrayfun(@(i) [tmp{i} '=' tmp{i} '+[' num2str(S(S(:,i)~=0,i)') '];'] ,1:length(tmp),'UniformOutput',0);
 
-out=['if rx==1' newline '    ' tmp{1} newline ....
+slow_rx=['if rx==1' newline '    ' tmp{1} newline ....
 strjoin(arrayfun(@(i) ['elseif rx==' int2str(i)  newline '    ' tmp{i}],2:length(tmp),'UniformOutput',0),newline)...
  newline 'end' newline];
+
+
+i_fast=cellfun(@(x) find(strcmp(chems,x)),fast_chems)-1;
+i_pair=cellfun(@(x) find(strcmp(chems,x)),fast_pair)-1;
+rx_complex=arrayfun(@(i) find( S(i,:)),i_pair,'UniformOutput',false);
+
+fast_rx=arrayfun(@(i)['if ' strjoin(arrayfun(@(j) ['rx==' int2str(j)],rx_complex{i},'UniformOutput',false),"||")...
+    newline '    xtot=sum(x(vox+[' int2str([i_pair(i) i_fast(i)]) ']*sz));' newline ...
+    '    x(vox+' int2str(i_pair(i)) '*sz)=round(xtot/(1+' fast_affinity{i} '));' newline '    x(vox+' int2str(i_fast(i)) '*sz)=xtot-x(vox+' int2str(i_pair(i)) '*sz);' newline 'end' ],1:length(rx_complex),'UniformOutput',false);
+
+out=strjoin({slow_rx,strjoin(fast_rx,newline)},newline);
+
+
 
 fid=fopen('perform_rx.m','w');
 fwrite(fid,out,'char');

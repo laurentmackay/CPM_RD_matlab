@@ -125,7 +125,7 @@ if  no_holes
             end
 
             min_dist=10;
-            transport_mask=D/min(D)*min_dist>dist;
+            transport_mask=((D~=0).*D/min(D(D~=0))+(D==0).*prod(shape))*min_dist>dist;
 %             if ~grow
             transport_mask(find(vox_trial==inds),:)=false;
 %             end

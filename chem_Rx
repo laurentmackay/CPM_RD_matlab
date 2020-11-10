@@ -4,8 +4,8 @@ Paxi <-> Pax; B_1*(K.^m./(L_K^m+K.^m)), delta_P
 %Raci <->  Rac; I_R*(L_rho^m./(L_rho^m+RhoRatio.^m)), delta_R;
 %Rhoi <-> Rho; I_rho*(L_R^m./(L_R^m +RacRatio.^m)), delta_rho;
 
-Rac <-> RacPAK; 3
-Pax <-> GPP; 3
+Rac <-> RacPAK; (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox))*alpha*PAKtot*K_is(vox)
+Pax <-> GPP; k_G*k_X*k_C*GIT*PIX*K_is(vox)*PAKtot*(1+alpha_R*RacRatio(vox));
 
 
 RacRatio=Rac/Rac_Square;

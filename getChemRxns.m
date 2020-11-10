@@ -1,4 +1,4 @@
-function [chems,S,rates] = getChems(f)
+function [chems,S,rates,fast_species,fast_pairs,fast_affinity] = getChems(f)
 
     function [species,stoic,rates]=parseRxns(trans,fast)
         if nargin==1
@@ -122,6 +122,32 @@ end
 % cell2mat(cellfun(@(x) ismember(chems,[x{:}]),rhs,'UniformOutput',0)')]
 
 [species_fast,stoic_fast,affinity]=parseRxns(rvsbl_rxn,true);
+
+fast_species=setdiff([species_fast{:}],[species{:}]);
+
+if any(abs(cell2mat([stoic_fast{:}]))~=1)
+
+     error('only unimolecular instantaneous reactions are currently supported')
+
+end
+
+fast_pairs={};
+fast_affinity={};
+
+for i=1:2:length(species_fast)
+    fast_boy=any(reshape(cell2mat(cellfun(@(x) strcmp(fast_species,x),species_fast{i},'UniformOutput',false)),[length(fast_species),2]));
+    if nnz(fast_boy)>1
+        error('intraconversion between fast species not currently supported')
+    end
+    if fast_boy(1)
+        affinity{ceil(i/2)}=['1/(' affinity{ceil(i/2)} ')'];
+    end
+    
+    fast_pairs{end+1}=species_fast{i}{~fast_boy};
+    fast_affinity{end+1}=affinity{ceil(i/2)}
+      
+
+end
 
 
 end
