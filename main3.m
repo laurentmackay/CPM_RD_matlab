@@ -9,8 +9,7 @@ if isempty(getCurrentTask()) %do not display pictures when running in parallel..
     panelD=subplot(2,2,4); annotatePlot('D',22,d);
 end
 
-Results=[];
-Times=[];
+
 
 %open(vid);
 
@@ -53,8 +52,11 @@ tic
 %timepoints where we take a frame for the video
 z=1;
 
-center=zeros(floor(Ttot/picstep)+1,2); %an array where we store the COM
-center(z,:)=com(cell_mask);
+center=zeros(2,floor(Ttot/picstep)+1); %an array where we store the COM
+
+Results=zeros([shape,N_species,floor(Ttot/picstep)+1]);
+Times=zeros(1,floor(Ttot/picstep)+1);
+center(:,z)=com(cell_mask);
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
 pic %takes a frame for the video
@@ -171,7 +173,13 @@ while time<Ttot
         if time>=lastplot+picstep || time==lastcpm % takes video frames
             pic
             gif
-            lastplot=time;            
+            lastplot=time;      
+            z=z+1;
+            center(:,z)=com(cell_mask);
+            Results(:,:,1,z)=cell_mask;
+            Results(:,:,2:(N_species+1),z)=x; %storing the results
+            Times(z)=time;
+            
         end
         
     end

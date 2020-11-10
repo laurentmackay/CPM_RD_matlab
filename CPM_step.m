@@ -126,6 +126,7 @@ if  no_holes
 
             min_dist=10;
             transport_mask=((D~=0).*D/min(D(D~=0))+(D==0).*prod(shape))*min_dist>dist;
+
 %             if ~grow
             transport_mask(find(vox_trial==inds),:)=false;
 %             end
@@ -137,9 +138,11 @@ if  no_holes
  
                 inds2=inds(transport_mask(:,i))+(i-1)*sz;
                 i_trial=vox_trial+(i-1)*sz;
+
                 
                 sum0=sum(x(inds+(i-1)*sz));
                 
+
                 if grow
                     us=x(vox_ref+(i-1)*sz);
                     Ts=sum(x(inds2));  
@@ -161,6 +164,12 @@ if  no_holes
                     ifix=jump(vox_trial,find(cell_mask(jump(vox_trial,:)),1));
                     x(ifix)=x(ifix)-(sum1-sum0-ut);
                 end
+                
+%                 x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
+%                 x(inds2)=x(inds2)*f;
+%                 if sum(x(inds+(i-1)*sz))-sum0~=0
+%                     disp('check this out boss')
+%                 end
             end
         
         

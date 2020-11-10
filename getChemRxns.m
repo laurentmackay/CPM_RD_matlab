@@ -131,8 +131,8 @@ if any(abs(cell2mat([stoic_fast{:}]))~=1)
 
 end
 
-fast_pairs={};
-fast_affinity={};
+fast_pairs=cell(length(species_fast),1);
+fast_affinity=cell(length(species_fast),1);
 
 for i=1:2:length(species_fast)
     fast_boy=any(reshape(cell2mat(cellfun(@(x) strcmp(fast_species,x),species_fast{i},'UniformOutput',false)),[length(fast_species),2]));
@@ -143,8 +143,8 @@ for i=1:2:length(species_fast)
         affinity{ceil(i/2)}=['1/(' affinity{ceil(i/2)} ')'];
     end
     
-    fast_pairs{end+1}=species_fast{i}{~fast_boy};
-    fast_affinity{end+1}=affinity{ceil(i/2)}
+    fast_pairs{i}=species_fast{i}{~fast_boy};
+    fast_affinity{i}=affinity{ceil(i/2)};
       
 
 end
