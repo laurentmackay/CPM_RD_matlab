@@ -1,4 +1,4 @@
-function [B_1,copyNum,e,z] = main3_fun(B_1,copyNum,e,z)
+function [B_1,copyNum] = main3_fun(B_1,copyNum)
 
 if isempty(getCurrentTask()) %do not display pictures when running in parallel...i.e., on the cluster
 
@@ -287,7 +287,7 @@ if usejava('desktop') && isempty(getCurrentTask())
 
     hold on
     try
-    plot(center(2,1:z),center(1,1:z),'r')
+    plot(center(2,1:iter),center(1,1:iter),'r')
     catch e
         disp(e)
     end
@@ -443,7 +443,7 @@ while time<Ttot
         x0=x;
 
         %run the SSA
-        eval(['try' newline SSA_call newline 'catch err' newline 'disp(err.stack.file);disp(err.stack.line);' newline 'end']);
+        eval(['try' newline SSA_call newline 'catch err' newline 'disp(err);' newline 'end']);
     disp('tryng SSA')
         try
 %         [A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x] = SSA02_fun(A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x);
@@ -711,7 +711,7 @@ while time<Ttot
             
                 hold on
                 try
-                plot(center(2,1:z),center(1,1:z),'r')
+                plot(center(2,1:iter),center(1,1:iter),'r')
                 catch e
                     disp(e)
                 end
