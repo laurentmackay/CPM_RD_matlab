@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 iter=iter+1;
 
 center(:,iter)=com(cell_mask);
@@ -14,5 +15,4 @@ if iter==1
 else
     
     Ham(iter)=Ham(iter-1)-dH_chem;
-    
 end
