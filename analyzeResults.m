@@ -1,8 +1,22 @@
-function [outputArg1,outputArg2] = analyzeResults(f)
+function [outputArg1,outputArg2] = analyzeResults(f,iters)
 
 %%load in the results
 load(['results/' f]);
 iter=min(iter,length(Times));
+
+if nargin==1
+    iters=1:iter;
+end
+
+if iters(1)>1
+T0=Times(iters(1)-1);
+else
+T0=0;
+end
+center=center(:,iters);
+Times=Times(iters);
+areas=areas(iters);
+perims=perims(iters);
 
 %% initial compuation
 lags=1:iter-1;
@@ -11,15 +25,15 @@ dt_mean=zeros(size(lags));
 drs={};
 dts={};
 for l=lags
-    drs{l}=sqrt(sum((center(:,l+1:iter)-center(:,1:iter-l)).^2,1));
-    dts{l}=Times(l+1:iter)-Times(1:iter-l);
+    drs{l}=sqrt(sum((center(:,l+1:end)-center(:,1:end-l)).^2,1));
+    dts{l}=Times(l+1:end)-Times(1:end-l);
     
     dr_mean(l)=mean(drs{l});
     dt_mean(l)=mean(dts{l});
 end
 
-dr=sqrt(sum((center(:,1)-center(:,2:iter)).^2,1));
-dt=Times(2:iter);
+dr=sqrt(sum((center(:,1)-center(:,2:end)).^2,1));
+dt=Times(2:end)-T0;
 
 figure(1);clf();
 
@@ -27,25 +41,24 @@ figure(1);clf();
 %% dispersion exponent
 subplot(2,3,1);
 
-loglog([dts{:}],[drs{:}],'.k','MarkerSize',0.05/log(length(lags)))
-hold on
-hplot=loglog(dt_mean,dr_mean,...
-    [dt(1) dt(end)],[dr(1) dr(1)*dt(end)^0.5],...
+% loglog([dts{:}],[drs{:}],'.k','MarkerSize',0.05/log(length(lags)))
+% hold on
+hplot=loglog([dt(1) dt(end)],[dr(1) dr(1)*dt(end)^0.5],...
     [dt(1) dt(end)],[dr(1) dr(1)*dt(end)],...
-    Times(2:iter),dr);
+    dt,dr);
 set(hplot,'LineWidth',2)
-set(hplot(1),'Color','r');
-set(hplot(2),'Color','g','LineStyle',':');
-set(hplot(3),'Color','g','LineStyle','-.');
-set(hplot(4),'Color','g');
-hold off
+% set(hplot(1),'Color','r');
+set(hplot(1),'Color','g','LineStyle',':');
+set(hplot(2),'Color','g','LineStyle','-.');
+set(hplot(3),'Color','g');
+% hold off
 
 
 xlim([dt(1) dt(end)]);
 ylim([min(dr), max(dr)]);
 xlabel('\Deltat')
 ylabel('\Deltar (\mum)');
-legend(hplot,{'Ergodic Mean','Brownian', 'Ballistic', 'Random Walk'},'Location','Best')
+legend(hplot,{'Brownian', 'Ballistic', 'Random Walk'},'Location','Best')
 
 %% displacement distributions
 v_insta = [drs{1}]./[dts{1}];
@@ -54,7 +67,7 @@ v_inst = @(i) [drs{1:i}]./[dts{1:i}];
 
 subplot(2,3,2);
 hold on
-for i=1:2
+for i=1:7
     [counts,bin_centers]=histcounts(v_inst(i),50,'Normalization','Probability');
     bin_centers=bin_centers(1:end-1)+diff(bin_centers);
     plot(bin_centers,counts);
@@ -91,20 +104,20 @@ axis tight
 
 subplot(2,3,4);
 
-plot(Times(1:iter),perims(1:iter),[Times(1) Times(iter)],[per per]);
+plot(Times,perims,[Times(1) Times(end)],[per per]);
 title('Cell Perimeter')
 
 subplot(2,3,5);
-plot(Times(1:iter),areas(1:iter),[Times(1) Times(iter)],[a a]);
+plot(Times,areas,[Times(1) Times(end)],[a a]);
 title('Cell Area')
 subplot(2,3,6);
 
-% H0=lam_a*(a-areas(1:iter)).^2+lam_p*(per-perims(1:iter)).^2+J*perims(1:iter);
-plot(Times(1:iter),Ham0(1:iter),Times(1:iter),Ham(1:iter));
+% H0=lam_a*(a-areas).^2+lam_p*(per-perims).^2+J*perims;
+plot(Times,Ham0(iters));
 title('H_0')
 
 %% plotting traj
 figure(2); clf();
-plot(center(1,1:iter),center(2,1:iter))
+plot(center(1,:),center(2,:))
 end
 

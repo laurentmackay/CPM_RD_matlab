@@ -30,7 +30,10 @@ h=Gsize/(N-1); %length of a latice square
 vmax=3/60; %max speed of the cell
 picstep=5;
 cpmsteps=15;
-cpmstep=h/(vmax*cpmsteps);
+
+cpmstep0=h/vmax;
+cpmstep=cpmstep0/cpmsteps;
+
 
 
 [j, i] = meshgrid(1:shape(2),1:shape(1)); %the i and j need to be reversed for some reason (\_(:0)_/)
@@ -103,6 +106,7 @@ end
 
 numDiff=0;
 numReac=0;
+cpmcounter=0;
 %arrays recording Ratio change
 %after run, plot TRac/TRho over Timeseries
 Timeseries=[];
@@ -159,8 +163,13 @@ while time<Ttot
             
             for kk=1:(2*Per)/cpmsteps %itterates CPM step Per times
                 disp('doing CPM')
-                CPM_step
-            
+                try
+                    CPM_step
+                catch
+                    time=Ttot;
+                    break;
+                end
+                
                 if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
                     disp('molecules changed')
                 end
@@ -168,13 +177,18 @@ while time<Ttot
             
             enumerate_diffusion %recalcluates diffusable sites
             lastcpm=time;
+            cpmcounter=cpmcounter+1;
         end
         
         if time>=lastplot+picstep || time==lastcpm % takes video frames
             pic
             gif
             lastplot=time;      
-            save_results
+            if cpmcounter==cpmsteps
+                save_results
+                cpmcounter=0;
+            end
+            
             
         end
         

@@ -1,4 +1,4 @@
-function [B_1,copyNum,e] = main3_fun(B_1,copyNum,e)
+function [B_1,copyNum,e,z] = main3_fun(B_1,copyNum,e,z)
 
 if isempty(getCurrentTask()) %do not display pictures when running in parallel...i.e., on the cluster
 
@@ -20,18 +20,21 @@ end
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 
-Ttot=0.25*3.6e3; %time the simulation end
+Ttot=3*3.6e3; %time the simulation end
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=80; %length of the grid in um
-N=100; % number of points used to discretize the grid
+N=80; % number of points used to discretize the grid
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); %length of a latice square
 
 vmax=3/60; %max speed of the cell
 picstep=5;
-cpmsteps=5;
-cpmstep=h/(vmax*cpmsteps);
+cpmsteps=15;
+
+cpmstep0=h/vmax;
+cpmstep=cpmstep0/cpmsteps;
+
 
 
 [j, i] = meshgrid(1:shape(2),1:shape(1)); %the i and j need to be reversed for some reason (\_(:0)_/)
@@ -101,6 +104,7 @@ if ~restart
     
     
     H0=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; % the hamiltonian
+    dH_chem=0; %initial chemotactic contribution to the hamiltonian
     
     grow_count=0;
     shrink_count=0;
@@ -250,16 +254,29 @@ lastplot=0;
 lastcpm=0;
 tic
 %timepoints where we take a frame for the video
-z=1;
 
-center=zeros(2,floor(Ttot/picstep)+1); %an array where we store the COM
+iter=0;
 
-Results=zeros([shape,N_species,floor(Ttot/picstep)+1]);
-Times=zeros(1,floor(Ttot/picstep)+1);
-center(:,z)=com(cell_mask);
+
+Nsteps=floor(Ttot/min(cpmstep0))+1;
+
+
+center=zeros(2,Nsteps);
+Results=zeros([shape,N_species,Nsteps]);
+Times=zeros(1,Nsteps);
+
+areas=zeros(1,Nsteps);
+perims=zeros(1,Nsteps);
+
+Ham0=zeros(1,Nsteps);
+Hchem=zeros(1,Nsteps);
+
+
+save_results
+
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
-if usejava('desktop')
+if usejava('desktop') && isempty(getCurrentTask())
     % to make a video all frames must be the same size setting its position just
     % stops some bugs
     fs=14; %axis font size
@@ -332,8 +349,9 @@ if usejava('desktop')
     %frames=[frames getframe(gcf)];
     frame=getframe(gcf);
 end
-gif('test.gif','frame',panelC)
-
+if usejava('desktop') && isempty(getCurrentTask())
+    gif('test.gif','frame',panelC)
+end
 reactions=0; %intializing a reaction counter
 
 
@@ -391,6 +409,7 @@ end
 
 numDiff=0;
 numReac=0;
+cpmcounter=0;
 %arrays recording Ratio change
 %after run, plot TRac/TRho over Timeseries
 Timeseries=[];
@@ -411,7 +430,7 @@ SSA_call=[getFunctionHeader(SSA_fn) ';'];
 d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
 while time<Ttot
     A=nnz(cell_mask); %current area
-    cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s
+    cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s (initially)
 
     while (time-last_time)<Ttot
 
@@ -447,196 +466,211 @@ while time<Ttot
 
             for kk=1:(2*Per)/cpmsteps %itterates CPM step Per times
                 disp('doing CPM')
-                adj_empty = ~cell_mask(up) | ~cell_mask(down) | ~cell_mask(left) | ~cell_mask(right); %cells at the boundry
-                adj_full = cell_mask(up) | cell_mask(down) | cell_mask(left) | cell_mask(right); %cells at the boundry
-                
-                bndry_cell = cell_mask & adj_empty;
-                bndry_empty = ~cell_mask & adj_full;
-                bndry = find( bndry_cell | bndry_empty );
-                
-                bndry_up=cell_mask  & ~cell_mask(up);
-                bndry_down=cell_mask  & ~cell_mask(down);
-                bndry_l=cell_mask  & ~cell_mask(left);
-                bndry_r=cell_mask  & ~cell_mask(right);
-                
-                bndry_ud= bndry_up | bndry_down;
-                bndry_lr= bndry_l | bndry_r;
-                
-                bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
-                
-                
-                if any(cell_maskp~=cell_mask)
-                    error('not reseting')
-                end
-                
-                
-                rho_eq=mean(RhoRatio(find(cell_mask)));
-                R_eq=mean(RacRatio(find(cell_mask)));
-                Ncell_mask=squeeze(sum(sum(x))); %for a sanity check
-                A0=A;
-                
-                no_holes=false;
-                
-                while ~no_holes
-                    vox_trial = bndry(randi(length(bndry)));
-                
-                    r=randi(size(jump,2));
-                    vox_ref=jump(sub2ind([sz,4],vox_trial,r));
-                    cell_maskp(vox_trial) = cell_mask(vox_ref);% make a new trial configuration
-                
-                    Per=perim(cell_maskp); % perimeter
-                    A=nnz(cell_maskp); % area
-                    HA=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; % the hamiltonian after the possible change
-                    dH=HA-H0;
-                    no_holes = getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 && getfield(bwconncomp(~cell_maskp,4),'NumObjects')==1 ;%makes sure the cell stays connected and no hole
-                    if ~no_holes
-                        cell_maskp(vox_trial)=cell_mask(vox_trial);%revert change
+                try
+                    adj_empty = ~cell_mask(up) | ~cell_mask(down) | ~cell_mask(left) | ~cell_mask(right); %cells at the boundry
+                    adj_full = cell_mask(up) | cell_mask(down) | cell_mask(left) | cell_mask(right); %cells at the boundry
+                    
+                    bndry_cell = cell_mask & adj_empty;
+                    bndry_empty = ~cell_mask & adj_full;
+                    bndry = find( bndry_cell | bndry_empty );
+                    
+                    bndry_up=cell_mask  & ~cell_mask(up);
+                    bndry_down=cell_mask  & ~cell_mask(down);
+                    bndry_l=cell_mask  & ~cell_mask(left);
+                    bndry_r=cell_mask  & ~cell_mask(right);
+                    
+                    bndry_ud= bndry_up | bndry_down;
+                    bndry_lr= bndry_l | bndry_r;
+                    
+                    bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
+                    
+                    
+                    if any(cell_maskp~=cell_mask)
+                        error('not reseting')
                     end
-                end
-                
-                
-                reacted = 0;
-                if  no_holes
-                    %check if growing or shrinking
-                    grow= cell_maskp(vox_trial) & ~cell_mask(vox_trial);
-                    shrink= ~cell_maskp(vox_trial) & cell_mask(vox_trial);
-                
-                
-                    if grow
-                        f=1;
-                        dH=dH+B_rho*(RhoRatio(vox_ref)-rho_eq)-B_R*(RacRatio(vox_ref)-R_eq);
-                    elseif shrink
-                        f=-1;
-                        dH=dH-B_rho*(RhoRatio(vox_trial)-rho_eq)+B_R*(RacRatio(vox_trial)-R_eq);
-                    end
-                
-                
-                    if (grow || shrink) && rand<exp(-(dH+Hb)/T)
-                        reacted=1;
-                            cm0=cell_mask;
-                        cell_mask=cell_maskp; %changing cell shape
-                
-                        if shrink
-                            bndry_up=cell_mask  & ~cell_mask(up);
-                            bndry_down=cell_mask  & ~cell_mask(down);
-                            bndry_l=cell_mask  & ~cell_mask(left);
-                            bndry_r=cell_mask  & ~cell_mask(right);
-                
-                            bndry_ud= bndry_up | bndry_down;
-                            bndry_lr= bndry_l | bndry_r;
-                
+                    
+                    
+                    rho_eq=mean(RhoRatio(find(cell_mask)));
+                    R_eq=mean(RacRatio(find(cell_mask)));
+                    Ncell_mask=squeeze(sum(sum(x))); %for a sanity check
+                    A0=A;
+                    
+                    no_holes=false;
+                    
+                    while ~no_holes
+                        vox_trial = bndry(randi(length(bndry)));
+                    
+                        r=randi(size(jump,2));
+                        vox_ref=jump(sub2ind([sz,4],vox_trial,r));
+                        cell_maskp(vox_trial) = cell_mask(vox_ref);% make a new trial configuration
+                    
+                        Per=perim(cell_maskp); % perimeter
+                        A=nnz(cell_maskp); % area
+                        HA=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; % the hamiltonian after the possible change
+                        dH=HA-H0;
+                        no_holes = getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 && getfield(bwconncomp(~cell_maskp,4),'NumObjects')==1 ;%makes sure the cell stays connected and no hole
+                        if ~no_holes
+                            cell_maskp(vox_trial)=cell_mask(vox_trial);%revert change
                         end
-                
-                            %recalculate parameters
-                        Per=perim(cell_mask);
-                        A=nnz(cell_mask);
-                
-                
-                
+                    end
+                    
+                    
+                    reacted = 0;
+                    if  no_holes
+                        %check if growing or shrinking
+                        grow= cell_maskp(vox_trial) & ~cell_mask(vox_trial);
+                        shrink= ~cell_maskp(vox_trial) & cell_mask(vox_trial);
+                    
+                    
                         if grow
-                            inds=cell_inds(1:A-1);
-                            cell_inds(1:A)=find(cell_mask);
-                        else
-                            cell_inds(1:A)=find(cell_mask);
-                            inds=cell_inds(1:A);
+                            f=1;
+                            dH_chem=B_rho*(RhoRatio(vox_ref)-rho_eq)-B_R*(RacRatio(vox_ref)-R_eq);
+                    
+                        elseif shrink
+                            f=-1;
+                            dH_chem=-B_rho*(RhoRatio(vox_trial)-rho_eq)+B_R*(RacRatio(vox_trial)-R_eq);
+                    
                         end
-                
-                
-                
+                    
+                    
+                        if (grow || shrink) && rand<exp(-(dH+dH_chem+Hb)/T)
+                            reacted=1;
+                                cm0=cell_mask;
+                            cell_mask=cell_maskp; %changing cell shape
+                    
+                            if shrink
+                                bndry_up=cell_mask  & ~cell_mask(up);
+                                bndry_down=cell_mask  & ~cell_mask(down);
+                                bndry_l=cell_mask  & ~cell_mask(left);
+                                bndry_r=cell_mask  & ~cell_mask(right);
+                    
+                                bndry_ud= bndry_up | bndry_down;
+                                bndry_lr= bndry_l | bndry_r;
+                    
+                            end
+                    
+                                %recalculate parameters
+                            Per=perim(cell_mask);
+                            A=nnz(cell_mask);
+                    
+                    
+                    
                             if grow
-                                dist=max(abs(i0(vox_ref)-i0(inds)),abs(j0(vox_ref)-j0(inds)));
+                                inds=cell_inds(1:A-1);
+                                cell_inds(1:A)=find(cell_mask);
                             else
-                                dist=max(abs(i0(vox_trial)-i0(inds)),abs(j0(vox_trial)-j0(inds)));
+                                cell_inds(1:A)=find(cell_mask);
+                                inds=cell_inds(1:A);
                             end
-                
-                            min_dist=10;
-                            transport_mask=((D~=0).*D/min(D(D~=0))+(D==0).*prod(shape))*min_dist>dist;
-                
-                            transport_mask(find(vox_trial==inds),:)=false;
-                
-                        x0=x;
-                
-                
-                            for i=1:length(D)
-                
-                                inds2=inds(transport_mask(:,i))+(i-1)*sz;
-                                i_trial=vox_trial+(i-1)*sz;
-                
-                
-                                sum0=sum(x(inds+(i-1)*sz));
-                
-                
+                    
+                    
+                    
                                 if grow
-                                    us=x(vox_ref+(i-1)*sz);
-                                    Ts=sum(x(inds2));
-                                    f=Ts/(Ts+us);
-                                    x(i_trial)=us;
-                                    inds2=[inds2; i_trial];
+                                    dist=max(abs(i0(vox_ref)-i0(inds)),abs(j0(vox_ref)-j0(inds)));
                                 else
-                                    ut=x(i_trial);
-                                    f=1+(ut/sum(x(inds2)));
-                                    x(i_trial)=0;
+                                    dist=max(abs(i0(vox_trial)-i0(inds)),abs(j0(vox_trial)-j0(inds)));
                                 end
-                                if ~isfinite(f)
-                                    error("NAN");
+                    
+                                min_dist=10;
+                                transport_mask=((D~=0).*D/min(D(D~=0))+(D==0).*prod(shape))*min_dist>dist;
+                    
+                                transport_mask(find(vox_trial==inds),:)=false;
+                    
+                            x0=x;
+                    
+                    
+                                for i=1:length(D)
+                    
+                                    inds2=inds(transport_mask(:,i))+(i-1)*sz;
+                                    i_trial=vox_trial+(i-1)*sz;
+                    
+                    
+                                    sum0=sum(x(inds+(i-1)*sz));
+                    
+                    
+                                    if grow
+                                        us=x(vox_ref+(i-1)*sz);
+                                        Ts=sum(x(inds2));
+                                        f=Ts/(Ts+us);
+                                        x(i_trial)=us;
+                                        inds2=[inds2; i_trial];
+                                    else
+                                        ut=x(i_trial);
+                                        f=1+(ut/sum(x(inds2)));
+                                        x(i_trial)=0;
+                                    end
+                                    if ~isfinite(f)
+                                        error("NAN");
+                                    end
+                                    x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1.0))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
+                    
+                                    if ~grow
+                                        sum1=sum(x(inds+(i-1)*sz));
+                                        if sum1-sum0~=ut
+                                            disp('check this out boss')
+                                            ifix=jump(vox_trial,find(cell_mask(jump(vox_trial,:)),1))+(i-1)*sz;
+                                            x(ifix)=x(ifix)-(sum1-sum0-ut);
+                                        end
+                                    else
+                                        sum1=sum(x([inds; vox_trial]+(i-1)*sz));
+                                        if sum1~=sum0
+                                            error('we got a wild ass over here')
+                                        end
+                                    end
+                    
                                 end
-                                x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1.0))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
-                                sum1=sum(x(inds+(i-1)*sz));
-                                if ~grow & sum1-sum0~=ut
-                                    disp('check this out boss')
-                                    ifix=jump(vox_trial,find(cell_mask(jump(vox_trial,:)),1));
-                                    x(ifix)=x(ifix)-(sum1-sum0-ut);
-                                end
-                
+                    
+                    
+                            I=[vox_trial vox_ref]; %places where molecule number has changed
+                            H0=HA; %changing the hamiltonn to the new one
+                    
+                            %recalculate parameters
+                            Per=perim(cell_mask);
+                            A=nnz(cell_mask);
+                            cell_inds(1:A)=find(cell_mask);
+                    
+                    
+                            if grow
+                                vox=cell_inds(1:A);
+                            else
+                                vox=[cell_inds(1:A); vox_trial];
                             end
-                
-                
-                        I=[vox_trial vox_ref]; %places where molecule number has changed
-                        H0=HA; %changing the hamiltonn to the new one
-                
-                        %recalculate parameters
-                        Per=perim(cell_mask);
-                        A=nnz(cell_mask);
-                        cell_inds(1:A)=find(cell_mask);
-                
-                
-                        if grow
-                            vox=cell_inds(1:A);
-                        else
-                            vox=[cell_inds(1:A); vox_trial];
+                    
+                            update_alpha_chem
+                    
+                            alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
+                            if grow
+                                disp('grow');
+                                grow_count=grow_count+1;
+                            else
+                                disp('shrink');
+                                shrink_count=shrink_count+1;
+                            end
+                    
                         end
-                
-                        update_alpha_chem
-                
-                        alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
-                        if grow
-                            disp('grow');
-                            grow_count=grow_count+1;
-                        else
-                            disp('shrink');
-                            shrink_count=shrink_count+1;
-                        end
-                
                     end
-                end
-                
-                if ~reacted
-                    %no move
-                    cell_maskp=cell_mask;
-                    Per=perim(cell_mask); % perimter
-                    A=nnz(cell_mask); % area
-                    cell_inds(1:A)=find(cell_mask);
-                end
-                
-                
-                
-                Ncell_maskp=squeeze(sum(sum(x)));
-                if any(Ncell_mask~=Ncell_maskp)
-                    error('molecule loss')
-                end
-                
-                if min(cell_mask(:))<0
-                    error('Oh no! D: (negtive numbers)')
+                    
+                    if ~reacted
+                        %no move
+                        cell_maskp=cell_mask;
+                        Per=perim(cell_mask); % perimter
+                        A=nnz(cell_mask); % area
+                        cell_inds(1:A)=find(cell_mask);
+                    end
+                    
+                    
+                    
+                    Ncell_maskp=squeeze(sum(sum(x)));
+                    if any(Ncell_mask~=Ncell_maskp)
+                        error('molecule loss')
+                    end
+                    
+                    if min(cell_mask(:))<0
+                        error('Oh no! D: (negtive numbers)')
+                    end
+                catch
+                    time=Ttot;
+                    break;
                 end
 
                 if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
@@ -662,10 +696,11 @@ while time<Ttot
                 pi(:,vox)=diffuse_mask(:,vox)'./sum(diffuse_mask(:,vox));
             end
             lastcpm=time;
+            cpmcounter=cpmcounter+1;
         end
 
         if time>=lastplot+picstep || time==lastcpm % takes video frames
-            if usejava('desktop')
+            if usejava('desktop') && isempty(getCurrentTask())
                 % to make a video all frames must be the same size setting its position just
                 % stops some bugs
                 fs=14; %axis font size
@@ -740,11 +775,22 @@ while time<Ttot
             end
             gif
             lastplot=time;
-            z=z+1;
-            center(:,z)=com(cell_mask);
-            Results(:,:,1,z)=cell_mask;
-            Results(:,:,2:(N_species+1),z)=x; %storing the results
-            Times(z)=time;
+            if cpmcounter==cpmsteps
+                iter=iter+1;
+                
+                center(:,iter)=com(cell_mask);
+                Results(:,:,1,iter)=cell_mask;
+                Results(:,:,2:(N_species+1),iter)=x; %storing the results
+                Times(iter)=time;
+                
+                areas(iter)=A;
+                perims(iter)=Per;
+                
+                Ham0(iter)=H0;
+                Hchem(iter)=dH_chem;
+                cpmcounter=0;
+            end
+
 
         end
 

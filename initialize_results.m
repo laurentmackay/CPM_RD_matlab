@@ -1,6 +1,7 @@
 iter=0;
-Nsteps=floor(Ttot/min(picstep,cpmstep))+1;
 
+
+Nsteps=floor(Ttot/min(cpmstep0))+1;
 
 
 center=zeros(2,Nsteps);
@@ -11,7 +12,7 @@ areas=zeros(1,Nsteps);
 perims=zeros(1,Nsteps);
 
 Ham0=zeros(1,Nsteps);
-Ham=zeros(1,Nsteps);
+Hchem=zeros(1,Nsteps);
 
 
 %save the initial conditions

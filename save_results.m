@@ -9,9 +9,4 @@ areas(iter)=A;
 perims(iter)=Per;
 
 Ham0(iter)=H0;
-if iter==1
-    Ham(iter)=H0+dH_chem;
-else
-    
-    Ham(iter)=Ham(iter-1)-dH_chem;
-end
+Hchem(iter)=dH_chem;
