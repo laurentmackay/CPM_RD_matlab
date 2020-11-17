@@ -19,17 +19,17 @@ end
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 
-Ttot=4*3.6e3; %time the simulation end
+Ttot=3*3.6e3; %time the simulation end
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=80; %length of the grid in um
-N=100; % number of points used to discretize the grid
+N=80; % number of points used to discretize the grid
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); %length of a latice square
 
 vmax=3/60; %max speed of the cell
 picstep=5;
-cpmsteps=5;
+cpmsteps=15;
 cpmstep=h/(vmax*cpmsteps);
 
 
@@ -53,18 +53,15 @@ lastplot=0;
 lastcpm=0;
 tic
 %timepoints where we take a frame for the video
-z=1;
 
-center=zeros(2,floor(Ttot/picstep)+1); %an array where we store the COM
+initialize_results
 
-Results=zeros([shape,N_species,floor(Ttot/picstep)+1]);
-Times=zeros(1,floor(Ttot/picstep)+1);
-center(:,z)=com(cell_mask);
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
 pic %takes a frame for the video
-gif('test.gif','frame',panelC)
-
+if usejava('desktop') && isempty(getCurrentTask())
+    gif('test.gif','frame',panelC)
+end
 reactions=0; %intializing a reaction counter
 
 
@@ -126,7 +123,7 @@ SSA_call=[getFunctionHeader(SSA_fn) ';'];
 d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
 while time<Ttot
     A=nnz(cell_mask); %current area
-    cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s
+    cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s (initially)
     
     while (time-last_time)<Ttot
         
@@ -169,7 +166,7 @@ while time<Ttot
                 end
             end
             
-            enumerate_diffusion %recaucluates diffusable sites
+            enumerate_diffusion %recalcluates diffusable sites
             lastcpm=time;
         end
         
@@ -177,11 +174,7 @@ while time<Ttot
             pic
             gif
             lastplot=time;      
-            z=z+1;
-            center(:,z)=com(cell_mask);
-            Results(:,:,1,z)=cell_mask;
-            Results(:,:,2:(N_species+1),z)=x; %storing the results
-            Times(z)=time;
+            save_results
             
         end
         

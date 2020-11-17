@@ -29,6 +29,7 @@ T=900; %"temperture" strength of noise
 
 
 H0=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; % the hamiltonian
+dH_chem=0; %initial chemotactic contribution to the hamiltonian
 
 grow_count=0;
 shrink_count=0;

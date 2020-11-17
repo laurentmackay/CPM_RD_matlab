@@ -73,14 +73,16 @@ if  no_holes
     
     if grow
         f=1;
-        dH=dH+B_rho*(RhoRatio(vox_ref)-rho_eq)-B_R*(RacRatio(vox_ref)-R_eq);
+        dH_chem=B_rho*(RhoRatio(vox_ref)-rho_eq)-B_R*(RacRatio(vox_ref)-R_eq);
+        
     elseif shrink
         f=-1;
-        dH=dH-B_rho*(RhoRatio(vox_trial)-rho_eq)+B_R*(RacRatio(vox_trial)-R_eq);
+        dH_chem=-B_rho*(RhoRatio(vox_trial)-rho_eq)+B_R*(RacRatio(vox_trial)-R_eq);
+       
     end
     
     
-    if (grow || shrink) && rand<exp(-(dH+Hb)/T)
+    if (grow || shrink) && rand<exp(-(dH+dH_chem+Hb)/T)
         reacted=1;
 %         if grow
             cm0=cell_mask;
@@ -158,11 +160,19 @@ if  no_holes
                     error("NAN");
                 end
                 x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1.0))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
-                sum1=sum(x(inds+(i-1)*sz));
-                if ~grow & sum1-sum0~=ut
-                    disp('check this out boss')
-                    ifix=jump(vox_trial,find(cell_mask(jump(vox_trial,:)),1));
-                    x(ifix)=x(ifix)-(sum1-sum0-ut);
+                
+                if ~grow
+                    sum1=sum(x(inds+(i-1)*sz));
+                    if sum1-sum0~=ut
+                        disp('check this out boss')
+                        ifix=jump(vox_trial,find(cell_mask(jump(vox_trial,:)),1))+(i-1)*sz;
+                        x(ifix)=x(ifix)-(sum1-sum0-ut);
+                    end
+                else
+                    sum1=sum(x([inds; vox_trial]+(i-1)*sz));
+                    if sum1~=sum0
+                        error('we got a wild ass over here')
+                    end
                 end
                 
 %                 x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
