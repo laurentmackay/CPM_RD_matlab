@@ -1,6 +1,6 @@
 clearvars all
 
-B=linspace(0,40,10);
+B=linspace(0,30,20);
 Nrep=2e1;
 
 
