@@ -45,6 +45,12 @@ rhs2=cellfun(@(x) regexp(x{2}, name ,"match"), io2,'UniformOutput',0);
 
 assigned2=cellfun(@(r,l) setdiff(l,r),[rhs rhs2],[lhs lhs2],'UniformOutput',0);
 assigned2=unique([assigned2{:}],'stable');
+
+
+errs=regexp(str,[ 'catch[ \t\f]*(' name ')'],'tokens');
+assigned=unique([assigned2 errs{:}],'stable');
+
+
 % assigned2=setdiff([out{:}],[in{:}]);
 % assigned=cellfun(@(x) regexp([x{2}],['[ \t\f]*' seps '[ \t\f]*'],"split"), inout,'UniformOutput',0)
 
@@ -76,6 +82,6 @@ assigned2=unique([assigned2{:}],'stable');
 % end
 % assigned=assigned(mask);
 % assigned=[assigned, assigned2];
-assigned=assigned2;
+
 end
 

@@ -12,7 +12,7 @@ if usejava('desktop') && isempty(getCurrentTask())
 
     hold on
     try
-    plot(center(2,1:z),center(1,1:z),'r')
+    plot(center(2,1:iter),center(1,1:iter),'r')
     catch e
         disp(e)
     end

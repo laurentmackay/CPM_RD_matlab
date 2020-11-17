@@ -1,4 +1,4 @@
-function [B_1,copyNum,e,z] = main3_fun(B_1,copyNum,e,z)
+function [B_1,copyNum] = main3_fun(B_1,copyNum)
 
 if isempty(getCurrentTask()) %do not display pictures when running in parallel...i.e., on the cluster
 
@@ -287,7 +287,7 @@ if usejava('desktop') && isempty(getCurrentTask())
 
     hold on
     try
-    plot(center(2,1:z),center(1,1:z),'r')
+    plot(center(2,1:iter),center(1,1:iter),'r')
     catch e
         disp(e)
     end
@@ -711,7 +711,7 @@ while time<Ttot
             
                 hold on
                 try
-                plot(center(2,1:z),center(1,1:z),'r')
+                plot(center(2,1:iter),center(1,1:iter),'r')
                 catch e
                     disp(e)
                 end
