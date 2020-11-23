@@ -202,10 +202,10 @@ if  no_holes
         
         alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
         if grow
-            disp('grow');
+%             disp('grow');
             grow_count=grow_count+1;
         else
-            disp('shrink');
+%             disp('shrink');
             shrink_count=shrink_count+1;
         end
         

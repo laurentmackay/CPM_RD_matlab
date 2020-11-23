@@ -195,7 +195,9 @@ while time<Ttot
                 if plotting
                     gif
                 end
-                time
+                if ~isempty(getCurrentTask())
+                    disp([num2str(copyNum) ': B=' num2str(B_1) ', t=' num2str(time)])
+                end
                 save_results
                 cpmcounter=0;
             end
