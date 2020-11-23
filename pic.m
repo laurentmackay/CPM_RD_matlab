@@ -8,7 +8,7 @@ if usejava('desktop') && isempty(getCurrentTask())
     subplot(2,2,1)
 %     imagesc(cell_mask,[0 1]);
     plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
-    colorbar;
+%     colorbar;
 
     hold on
     try
@@ -26,7 +26,7 @@ if usejava('desktop') && isempty(getCurrentTask())
     
     subplot(2,2,2)
     plotCellIm(panelB,RhoRatio,cell_mask,i0,j0)
-    caxis([0 1])
+    caxis('auto')
     colorbar;
     ax = gca;
     ax.FontSize = fs;
@@ -36,7 +36,7 @@ if usejava('desktop') && isempty(getCurrentTask())
     
     subplot(2,2,3)
     plotCellIm(panelC,RacRatio,cell_mask,i0,j0)
-    caxis([0 0.4])
+    caxis('auto')
     colorbar
     ax = gca;
     ax.FontSize = fs;
@@ -48,7 +48,7 @@ if usejava('desktop') && isempty(getCurrentTask())
     
      subplot(2,2,4)
     plotCellIm(panelD,PaxRatio,cell_mask,i0,j0)
-    caxis([0 1])
+    caxis('auto')
     colorbar
     ax = gca;
     ax.FontSize = fs;

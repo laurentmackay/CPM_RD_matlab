@@ -123,8 +123,9 @@ P_diff=0.5;
 
 SSA='SSA02';
 SSA_fn=mk_fun(SSA,'gamma','alpha','pi');
-SSA_call=[getFunctionHeader(SSA_fn) ';'];
+
 d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
+SSA_call=[getFunctionHeader(SSA_fn) ';'];
 while time<Ttot
     A=nnz(cell_mask); %current area
     cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s (initially)
@@ -139,9 +140,10 @@ while time<Ttot
         
         x0=x;
         
+        disp('tryng SSA')    
         %run the SSA
-        eval(['try' newline SSA_call newline 'catch err' newline 'disp(err.stack.file);disp(err.stack.line);' newline 'end']);
-    disp('tryng SSA')        
+        eval(['try' newline SSA_call newline 'catch err' newline 'disp(err);' newline 'end']);
+    
         try
 %         [A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x] = SSA02_fun(A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x);
         catch err
@@ -182,9 +184,10 @@ while time<Ttot
         
         if time>=lastplot+picstep || time==lastcpm % takes video frames
             pic
-            gif
+            
             lastplot=time;      
             if cpmcounter==cpmsteps
+                gif
                 save_results
                 cpmcounter=0;
             end

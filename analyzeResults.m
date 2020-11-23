@@ -63,11 +63,14 @@ legend(hplot,{'Brownian', 'Ballistic', 'Random Walk'},'Location','Best')
 %% displacement distributions
 v_insta = [drs{1}]./[dts{1}];
 v_insta2 = [drs{1:2}]./[dts{1:2}];
-v_inst = @(i) [drs{1:i}]./[dts{1:i}];
+n0=3;
+
+% sqrt(sum((center(:,1:n0:end-n0)-center(:,1+n0:n0:end)).^2,1))./diff(Times)
+v_inst = @(i) [drs{1:n0:i}]./[dts{1:n0:i}];
 
 subplot(2,3,2);
 hold on
-for i=1:7
+for i=1:1
     [counts,bin_centers]=histcounts(v_inst(i),50,'Normalization','Probability');
     bin_centers=bin_centers(1:end-1)+diff(bin_centers);
     plot(bin_centers,counts);
