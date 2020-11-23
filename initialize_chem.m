@@ -7,6 +7,7 @@ reactions=0;
 D_1=0.43;                  %inactive rho/rac
 D_2=0.02;                  %active rho/rac
 D_3=0.03;                  %pax
+D_3=1;                  %pax
 D = [D_1 D_1 D_2 D_2 D_3 D_3];
 
 D=[D_1 D_2 D_1 D_2 D_3 D_3 0 0];
