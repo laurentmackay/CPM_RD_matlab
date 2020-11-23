@@ -122,7 +122,7 @@ dt_diff=zeros(size(D));
 P_diff=0.5;
 
 SSA='SSA02';
-SSA_fn=mk_fun(SSA,'gamma','alpha','pi');
+SSA_fn=mk_fun(SSA,'gamma','alpha','pi','jump');
 
 d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
 SSA_call=[getFunctionHeader(SSA_fn) ';'];
