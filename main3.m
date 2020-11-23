@@ -21,7 +21,7 @@ end
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 
-Ttot=3*3.6e3; %time the simulation end
+Ttot=3*3.6e3; %Total simulation time
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=80; %length of the grid in um
 N=80; % number of points used to discretize the grid
@@ -195,7 +195,9 @@ while time<Ttot
                 if plotting
                     gif
                 end
-                time
+                if ~isempty(getCurrentTask())
+                    disp([num2str(copyNum) ': B=' num2str(B_1) ', t=' num2str(time)])
+                end
                 save_results
                 cpmcounter=0;
             end
