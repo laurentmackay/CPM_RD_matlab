@@ -1,4 +1,4 @@
-function [B_1,copyNum] = main3_fun(B_1,copyNum)
+function [B_1,copyNum,gca,gcf] = main3_fun(B_1,copyNum,gca,gcf)
 
 if isempty(getCurrentTask()) %do not display pictures when running in parallel...i.e., on the cluster
 
@@ -118,6 +118,7 @@ if ~restart
     D_1=0.43;                  %inactive rho/rac
     D_2=0.02;                  %active rho/rac
     D_3=0.03;                  %pax
+    D_3=1;                  %pax
     D = [D_1 D_1 D_2 D_2 D_3 D_3];
     
     D=[D_1 D_2 D_1 D_2 D_3 D_3 0 0];
@@ -283,7 +284,6 @@ if usejava('desktop') && isempty(getCurrentTask())
 
     subplot(2,2,1)
     plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
-    colorbar;
 
     hold on
     try
@@ -301,7 +301,7 @@ if usejava('desktop') && isempty(getCurrentTask())
 
     subplot(2,2,2)
     plotCellIm(panelB,RhoRatio,cell_mask,i0,j0)
-    caxis([0 1])
+    caxis('auto')
     colorbar;
     ax = gca;
     ax.FontSize = fs;
@@ -311,7 +311,7 @@ if usejava('desktop') && isempty(getCurrentTask())
 
     subplot(2,2,3)
     plotCellIm(panelC,RacRatio,cell_mask,i0,j0)
-    caxis([0 0.4])
+    caxis('auto')
     colorbar
     ax = gca;
     ax.FontSize = fs;
@@ -323,7 +323,7 @@ if usejava('desktop') && isempty(getCurrentTask())
 
      subplot(2,2,4)
     plotCellIm(panelD,PaxRatio,cell_mask,i0,j0)
-    caxis([0 1])
+    caxis('auto')
     colorbar
     ax = gca;
     ax.FontSize = fs;
@@ -425,9 +425,13 @@ dt_diff=zeros(size(D));
 P_diff=0.5;
 
 SSA='SSA02';
-SSA_fn=mk_fun(SSA,'gamma','alpha','pi');
-SSA_call=[getFunctionHeader(SSA_fn) ';'];
+SSA_fn=mk_fun(SSA,'gamma','alpha','pi','jump');
+
 d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
+SSA_call=[getFunctionHeader(SSA_fn) ';'];
+
+disp(SSA_call)
+
 while time<Ttot
     A=nnz(cell_mask); %current area
     cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s (initially)
@@ -442,9 +446,10 @@ while time<Ttot
 
         x0=x;
 
+        disp('tryng SSA')
         %run the SSA
         eval(['try' newline SSA_call newline 'catch err' newline 'disp(err);' newline 'end']);
-    disp('tryng SSA')
+
         try
 %         [A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x] = SSA02_fun(A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x);
         catch err
@@ -707,7 +712,6 @@ while time<Ttot
             
                 subplot(2,2,1)
                 plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
-                colorbar;
             
                 hold on
                 try
@@ -725,7 +729,7 @@ while time<Ttot
             
                 subplot(2,2,2)
                 plotCellIm(panelB,RhoRatio,cell_mask,i0,j0)
-                caxis([0 1])
+                caxis('auto')
                 colorbar;
                 ax = gca;
                 ax.FontSize = fs;
@@ -735,7 +739,7 @@ while time<Ttot
             
                 subplot(2,2,3)
                 plotCellIm(panelC,RacRatio,cell_mask,i0,j0)
-                caxis([0 0.4])
+                caxis('auto')
                 colorbar
                 ax = gca;
                 ax.FontSize = fs;
@@ -747,7 +751,7 @@ while time<Ttot
             
                  subplot(2,2,4)
                 plotCellIm(panelD,PaxRatio,cell_mask,i0,j0)
-                caxis([0 1])
+                caxis('auto')
                 colorbar
                 ax = gca;
                 ax.FontSize = fs;
@@ -773,9 +777,10 @@ while time<Ttot
                 %frames=[frames getframe(gcf)];
                 frame=getframe(gcf);
             end
-            gif
+
             lastplot=time;
             if cpmcounter==cpmsteps
+                gif
                 iter=iter+1;
                 
                 center(:,iter)=com(cell_mask);

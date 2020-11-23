@@ -1,4 +1,4 @@
-if usejava('desktop') && isempty(getCurrentTask())
+if plotting
 %     close all
     % to make a video all frames must be the same size setting its position just
     % stops some bugs

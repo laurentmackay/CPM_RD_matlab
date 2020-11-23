@@ -1,4 +1,7 @@
 function fn=mk_fun(script,varargin)
+%varargin should be strings denoting any function names in that are in the matlab path
+%which should be considered as local variables
+%
     function bool = isScript(f)
         fid = fopen(f);
         

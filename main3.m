@@ -1,5 +1,7 @@
 
-if isempty(getCurrentTask()) %do not display pictures when running in parallel...i.e., on the cluster
+plotting=usejava('desktop') && isempty(getCurrentTask())
+
+if plotting %do not display pictures when running in parallel...i.e., on the cluster
     
     figure(1);clf();
     set(gcf,'defaultaxesfontsize',14);
@@ -143,7 +145,7 @@ while time<Ttot
         
         x0=x;
         
-        disp('tryng SSA')    
+%         disp('tryng SSA')    
         %run the SSA
         eval(['try' newline SSA_call newline 'catch err' newline 'disp(err);' newline 'end']);
     
@@ -167,7 +169,7 @@ while time<Ttot
         if time>=lastcpm+cpmstep
             
             for kk=1:(2*Per)/cpmsteps %itterates CPM step Per times
-                disp('doing CPM')
+%                 disp('doing CPM')
                 try
                     CPM_step
                 catch
@@ -190,7 +192,10 @@ while time<Ttot
             
             lastplot=time;      
             if cpmcounter==cpmsteps
-                gif
+                if plotting
+                    gif
+                end
+                time
                 save_results
                 cpmcounter=0;
             end

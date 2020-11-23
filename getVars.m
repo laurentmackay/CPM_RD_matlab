@@ -65,13 +65,14 @@ if ~isempty(vars)
     vars=vars(mask);
     
     
-
+    vars=unique([vars vars_bare ],'stable');
     
     
         isgca=cellfun(@(x) strcmp(x,'gca'),vars);
-    if any(isgca)
-        disp('gca all the way!!!')
-    end
+        isgcf=cellfun(@(x) strcmp(x,'gcf'),vars);
+        
+        vars=vars(~( isgca | isgcf));
+        
 else
     vars={};
     
