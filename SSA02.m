@@ -14,8 +14,11 @@ neg=any(x<0);
 update_all=false;
 
 diff_err=0.01;
+diff_max=0.1;
+
 dt_max=sqrt(diff_err)*(h^2)/max(D);
 
+dt_max(dt_max>diff_max)=diff_max;
 a_total_new=sum(alpha_rx);
 
 
@@ -101,14 +104,18 @@ for kk=1:nrx
 %         end
         dxi=xi0-x(vox0);
         diffusing_species_sum = diffusing_species_sum - (diffuse_mask(:,vox)*dxi);
-        neg=x(vox+(rx-1)*sz)<0;
         
+%         try
+%         neg=x(vox+(rx-1)*sz)<0;
+%         catch err
+%             disp(err)
+%         end
        
         
         update_alpha_chem
         
 
-        
+        neg=any(alpha_rx<0);
         a_total_new=sum(alpha_rx);
         
     end

@@ -1,0 +1,27 @@
+%% Reactions
+%RhoGTPAses
+Raci <-> Rac; Q_R/Rac_Square, d_R
+Ci <->  C; Q_C/C_Square, d_C
+Rhoi <-> Rho; Q_rho/Rho_Square, d_rho
+
+%Phosphointosides
+{} <-> P1; I_P1, delta_P1
+P1 <-> P2; kPI5K*(1+Rac/R_b)/2, k21
+P2 <-> P3; kPI3K*(1+Rac/R_b)/2, kPTEN*(1+Rho/rho_b)/2
+
+
+%Reaction rates
+feedback = (1-ff + ff*P3/P3b)
+Q_rho = (I_rho+beta*Rac)./(1+(C/a2).^n)
+Q_R = (I_R + alpha*C).*feedback
+Q_C = I_C./(1+(Rho/a1).^n).*feedback
+
+
+%% Diffusion Rates
+D(Raci)=D(Rhoi)=D(Ci)=0.43       %fast diffusion for inactive RhoGTPases
+D(Rac)=D(Rho)=D(C)=0.02          %slow for active forms
+D(P1)=D(P2)=D(P3)=1            %fast for phosphoinitosides?
+
+%% Auxiliary definitions
+RacRatio=Rac/Rac_Square;
+RhoRatio=Rho/Rho_Square;

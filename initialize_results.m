@@ -1,5 +1,7 @@
 iter=0;
 
+time=0;
+reactions=0;
 
 Nsteps=floor(Ttot/min(cpmstep0))+1;
 

@@ -70,23 +70,29 @@ function [chems,S,rates,fast_species,fast_pairs,fast_affinity] = getChems(f)
 
 str=fileread(f);
 
-str=regexprep(str,"%[ \%\f\w\=\(\)\+\;\:\.\*\,\]\[\-\/\'\^]+",""); %remove comments
+str=regexprep(str,"%[ \%\f\w\=\(\)\+\;\:\.\*\,\]\[\-\/\'\^\?]+",""); %remove comments
 str=regexprep(str,"\'[^\'\n\r]+\'",""); %remove hardcoded strings with single quotes
 str=regexprep(str,'\"[^\"\n\r]+\"',""); %remove hardcoded strings with double quotes
 str=regexprep(str,'function[^\=]+\=[^\=]+\)',""); %remove function definition
 
 name='[a-zA-Z_$][a-zA-Z_$0-9\-]*';
-empty='[ \f\t\v]*';
+
+
+str=regexprep(str,['[^\n]*D\(' name '\)[^\n]*\n'],""); %remove diffusion rate declarations
+
+whitespace='[ \f\t\v]*';
+nada={'0','{}'};
+emptyset=strjoin(nada,'|');
 empty_or_num='[ \f\t\v\.0-9]*';
 
-chem_set = ['(' empty_or_num '(' name ')' empty '[+])*' '(' empty_or_num name ')' empty ];
+chem_set = ['(' empty_or_num '(' name '|' emptyset ')' whitespace '[+])*?' '(' empty_or_num name '|' emptyset ')' whitespace ];
 
 
-forw_rxn = [  '[^<]*-' empty '>' ];
-backw_rxn = [ '<' empty '-[^>]*'  ];
-rvsbl_rxn = [ '<' empty '-' empty '>'];
+forw_rxn = [  '[^<]*-' whitespace '>' ];
+backw_rxn = [ '<' whitespace '-[^>]*'  ];
+rvsbl_rxn = [ '<' whitespace '-' whitespace '>'];
 
-trans = [empty '(' forw_rxn '|' backw_rxn '|' rvsbl_rxn ')' empty];
+trans = [whitespace '(' forw_rxn '|' backw_rxn '|' rvsbl_rxn '){1}+' whitespace];
 
 
 rxn = [chem_set  trans  chem_set '[^\r\n]*'];
@@ -115,7 +121,8 @@ S=zeros(length(chems),Nrx);
 
 
 for i=1:Nrx
-    S(ismember(chems,[species{i}]),i)=[stoic{i}{:}]';
+    is_species=ismember([species{i}],chems);
+    S(ismember(chems,[species{i}]),i)=[stoic{i}{is_species}]';
 end
 
 % S=[cell2mat(cellfun(@(x) ismember(chems,[x{:}]),lhs,'UniformOutput',0)');
@@ -123,7 +130,7 @@ end
 
 [species_fast,stoic_fast,affinity]=parseRxns(rvsbl_rxn,true);
 
-fast_species=setdiff([species_fast{:}],[species{:}]);
+fast_species=setdiff([species_fast{:}],[species{:}],'stable');
 
 if any(abs(cell2mat([stoic_fast{:}]))~=1)
 

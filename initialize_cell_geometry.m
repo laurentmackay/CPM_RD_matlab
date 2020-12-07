@@ -41,4 +41,4 @@ cell_inds=zeros(N*N,1);
 cell_inds(1:A)=find(cell_mask);
 
 
-
+detect_bndrys

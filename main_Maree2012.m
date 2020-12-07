@@ -6,10 +6,14 @@ if plotting %do not display pictures when running in parallel...i.e., on the clu
     figure(1);clf();
     set(gcf,'defaultaxesfontsize',14);
     d=[0.04, 0.04];
-    panelA=subplot(2,2,1); annotatePlot('A',22,d);
-    panelB=subplot(2,2,2); annotatePlot('B',22,d);
-    panelC=subplot(2,2,3); annotatePlot('C',22,d);
-    panelD=subplot(2,2,4); annotatePlot('D',22,d);
+    h_vec={};
+    for i=1:9
+        h_vec{i}=subplot(3,3,i);
+    end
+%     panelA=subplot(2,2,1); annotatePlot('A',22,d);
+%     panelB=subplot(2,2,2); annotatePlot('B',22,d);
+%     panelC=subplot(2,2,3); annotatePlot('C',22,d);
+%     panelD=subplot(2,2,4); annotatePlot('D',22,d);
     
 end
 
@@ -21,7 +25,7 @@ end
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 
-Ttot=16*3.6e3; %Total simulation time
+Ttot=3*3.6e3; %Total simulation time
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=80; %length of the grid in um
 N=80; % number of points used to discretize the grid
@@ -43,7 +47,7 @@ cpmstep=cpmstep0/cpmsteps;
 div=0.1;
 
 %prepare some .m files to model the chemical reactions from the reactions specified in `chem_Rx` file
-mk_rxn_files('chem_Rx_Pax2')
+mk_rxn_files('chem_Rx_Maree2012')
 
 restart=false;
 
@@ -63,9 +67,10 @@ initialize_results
 
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
-pic %takes a frame for the video
-if usejava('desktop') && isempty(getCurrentTask())
-    gif('test.gif','frame',panelC)
+
+if plotting
+    pic_gen %takes a frame for the video
+    gif('test.gif','frame',h_vec{2})
 end
 reactions=0; %intializing a reaction counter
 
@@ -124,7 +129,7 @@ dt_diff=zeros(size(D));
 P_diff=0.5;
 
 SSA='SSA02';
-SSA_fn=mk_fun(SSA,'gamma','alpha','pi','jump');
+SSA_fn=mk_fun(SSA,'gamma','alpha','pi','jump','beta');
 
 d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
 SSA_call=[getFunctionHeader(SSA_fn) ';'];
@@ -139,15 +144,15 @@ while time<Ttot
         
         alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
 %         disp('gonna do SSA')
-        if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
-            disp('molecules changed')
-        end
+%         if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
+%             disp('main: molecules changed')
+%         end
         
         x0=x;
         
 %         disp('tryng SSA')    
         %run the SSA
-        eval(['try' newline SSA_call newline 'catch err' newline 'disp(err);' newline 'end']);
+        eval(['try' newline SSA_call newline 'catch err' newline 'disp(err.stack(1));' newline 'end']);
     
         try
 %         [A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x] = SSA02_fun(A,D,I_R,I_rho,L_R,L_rho,P_diff,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha_chem,alpha_rx,cell_inds,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,h,id0,ir0,jump,m,nrx,pT0,pi,rx_count,rx_speedup,time,x);
@@ -157,10 +162,10 @@ while time<Ttot
         end
         
 %        disp('just did SSA')
-        if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
-            disp('molecules changed')
-        end
-        
+%         if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
+%             disp('main: molecules changed')
+%         end
+%         
         reactions=reactions+nrx; %reaction counter
         
         
@@ -177,9 +182,9 @@ while time<Ttot
                     break;
                 end
                 
-                if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
-                    disp('molecules changed')
-                end
+%                 if sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho)~=d0
+%                     disp('main: molecules changed')
+%                 end
             end
             
             enumerate_diffusion %recalcluates diffusable sites
@@ -188,7 +193,7 @@ while time<Ttot
         end
         
         if time>=lastplot+picstep || time==lastcpm % takes video frames
-            pic
+            pic_gen
             
             lastplot=time;      
             if cpmcounter==cpmsteps
@@ -221,11 +226,11 @@ if isempty(getCurrentTask())
     fn=['results/final_B_' num2str(B_1) '.mat'];
     ls results
     disp(['saving to: ' fn]);
-    save(fn, '-v7.3');
+    save(fn);
 else
     fn=['results/final_B_' num2str(B_1) '_copy' int2str(copyNum) '.mat'];
     disp(['saving to: ' fn]);
     ls results
-    save(fn, '-v7.3');
+    save(fn);
 
 end

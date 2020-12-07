@@ -8,8 +8,10 @@ if plotting
     subplot(2,2,1)
 %     imagesc(cell_mask,[0 1]);
     plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
-%     colorbar;
-
+%     plotCellIm(panelA,alpha_chem(:,:,5),cell_mask,i0,j0)
+     plotCellIm(panelA,I_Ks,cell_mask,i0,j0)
+    colorbar;
+    title(['t=' num2str(time)], 'Fontsize', 24)
     hold on
     try
     plot(center(2,1:iter),center(1,1:iter),'r')
@@ -30,12 +32,12 @@ if plotting
     colorbar;
     ax = gca;
     ax.FontSize = fs;
-    title('Rho', 'Fontsize', 24)
+    title('K', 'Fontsize', 24)
     % xlabel('X')
     % ylabel('Y')
     
     subplot(2,2,3)
-    plotCellIm(panelC,RacRatio,cell_mask,i0,j0)
+    plotCellIm(panelC,RacRatio0,cell_mask,i0,j0)
     caxis('auto')
     colorbar
     ax = gca;
