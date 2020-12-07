@@ -43,8 +43,6 @@ ref=@(x) ['(?<pre>[' code ']+|^)(?<var>' x ')(?<post>[' code ']+|$)'];
 spatial_ref=cellfun(@(x) ref(x),spatial_vars,'UniformOutput',0);
 
 lines=regexp(str,ass,'match');
-i=1;
-strjoin(arrayfun(@(j) chemRateString(chems{j},-S(j,i)),1:size(S,1),'UniformOutput',0),'')
 
 lines=[lines...
  arrayfun(@(i) ['alpha_chem(vox+' num2str(i-1) '*sz)=(' rates{i} ')' strjoin(arrayfun(@(j) chemRateString(chems{j},-S(j,i)),1:size(S,1),'UniformOutput',0),'')],1:length(rates),'UniformOutput',0)];
@@ -100,8 +98,10 @@ fid=fopen('perform_rx.m','w');
 fwrite(fid,out,'char');
 fclose(fid);
 
+D=getDiffusionRates(f,chems);
+
 fid=fopen('initialize_chem_params.m','w');
-fwrite(fid,['N_species = ' int2str(length(chems)) ';' newline 'N_rx = ' int2str(length(rates)) ';'],'char');
+fwrite(fid,['N_species = ' int2str(length(chems)) ';' newline 'N_rx = ' int2str(length(rates)) ';' newline 'D = [' num2str(D) '];'],'char');
 fclose(fid);
 
 end

@@ -14,6 +14,8 @@ figure(1);clf();
 plot(acf_tot)
 
  figure(2);clf();plot(getHalflife(acf_tot))
+ 
+
 % 
 % 
 % s0=sqrt(sum(v0.^2,1));

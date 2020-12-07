@@ -101,14 +101,18 @@ for kk=1:nrx
 %         end
         dxi=xi0-x(vox0);
         diffusing_species_sum = diffusing_species_sum - (diffuse_mask(:,vox)*dxi);
-        neg=x(vox+(rx-1)*sz)<0;
         
+%         try
+%         neg=x(vox+(rx-1)*sz)<0;
+%         catch err
+%             disp(err)
+%         end
        
         
         update_alpha_chem
         
 
-        
+        neg=any(alpha_rx<0);
         a_total_new=sum(alpha_rx);
         
     end

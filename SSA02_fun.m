@@ -1,11 +1,12 @@
 function [A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
-PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha,alpha_R,...
-alpha_chem,alpha_rx,cell_inds,delta_P,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,...
-dt_diff,gamma,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,rx_count,rx_speedup,time,...
-x] = SSA02_fun(A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,PAKtot,PIX,P_diff,...
-PaxRatio,Pax_Square,Paxtot,RacRatio,Rac_Square,RhoRatio,Rho_Square,alpha,alpha_R,alpha_chem,...
-alpha_rx,cell_inds,delta_P,delta_R,delta_rho,diffuse_mask,diffusing_species_sum,dt_diff,...
-gamma,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,rx_count,rx_speedup,time,x)
+PaxRatio,Pax_Square,Paxtot,Q_P,Q_R,Q_rho,RacRatio,Rac_Square,RhoRatio,Rho_Square,...
+alpha,alpha_R,alpha_chem,alpha_rx,cell_inds,delta_P,delta_R,delta_rho,diffuse_mask,...
+diffusing_species_sum,dt_diff,gamma,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,rx_count,...
+rx_speedup,time,x] = SSA02_fun(A,B_1,D,GIT,I_K,I_Ks,I_R,I_rho,K,K_is,L_K,L_R,L_rho,...
+PAKtot,PIX,P_diff,PaxRatio,Pax_Square,Paxtot,Q_P,Q_R,Q_rho,RacRatio,Rac_Square,RhoRatio,...
+Rho_Square,alpha,alpha_R,alpha_chem,alpha_rx,cell_inds,delta_P,delta_R,delta_rho,diffuse_mask,...
+diffusing_species_sum,dt_diff,gamma,h,id0,ir0,jump,k_C,k_G,k_X,m,nrx,pT0,pi,rx_count,...
+rx_speedup,time,x)
 
 N_instantaneous=50; % the number of steady reaction itterated at a moment in time
 sz=size(x,1)*size(x,2);
@@ -132,8 +133,12 @@ for kk=1:nrx
 %         end
         dxi=xi0-x(vox0);
         diffusing_species_sum = diffusing_species_sum - (diffuse_mask(:,vox)*dxi);
-        neg=x(vox+(rx-1)*sz)<0;
 
+%         try
+%         neg=x(vox+(rx-1)*sz)<0;
+%         catch err
+%             disp(err)
+%         end
 
 
         if length(vox)>1
@@ -145,23 +150,26 @@ for kk=1:nrx
         a_c_0=alpha_chem(I_rx);
         
         
+        Q_R(vox) = (I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m));
+        Q_rho(vox) = I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m));
+        Q_P(vox) = B_1*(K(vox).^m./(L_K^m+K(vox).^m));
         RacRatio(vox)=x(vox+1*sz)/Rac_Square;
         RhoRatio(vox)=x(vox+3*sz)/Rho_Square;
         PaxRatio(vox)=x(vox+5*sz)/Pax_Square;
         K_is(vox)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox)).*(1+alpha_R*RacRatio(vox))+k_G*k_X*GIT*PIX);
         K(vox)=alpha_R*RacRatio(vox).*K_is(vox).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(vox));
         I_Ks(vox)=I_K*(1-K_is(vox).*(1+alpha_R*RacRatio(vox)));
-        alpha_chem(vox+0*sz)=((I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m))).*x(vox+0*sz);
+        alpha_chem(vox+0*sz)=(Q_R(vox)).*x(vox+0*sz);
         alpha_chem(vox+1*sz)=(delta_R).*x(vox+1*sz);
-        alpha_chem(vox+2*sz)=(I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m))).*x(vox+2*sz);
+        alpha_chem(vox+2*sz)=(Q_rho(vox)).*x(vox+2*sz);
         alpha_chem(vox+3*sz)=(delta_rho).*x(vox+3*sz);
-        alpha_chem(vox+4*sz)=(B_1*(K(vox).^m./(L_K^m+K(vox).^m))).*x(vox+4*sz);
+        alpha_chem(vox+4*sz)=(Q_P(vox)).*x(vox+4*sz);
         alpha_chem(vox+5*sz)=(delta_P).*x(vox+5*sz);
         
         alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
 
 
-
+        neg=any(alpha_rx<0);
         a_total_new=sum(alpha_rx);
 
     end
@@ -192,17 +200,20 @@ for kk=1:nrx
         a_c_0=alpha_chem(I_rx);
         
         
+        Q_R(vox) = (I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m));
+        Q_rho(vox) = I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m));
+        Q_P(vox) = B_1*(K(vox).^m./(L_K^m+K(vox).^m));
         RacRatio(vox)=x(vox+1*sz)/Rac_Square;
         RhoRatio(vox)=x(vox+3*sz)/Rho_Square;
         PaxRatio(vox)=x(vox+5*sz)/Pax_Square;
         K_is(vox)=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox)).*(1+alpha_R*RacRatio(vox))+k_G*k_X*GIT*PIX);
         K(vox)=alpha_R*RacRatio(vox).*K_is(vox).*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio(vox));
         I_Ks(vox)=I_K*(1-K_is(vox).*(1+alpha_R*RacRatio(vox)));
-        alpha_chem(vox+0*sz)=((I_R+I_Ks(vox)).*(L_rho^m./(L_rho^m+RhoRatio(vox).^m))).*x(vox+0*sz);
+        alpha_chem(vox+0*sz)=(Q_R(vox)).*x(vox+0*sz);
         alpha_chem(vox+1*sz)=(delta_R).*x(vox+1*sz);
-        alpha_chem(vox+2*sz)=(I_rho*(L_R^m./(L_R^m +(RacRatio(vox)+gamma*K(vox)).^m))).*x(vox+2*sz);
+        alpha_chem(vox+2*sz)=(Q_rho(vox)).*x(vox+2*sz);
         alpha_chem(vox+3*sz)=(delta_rho).*x(vox+3*sz);
-        alpha_chem(vox+4*sz)=(B_1*(K(vox).^m./(L_K^m+K(vox).^m))).*x(vox+4*sz);
+        alpha_chem(vox+4*sz)=(Q_P(vox)).*x(vox+4*sz);
         alpha_chem(vox+5*sz)=(delta_P).*x(vox+5*sz);
         
         alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);
