@@ -21,7 +21,7 @@ end
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 
-Ttot=3*3.6e3; %Total simulation time
+Ttot=16*3.6e3; %Total simulation time
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=80; %length of the grid in um
 N=80; % number of points used to discretize the grid
@@ -43,7 +43,7 @@ cpmstep=cpmstep0/cpmsteps;
 div=0.1;
 
 %prepare some .m files to model the chemical reactions from the reactions specified in `chem_Rx` file
-mk_rxn_files('chem_Rx')
+mk_rxn_files('chem_Rx_Pax2')
 
 restart=false;
 
@@ -221,11 +221,11 @@ if isempty(getCurrentTask())
     fn=['results/final_B_' num2str(B_1) '.mat'];
     ls results
     disp(['saving to: ' fn]);
-    save(fn);
+    save(fn, '-v7.3');
 else
     fn=['results/final_B_' num2str(B_1) '_copy' int2str(copyNum) '.mat'];
     disp(['saving to: ' fn]);
     ls results
-    save(fn);
+    save(fn, '-v7.3');
 
 end

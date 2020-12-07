@@ -15,41 +15,6 @@ initialize_chem_params
 
 % D=[D_1 D_1 D_1 D_1];
 
-N_instantaneous=50;
-
-%Parameters from (Tang et al., 2018)
-B_1=5;
-
-I_rho=0.016;
-I_R=0.003;
-I_K=0.009;
-% I_K=0;
-% I_R=0.025;
-delta_R=0.025;
-delta_rho=0.016;
-delta_P=0.0004;
-
-L_rho=0.34;
-L_R=0.34;
-L_K=5.77;
-
-
-alpha_R=15; Rtot=7.5;
-
-
-
-k_X=41.7; k_G=5.71; k_C=5;
-GIT=0.11; PIX=0.069; Paxtot=2.3;
-n=3; m=4; gamma=0.3;
-PAKtot = gamma*Rtot;
-
-alpha=alpha_R/Rtot;
-
-VolCell=(0.5*10^-6)*(h*10^-6)^2; %volume of the cell in m^3
-muM = 6.02214*10^23*VolCell*10^3*10^-6; %Rescales from \muM to molecules
-
-%%%
-
 %to find total number of molecules took concentrations from paper and
 % assumed sperical cell r=5um gives N=3e5*[X]
 totalRho = 2250000/SF;
@@ -58,6 +23,56 @@ totalPax = 690000/SF;
 Rho_Square = totalRho/(A);    %Average number of Rho per square
 Rac_Square = totalRac/(A);    %Average number of Rac per square
 Pax_Square = totalPax/(A);    %Average number of Pax per square
+
+N_instantaneous=50;
+
+%Parameters from (Tang et al., 2018)
+B_1=0.5e-1;
+
+% delta_P = (tau^-1)-B_1
+
+
+I_rho=0.016;
+I_R=0.003;
+I_K=0.012;
+% I_K=0;
+% I_R=0.025;
+delta_R=0.025;
+delta_rho=0.016;
+delta_P=0.04;
+
+tau_B = 1/(B_1+delta_P)
+
+L_rho=0.34;
+L_R=0.34;
+L_K=0.55;
+
+
+alpha_R=15; Rtot=7.5;
+
+
+
+% k_X=41.7; k_G=5.71; k_C=5;
+ 
+k_X=5;k_G=5.71; k_C=15;
+GIT=0.11; PIX=0.039; Paxtot=3;
+n=4; m=4; gamma=0.3;
+PAKtot = gamma*Rtot;
+
+alpha_PAK=alpha_R/Rtot;
+
+VolCell=(0.5*10^-6)*(h*10^-6)^2; %volume of a single lattice cell in m^3
+muM = 6.02214*10^23*VolCell*10^3*10^-6; %Rescales from \muM to molecules
+
+%%%
+
+
+if length(D)==9
+    Rho_Square=muM*3.1;
+    Rac_Square=muM*7.5;
+    C_Square=muM*2.4;
+end
+
 
 if length(D)==9
     Rho_Square=muM*3.1;
@@ -69,15 +84,24 @@ end
 
 % rough estimate of uninduced state
 
-RhoRatio_u = 0.55;
-RacRatio_u = 0.12;%0.085
+RhoRatio_u = 0.4;
+RacRatio_u = 0.15;%0.085
 
-PaxRatio_u = 0.22;
-
+PaxRatio_u = 0.082;
+% PaxRatio_u = 0.2;
 
 % rough estimate of the induced state
 RhoRatio_i = 0.2;
-RacRatio_i = 0.5; %0.215;
+RacRatio_i = 0.35; %0.215;
+
+if length(D)==9
+    RacRatio_u = 0.35; %0.215;
+    RacRatio_i = 0.85; %0.215;
+    CRatio=[0.6; 0.5];
+    
+    RhoRatio_i = 0.05;
+    RhoRatio_u = 0.4;
+end
 
 if length(D)==9
     RacRatio_u = 0.35; %0.215;
@@ -95,7 +119,8 @@ end
 
 
 %0.215;
-PaxRatio_i = 0.33;
+PaxRatio_i = 0.2;
+% PaxRatio_i = PaxRatio_u;
 
 % RhoRatio_i = 0.35;
 % RacRatio_i = 0.12; %0.215;
@@ -175,7 +200,7 @@ else
     kPI3K=0.00072*5;%speed these up
     kPTEN=0.432/5;
     
-    P3b=.4*muM;
+    P3b=.2*muM;
     
     C0=CRatio*C_Square;
     Ci0=C_Square-C0;
@@ -222,6 +247,7 @@ alpha_rx=zeros(1,N_rx);
 alpha_diff=zeros(6,1); %the 6 here is not the same as N_rx...need to figure out a system
 ir0=((1:N_rx)-1)*sz;
 
+RacRatio0=zeros(shape);
 RhoRatio=zeros(shape);
 RacRatio=zeros(shape);
 RbarRatio=zeros(shape);
@@ -234,6 +260,7 @@ feedback=zeros(shape);
 Q_R=zeros(shape);
 Q_C=zeros(shape);
 Q_rho=zeros(shape);
+Q_P=zeros(shape);
 vox=cell_inds(1:A);
 
 % [x,sz,alpha_rx,...
@@ -249,5 +276,5 @@ vox=cell_inds(1:A);
 % update_all=true;
 update_alpha_chem
 
-RhoRatio0=RhoRatio;
-RacRatio0=RacRatio;
+% RhoRatio0=RhoRatio;
+% RacRatio0=RacRatio;

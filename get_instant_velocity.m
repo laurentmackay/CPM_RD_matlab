@@ -1,7 +1,7 @@
 function v = get_instant_velocity(f,iters,n0)
 
 %%load in the results
-load(['results/' f]);
+load([ f]);
 iter=min(iter,length(Times));
 
 if nargin==1 || isempty(iters)

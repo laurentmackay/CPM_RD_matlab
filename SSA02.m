@@ -14,8 +14,11 @@ neg=any(x<0);
 update_all=false;
 
 diff_err=0.01;
+diff_max=0.1;
+
 dt_max=sqrt(diff_err)*(h^2)/max(D);
 
+dt_max(dt_max>diff_max)=diff_max;
 a_total_new=sum(alpha_rx);
 
 

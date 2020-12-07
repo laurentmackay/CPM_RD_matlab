@@ -1,27 +1,32 @@
 Raci <->  Rac; Q_R, delta_R;
 Rhoi <-> Rho; Q_rho, delta_rho;
-Paxi <-> Pax; Q_P, delta_P
+Paxi <-> Pax; Q_P, delta_P;
 
 
-Rac <-> RacPAK; (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox))*alpha*PAKtot*K_is(vox)
-Pax <-> GPP; k_G*k_X*k_C*GIT*PIX*K_is(vox)*PAKtot*(1+alpha_R*RacRatio(vox));
+Rac <-> RacPAK; (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio(vox))*alpha_PAK*PAKtot*K_is(vox)
+Pax <-> GPP; (k_G*k_X*k_C*GIT*PIX*K_is(vox)*PAKtot*(1+alpha_R*RacRatio0(vox)));
+
+RacRatio0 = Rac / Rac_Square;
+RacRatio = (Rac + RacPAK) / Rac_Square;
+RhoRatio = Rho / Rho_Square;
+PaxRatio = Pax / Pax_Square;
+
+
+K_is=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio).*(1+alpha_R*RacRatio0)+k_G*k_X*GIT*PIX);
+K=alpha_R*RacRatio0.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);         %changed from paper
+I_Ks=I_K*(1-K_is.*(1+alpha_R*RacRatio0));
 
 Q_R = (I_R+I_Ks).*(L_rho^m./(L_rho^m+RhoRatio.^m))
-Q_rho = I_rho*(L_R^m./(L_R^m +(RacRatio+gamma*K).^m))
-Q_P = B_1*bndry(vox).*(K.^m./(L_K^m+K.^m))
+Q_rho = I_rho*(L_R^m./(L_R^m +(RacRatio).^m))
+%Q_P = B_1*(K.^n./(L_K^n+K.^n))
+Q_P = B_1*bndry_mask.*(K.^n./(L_K^n+K.^n))
 
 
-RacRatio=Rac/Rac_Square;
-RhoRatio=Rho/Rho_Square;
-PaxRatio=Pax/Pax_Square;
 
-K_is=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio).*(1+alpha_R*RacRatio)+k_G*k_X*GIT*PIX);
-K=alpha_R*RacRatio.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);         %changed from paper
-I_Ks=I_K*(1-K_is.*(1+alpha_R*RacRatio));
 
-D(Raci)=D(Rhoi)=D(Paxi)=0.43       %fast diffusion for inactive RhoGTPases
-D(Rac)=D(Rho)=D(Pax)=0.02          %slow for active forms
-D(Paxi)=D(Pax)=0.03          %fast for phosphoinitosides?
-
+D(Raci)=D(Rhoi)=0.43       %fast diffusion for inactive RhoGTPases
+D(Rac)=D(Rho)=0.02          %slow for active forms
+D(Paxi)=20        %fast for paxillin
+D(Pax)=0.1        %fast for paxillin
 
 

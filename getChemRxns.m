@@ -130,7 +130,7 @@ end
 
 [species_fast,stoic_fast,affinity]=parseRxns(rvsbl_rxn,true);
 
-fast_species=setdiff([species_fast{:}],[species{:}]);
+fast_species=setdiff([species_fast{:}],[species{:}],'stable');
 
 if any(abs(cell2mat([stoic_fast{:}]))~=1)
 
