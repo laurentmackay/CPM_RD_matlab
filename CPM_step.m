@@ -1,5 +1,6 @@
 detect_bndrys
 
+is_discrete = all(mod(x(cell_inds(1:A)),1)==0);
 % bndry_lr=cell_mask & (~cell_mask(left) | ~cell_mask(right));
 
 if any(cell_maskp~=cell_mask)
@@ -110,7 +111,7 @@ if  no_holes
 %                 dist=sqrt(((i0(vox_trial)-i0(inds)).^2)+(j0(vox_trial)-j0(inds)).^2)*h;
             end
 
-            min_dist=510;
+            min_dist=5600;
             transport_mask=((D~=0).*D/min(D(D~=0))+(D==0).*prod(shape))*min_dist>dist;
 
 %             if ~grow
@@ -118,53 +119,76 @@ if  no_holes
 %             end
             
         x0=x;
+            inds2=inds+i_chem_0;
+            i_trial=vox_trial+i_chem_0;
             
             
-            for i=1:length(D)
- 
-                inds2=inds(transport_mask(:,i))+(i-1)*sz;
-                i_trial=vox_trial+(i-1)*sz;
-
-                
-                sum0=sum(x(inds+(i-1)*sz));
-                
-
-                if grow
-                    us=x(vox_ref+(i-1)*sz);
-                    Ts=sum(x(inds2));  
-                    f=Ts/(Ts+us);
-                    x(i_trial)=us;
-                    inds2=[inds2; i_trial];
-                else
-                    ut=x(i_trial);
-                    f=1+(ut/sum(x(inds2)));
-                    x(i_trial)=0;
-                end
-                if ~isfinite(f)
-                    error("NAN");
-                end
-                x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1.0))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
-                
-                if ~grow
-                    sum1=sum(x(inds+(i-1)*sz));
-                    if sum1-sum0~=ut
-                        disp('check this out boss')
-                        ifix=jump(vox_trial,find(cell_mask(jump(vox_trial,:)),1))+(i-1)*sz;
-                        x(ifix)=x(ifix)-(sum1-sum0-ut);
-                    end
-                else
-                    sum1=sum(x([inds; vox_trial]+(i-1)*sz));
-                    if sum1~=sum0
-                        error('we got a wild ass over here')
-                    end
-                end
-                
-%                 x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
-%                 x(inds2)=x(inds2)*f;
-%                 if sum(x(inds+(i-1)*sz))-sum0~=0
-%                     disp('check this out boss')
-%                 end
+            if grow
+                us=x(vox_ref+i_chem_0);
+                Ts=sum(x(inds2));
+                f=Ts./(Ts+us);
+                x(i_trial)=us;
+                inds2=[inds2; i_trial];
+            else
+                ut=x(i_trial);
+                f=1+(ut./sum(x(inds2)));
+                x(i_trial)=0;
             end
+
+            if is_discrete
+                x(inds2)=floor(x(inds2).*f)+[zeros(1,N_species); diff(floor(cumsum(rem(x(inds2).*f,1.0))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
+            else
+                x(inds2)=x(inds2).*f;
+            end
+            
+%             for i=1:length(D)
+%  
+%                 inds2=inds(transport_mask(:,i))+(i-1)*sz;
+%                 i_trial=vox_trial+(i-1)*sz;
+% 
+%                 
+%                 sum0=sum(x(inds+(i-1)*sz));
+%                 
+% 
+%                 if grow
+%                     us=x(vox_ref+(i-1)*sz);
+%                     Ts=sum(x(inds2));  
+%                     f=Ts/(Ts+us);
+%                     x(i_trial)=us;
+%                     inds2=[inds2; i_trial];
+%                 else
+%                     ut=x(i_trial);
+%                     f=1+(ut/sum(x(inds2)));
+%                     x(i_trial)=0;
+%                 end
+%                 if ~isfinite(f)
+%                     error("NAN");
+%                 end
+%                 if is_discrete
+%                     x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1.0))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
+%                 else
+%                     x(inds2)=x(inds2)*f;
+%                 end
+%                 if ~grow
+%                     sum1=sum(x(inds+(i-1)*sz));
+%                     if abs(sum1-sum0-ut)>1e-5
+%                         disp('check this out boss')
+%                         ifix=jump(vox_trial,find(cell_mask(jump(vox_trial,:)),1))+(i-1)*sz;
+%                         x(ifix)=x(ifix)-(sum1-sum0-ut);
+%                     end
+%                 else
+%                     sum1=sum(x([inds; vox_trial]+(i-1)*sz));
+%                     if abs(sum1-sum0)>1e-5
+%                         error('we got a wild ass over here')
+%                     end
+%                 end
+%                 
+% %                 x(inds2)=floor(x(inds2)*f)+[0; diff(floor(cumsum(rem(x(inds2)*f,1))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
+% %                 x(inds2)=x(inds2)*f;
+% %                 if sum(x(inds+(i-1)*sz))-sum0~=0
+% %                     disp('check this out boss')
+% %                 end
+%             end
         
         
         I=[vox_trial vox_ref]; %places where molecule number has changed
@@ -182,7 +206,7 @@ if  no_holes
             vox=[cell_inds(1:A); vox_trial];
         end
         
-        update_alpha_chem
+%         update_alpha_chem
         
         alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
         if grow
@@ -202,13 +226,25 @@ if ~reacted
     Per=perim(cell_mask); % perimter
     A=nnz(cell_mask); % area
     cell_inds(1:A)=find(cell_mask);
+else
+    eval_model
+%         grow
+%         im = reshape(RacRatio0,shape);
+%         im(im==0) = nan;
+%         imagesc(im); colorbar();
+%         title(['time = ' num2str(time)]);
+%         hold on;
+%         plot(j0(vox_trial),i0(vox_trial),'rx')
+%        [grow  x(j0(vox_trial),i0(vox_trial))]
+%         hold off;
+%         drawnow;
 end
 
 
 
 Ncell_maskp=squeeze(sum(sum(x)));
 %sanity checks
-if any(Ncell_mask~=Ncell_maskp)
+if (is_discrete & any(Ncell_mask~=Ncell_maskp)) | (~is_discrete & any(abs(Ncell_mask-Ncell_maskp)>1e-5))
     error('molecule loss')
 end
 

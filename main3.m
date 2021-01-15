@@ -24,7 +24,7 @@ nrx=3e4; %number of times reactions are carried out in a chem_func loop
 Ttot=16*3.6e3; %Total simulation time
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=80; %length of the grid in um
-N=80; % number of points used to discretize the grid
+N=150; % number of points used to discretize the grid
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); %length of a latice square
@@ -124,7 +124,7 @@ dt_diff=zeros(size(D));
 P_diff=0.5;
 
 SSA='SSA02';
-SSA_fn=mk_fun(SSA,'gamma','alpha','pi','jump');
+SSA_fn=mk_fun(SSA,'gamma','pi','jump');
 
 d0=sum(sum(sum(x(:,:,:),3)))-(totalRac+totalRho);
 SSA_call=[getFunctionHeader(SSA_fn) ';'];
@@ -172,7 +172,8 @@ while time<Ttot
 %                 disp('doing CPM')
                 try
                     CPM_step
-                catch
+                catch err
+                    disp(err)
                     time=Ttot;
                     break;
                 end

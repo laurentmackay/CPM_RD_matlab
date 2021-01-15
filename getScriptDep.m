@@ -2,7 +2,8 @@ function dep = getScriptDep(f)
 if isstring(f) || ischar(f)
     vars=getVars(f);
     local=getInitialized(f);
-    dep=setdiff(vars,local);
+    [~,i]=setdiff(vars,local);
+    dep=vars(sort(i));
 else
     dep={};
     for i=1:length(f)

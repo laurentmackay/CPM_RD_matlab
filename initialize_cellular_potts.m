@@ -16,8 +16,7 @@ B_rho=2e3*h^2;%chemical potential rho
 B_R=2e3*(.18/.13)*h^2; %chemical potential rac
 %(defined such that they have no net effect at the saddle)
 
-% a=1308/h^2; %ideal area      values from abira
-% per=128/h; %ideal permiter       values from abira 128 for perfect circle data 295
+
 a=A; %ideal area      values from abira
 per=Per; %ideal permiter       values from abira 128 for perfect circle data 295
 Hb=0; %membranes resistance to movement

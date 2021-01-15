@@ -1,0 +1,80 @@
+Pax=Pax_Square-Paxi
+Rac=Rac_Square-Raci-RacPAK
+Rho=Rho_Square-Rhoi
+
+RacRatio0 = Rac / Rac_Square
+RhoRatio = Rho / Rho_Square
+RacRatio = Rac  / Rac_Square
+PaxRatio = Pax / Pax_Square
+
+K_is=1/((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio)*(1+alpha_R*RacRatio0)+k_G*k_X*GIT*PIX)
+K=alpha_R*RacRatio0*K_is*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio)
+I_Ks=I_K*(1-K_is*(1+alpha_R*RacRatio0))
+
+
+Q_R = I_R*(L_rho^m/(L_rho^m+RhoRatio^m))
+Q_rho = (I_rho+I_Ks)*(L_R^m/(L_R^m +(RacRatio)^m))
+Q_P = B_1*(K^n/(L_K^n+K^n))
+
+
+f_Raci = -(Q_R*Raci)+(delta_R*Rac)
+f_Rhoi = -(Q_rho*Rhoi)+(delta_rho*Rho)
+f_Paxi = -(Q_P*Paxi)+(delta_P*Pax)
+
+
+
+subs__0 = 1/(((Rac*alpha_R)/Rac_Square + 1)*(PIX*k_X + (GIT*PIX*Pax*Paxtot*k_C*k_G*k_X)/Pax_Square + 1) + GIT*PIX*k_G*k_X)
+subs__1 = 1/(Pax_Square*Rac_Square + Pax_Square*Rac*alpha_R + PIX*Pax_Square*Rac_Square*k_X + PIX*Pax_Square*Rac*alpha_R*k_X + GIT*PIX*Pax_Square*Rac_Square*k_G*k_X + GIT*PIX*Pax*Paxtot*Rac_Square*k_C*k_G*k_X + GIT*PIX*Pax*Paxtot*Rac*alpha_R*k_C*k_G*k_X)^2
+subs__2 = PIX*k_X + (GIT*PIX*Pax*Paxtot*k_C*k_G*k_X)/Pax_Square + 1
+subs__3 = (Rac*alpha_R)/Rac_Square
+subs__4 = subs__3 + 1
+subs__5 = k_X^2
+subs__6 = k_G^2
+subs__7 = PIX^2
+subs__8 = GIT^2
+subs__9 = subs__0^2
+subs__10 = GIT*PAKtot*PIX*k_C*k_G*k_X*subs__0*subs__4
+subs__11 = PAKtot*alpha_PAK*subs__0*subs__2
+
+J_gamma_12=subs__11 - PAKtot*alpha_PAK*subs__2^2*subs__3*subs__9 + 1
+J_gamma_22=PAKtot*Pax*Pax_Square^2*Rac_Square*alpha_R*k_C*subs__1*subs__5*subs__6*subs__7*subs__8
+J_gamma_16=PAKtot*Paxtot*Pax_Square*Rac*Rac_Square^2*alpha_PAK*k_C*subs__1*subs__5*subs__6*subs__7*subs__8
+J_gamma_26=subs__10 - (PAKtot*Pax*Paxtot*k_C^2*subs__4^2*subs__5*subs__6*subs__7*subs__8*subs__9)/Pax_Square + 1
+subs2__0 = 1/(J_gamma_12 + J_gamma_26 + J_gamma_12*J_gamma_26 - J_gamma_16*J_gamma_22 + 1)
+subs2__1 = J_gamma_22*f_Raci
+subs2__2 = J_gamma_16*f_Paxi
+subs2__3 = -subs2__2
+subs2__4 = -subs2__1
+subs2__5 = J_gamma_12*f_Raci
+subs2__6 = J_gamma_12*f_Paxi
+
+
+
+
+
+
+
+dRaci/dt=f_Raci
+
+dRhoi/dt=f_Rhoi
+
+dPaxi/dt=f_Paxi
+dRacPAK/dt=-subs2__0*(subs2__2 + subs2__5 + J_gamma_16*subs2__4 + J_gamma_26*subs2__5)
+#dGPP/dt=-subs2__0*(subs2__1 + J_gamma_26*f_Paxi + J_gamma_22*subs2__3 + J_gamma_26*subs2__6)
+
+
+par I_R=0.3, B_1=0.01, I_rho=0.016,  I_K=0.009, delta_R=0.025, delta_rho=0.016, delta_P=0.0004, L_rho=0.34, L_R=0.34, L_K=5.77, alpha_R=15,  Rtot=7.5,  
+param k_X=41.7, k_G=5.71, k_C=5
+param GIT=0.11, PIX=0.069, Paxtot=2.3
+param n=4,  m=4,  gamma=0.3, PAKtot = gamma*Rtot, alpha_PAK=alpha_R/Rtot, Rac_Square = 1.6141e+03, Rho_Square = 1.6141e+03, Pax_Square = 494.9785
+
+#init Raci=1506.4, Rhoi=807.65, Paxi=118.41375, RacPAK=232.68863, GPP=275.15216
+
+init Raci=1506.4, Rhoi=807.65, Paxi=118.41375, RacPAK=232.68863
+@ bounds=1e5, total=10000, xhi=10000, normmax=1e8, meth=gear, ds=-0.01, dsmax=0.05, dsmin=0.00000001, nmax=1000000, npr=1000, parmax=400, parmin=-10, epsu=1e-7, epsl=1e-7, epss=1e-5
+
+
+
+
+
+

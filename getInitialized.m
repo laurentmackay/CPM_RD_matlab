@@ -1,87 +1,80 @@
-function assigned = getInitialized(f)
+function assigned = getInitialized(f, ignore_code_ref)
 str=fileread(f);
+
+if nargin==1
+    ignore_code_ref=false;
+end
 
 
 str=regexprep(str,"%[^\n]*(\n)?","$1"); %remove comments
 str=regexprep(str,"\.\.\.\n",""); %remove elipses
+str=regexprep(str,'~([^=])','$1'); %remove tildes
 str=regexprep(str,"\'[^\'\n\r]+\'",""); %remove hardcoded strings with single quotes
 str=regexprep(str,'\"[^\"\n\r]+\"',""); %remove hardcoded strings with double quotes
 str=regexprep(str,'function[^\=]+\=[^\=]+\)',""); %remove function definition
 str=regexprep(str,"\'",""); %remove transposes
 
-code='0-9 \t\f\*\+\-\/\,\=\(\)\[\]\>\<\&\~\:\|\{\}\^\.';
-name='[a-zA-Z_$][a-zA-Z_$0-9]*';
-assignment='(?:[ \t\f]*\=[ \t\f]*)';
+code='0-9 \t\f\*\+\-\/\,\=\(\)\[\]\>\<\&\~\:\|\{\}\^\.\@';
+name='[a-zA-Z_\^][a-zA-Z_$0-9]*';
+assignment='(?:[ \t\f]*|[a-zA-Z_$0-9])\=[ \t\f]*';
+% assignment='(?<!~)\=[ \t\f]*';
+% assignment='(?:([ \t\f]*)\=[ \t\f]*)';
 seps='(:?\,| )';
-seps2='(:?\,| |\:|\(|\))';
-array_access='(:?\([^\n]*\))?';
-ref=[name array_access];
-ref=[name];
-ref2=[name array_access];
-list=['((:?[ ]*' ref '[ ]*' seps ')?(:?[ ]*' ref '))[ ]*'];
-list2=['((:?[' code ']*' ref '[' code ']*(?:' code ')*)?(:?[' code ']*' ref '[' code ']*))'];
 
 
-assigned=regexp(str,['('  name  ') *\=[^\(\)\n]+\n'],"tokens"); %get simply assigned variables
-assigned=cellfun(@(x) x(1), assigned);
-assigned=unique(assigned);
+
+list_lhs=['((:?' seps '*' name '[ \t\f]*?' seps ')+(:?' name '[ ]*))'];
+% list_rhs=['((:?[' code ']*' ref '[' code ']*(?:' code ')*)?(:?[' code ']*' ref '[' code ']*))'];
+list_rhs=['((:?[' code ']*' name '[' code ']+)*(:?[' code ']*' name '[' code ']*?))'];
+
+% assigned=regexp(str,['('  name  ') *\=[^\(\)\n]+\n'],"tokens"); %get simply assigned variables
+% assigned=cellfun(@(x) x(1), assigned);
+% assigned=unique(assigned);
+
+[vars,i_vars]=regexp(str,['(' name  ')'],"tokens","start");
+[vars,ind]=unique([vars{:}],'stable');
+i_vars=i_vars(ind);
 
 
-inout=regexp(str,['\[' list  '\]' assignment name '\(' list2 '\)'],"tokens");
+[unpack,i_unpack]=regexp(str,['\[' list_lhs '\]' assignment name '\(' list_rhs '\)' ],"tokens","start");
 
+rhs= cellfun(@(x) regexp([x{2}],['(?<!\d)' name],"match"), unpack,'UniformOutput',0);
+lhs=cellfun(@(x) regexp(strtrim(regexprep(x{1},[seps '+'],' ')),' ',"split"), unpack,'UniformOutput',0);
 
-  
-% assigned2=cellfun(@(x) split([x{:}],',')', assigned2,'UniformOutput',0);
-% rhs=cellfun(@(x) regexp([x{2}],['(' name ')'],"tokens"), inout,'UniformOutput',0);
-% rhs=[rhs{:}];
-rhs= cellfun(@(x) regexp([x{2}],['[^a-zA-Z_$0-9]*'],"split"), inout,'UniformOutput',0);
-lhs=cellfun(@(x) regexp([x{1}],['[ \t\f]*' seps  '[ \t\f]*'],"split"), inout,'UniformOutput',0);
+[assign,i_assign]=regexp(str,[ '(' name ')' assignment '(:?(:?[' code ']*)?(' name ')(:?[' code ']*)?)*' ],"tokens","start");
+% io3=regexp(str,[ '(' name ')' assignment '(:?(:?[' code ']*)?(' name ')(:?[' code ']*)?)*' ],"match");
+lhs2=cellfun(@(x) x{1}, assign,'UniformOutput',0);
+rhs2=cellfun(@(x) regexp(x{2}, ['(?<!\d)' name] ,"match"), assign,'UniformOutput',0);
 
-io2=regexp(str,[ '(' name ')' assignment '(:?(:?[' code ']*)?(' name ')(:?[' code ']*)?)*' ],"tokens"); 
-% io3=regexp(str,[ '(' name ')' assignment '(:?(:?[' code ']*)?(' name ')(:?[' code ']*)?)*' ],"match"); 
-lhs2=cellfun(@(x) x{1}, io2,'UniformOutput',0);
-rhs2=cellfun(@(x) regexp(x{2}, name ,"match"), io2,'UniformOutput',0);
+i_tot=[i_unpack, i_assign];
+rhs=[rhs rhs2];
+lhs=[lhs lhs2];
 
+[i_tot,sorted]=sort(i_tot);
+rhs = rhs(sorted);
+lhs = lhs(sorted);
 
-assigned2=cellfun(@(r,l) setdiff(l,r),[rhs rhs2],[lhs lhs2],'UniformOutput',0);
-assigned2=unique([assigned2{:}],'stable');
+assigned=cellfun(@(r,l) setdiff(l,r),rhs,lhs,'UniformOutput',0);
 
-
+if ~isempty(i_tot)
+    i_tot=repelem(i_tot,cellfun(@(a) numel(a),assigned));
+    [assigned,inds]=unique([assigned{:}],'stable');
+    i_tot=i_tot(inds);
+    if ~ignore_code_ref
+        inds=arrayfun(@(a,i) i_vars(strcmp(a,vars))>=i,assigned,i_tot);
+        assigned=assigned(inds);
+    end
+    
+end
 errs=regexp(str,[ 'catch[ \t\f]*(' name ')'],'tokens');
-assigned=unique([assigned2 errs{:}],'stable');
+assigned = [assigned errs{:}];
+mask=cellfun(@(a) numel(a)~=0,assigned);
+assigned=assigned(mask);
+if ~isempty(assigned)
+    assigned=unique(assigned,'stable');
+end
 
 
-% assigned2=setdiff([out{:}],[in{:}]);
-% assigned=cellfun(@(x) regexp([x{2}],['[ \t\f]*' seps '[ \t\f]*'],"split"), inout,'UniformOutput',0)
-
-% if ~isempty(assigned2)
-%     assigned2=unique(assigned2(:))';
-% end
-
-% mask = cellfun(@(x) exist(x,'builtin')~=5,assigned);
-% mask = mask & cellfun(@(x) exist(x,'file')~=2,assigned);
-
-% % assigned=assigned(mask);
-% mask=true(1,length(assigned));
-% number=' ?[0-9]+((?:\.|[edfEDF][+\-]?[0-9][0-9\.]*)?';
-% %remove assignments that reference the variable
-% for i = 1:length(assigned)
-%     var=assigned{i};
-%     assignments=regexp(str,['[ ^\n\r\]*' var ' *\=([^\n\r\;\=]+)[\n\r\;]'],"tokens");
-%     assignments=cellfun(@(x) x(1), assignments);
-%     for ass = assignments
-%         numerical = regexp(ass,number);
-%         if ~isempty(numerical{1}) & numerical{1}==1
-%             break; %do not worry about variables that are assigned a numerical value at the beginning of the file
-%         end
-%         update=regexp(ass,[var '[^\(]'],'match');
-%         if ~isempty(update{1})
-%             mask(i)=false;
-%         end
-%     end
-% end
-% assigned=assigned(mask);
-% assigned=[assigned, assigned2];
 
 end
 

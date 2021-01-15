@@ -146,7 +146,7 @@ for i=1:2:length(species_fast)
     if nnz(fast_boy)>1
         error('intraconversion between fast species not currently supported')
     end
-    j=ceil(i/2)
+    j=ceil(i/2);
     if fast_boy(1)
         affinity{j}=['1/(' affinity{ceil(i/2)} ')'];
     end

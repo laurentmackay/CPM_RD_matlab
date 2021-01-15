@@ -1,14 +1,16 @@
-T_final=1e3;
-dt=0.0005;
+T_final=1e4;
+dt=0.003;
+t_plot=100;
+
+
 figure(3);clf();
 
-u = reshape(x,[sz,size(x,3)]);
-
-
-
+% u = reshape(x,[sz,size(x,3)]);
+% u = u()
+u = x(cell_inds(1:A) + ((1:N_species)-1)*sz);
 
 % u(i0(:)>40 & u(:,2)>0,2) = u(i0(:)>40 & u(:,2)>0,2)/2;
-% 
+%
 % u(i0(:)<40 & u(:,2)>0,2) = u(i0(:)<40 & u(:,2)>0,2) + sum( u(i0(:)>40 & u(:,2)>0,2))/nnz(u(i0(:)<40 & u(:,2)>0));
 
 interior=~bndrys&cell_mask(:);
@@ -36,17 +38,19 @@ i2 = repelem(vox,2);
 j2 = mod(find(u_x(row,:)')-1,sz)+1;
 u_xx = sparse(i2,j2,v,sz,sz);
 
+u_xx=u_xx(cell_inds(1:A),cell_inds(1:A));
+
 %%
 
 %     u_xx = (u_x(jump(:,1),:)-u_x(jump(:,2),:)+...
 %         u_x(jump(:,3),:)-u_x(jump(:,4),:))/h;
-    
-    t=0;
-    t_last=0;
-    
+
+t=0;
+t_last=0;
+im=nan(shape);
 eval_Rx
 %  dt * u_xx*(D(1:N_slow).*u(:,1:N_slow))
-
+tic;
 
 while t<=T_final
     
@@ -59,12 +63,14 @@ while t<=T_final
     
     
     t=t+dt;
-%     
-    if t-t_last>1
-      
-    imagesc(reshape(u(:,2),shape)/Rac_Square); colorbar();
-      title(['time = ' num2str(t)])
-    drawnow;
-    t_last=t;
+    %
+    if t-t_last>=t_plot || t>=T_final
+        t_plot/toc
+        im(cell_inds(1:A))=u(:,2)/Rac_Square;
+        imagesc(im); colorbar();
+        title(['time = ' num2str(t)])
+        drawnow;
+        tic
+        t_last=t;
     end
 end

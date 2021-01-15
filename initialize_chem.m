@@ -1,5 +1,7 @@
 initialize_chem_params
 
+i_chem_0 = ((1:N_species)-1)*sz;
+
 %~~~~~~~~setting up the chemical state of the cell~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -26,40 +28,7 @@ Pax_Square = totalPax/(A);    %Average number of Pax per square
 
 N_instantaneous=50;
 
-%Parameters from (Tang et al., 2018)
-B_1=0.5e-1;
-
-% delta_P = (tau^-1)-B_1
-
-
-I_rho=0.016;
-I_R=0.003;
-I_K=0.012;
-% I_K=0;
-% I_R=0.025;
-delta_R=0.025;
-delta_rho=0.016;
-delta_P=0.04;
-
-tau_B = 1/(B_1+delta_P)
-
-L_rho=0.34;
-L_R=0.34;
-L_K=0.55;
-
-
-alpha_R=15; Rtot=7.5;
-
-
-
-% k_X=41.7; k_G=5.71; k_C=5;
- 
-k_X=5;k_G=5.71; k_C=15;
-GIT=0.11; PIX=0.039; Paxtot=3;
-n=4; m=4; gamma=0.3;
-PAKtot = gamma*Rtot;
-
-alpha_PAK=alpha_R/Rtot;
+model_params
 
 VolCell=(0.5*10^-6)*(h*10^-6)^2; %volume of a single lattice cell in m^3
 muM = 6.02214*10^23*VolCell*10^3*10^-6; %Rescales from \muM to molecules
@@ -84,11 +53,11 @@ end
 
 % rough estimate of uninduced state
 
-RhoRatio_u = 0.4;
-RacRatio_u = 0.15;%0.085
+RhoRatio_u = 0.6;
+RacRatio_u = 0.045;%0.085
 
 PaxRatio_u = 0.082;
-% PaxRatio_u = 0.2;
+% PaxRatio_u = 0.002;
 
 % rough estimate of the induced state
 RhoRatio_i = 0.2;
@@ -120,15 +89,6 @@ end
 
 %0.215;
 PaxRatio_i = 0.2;
-% PaxRatio_i = PaxRatio_u;
-
-% RhoRatio_i = 0.35;
-% RacRatio_i = 0.12; %0.215;
-% PaxRatio_i = 0.27; %0.33
-%
-% RhoRatio_i = 0.2;
-% RacRatio_i = 0.2; %0.215;
-% PaxRatio_i = 0.31; %0.33
 
 RhoRatio=[RhoRatio_u; RhoRatio_i];
 RacRatio=[RacRatio_u; RacRatio_i];
@@ -157,16 +117,45 @@ if length(D)~=9
     end
     
     Pax0 = Pax_Square*PaxRatio;           %active Rac
-    Paxi0 = Pax_Square*P_i;        %inactive Rac that's ready to convert to active Rac
+    if length(D)==6
+        Paxi0=Pax_Square-Pax0;
+    else
+        Paxi0 = Pax_Square*P_i;        %inactive Rac that's ready to convert to active Rac
+    end
     
+    RacPak0 = (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*Pax0/Pax_Square).*alpha_PAK*PAKtot.*K_is .* Rac0;
+    GPP0 = (k_G*k_X*k_C*GIT*PIX*K_is*PAKtot.*(1+alpha_R*Rac0/Rac_Square)) .*Pax0;
     
-    RacPak0 = Rac_Square - Rac0 - Raci0;
+    RacPak0 =  Rac_Square - Rac0 - Raci0;
     GPP0 = Pax_Square - Pax0 - Paxi0;
     
     %Setting up initial state of the cell
     N0=[Raci0 Rac0 Rhoi0 Rho0 Paxi0 Pax0];
     
     N0=[Raci0 Rac0 Rhoi0 Rho0 Paxi0 Pax0 RacPak0 GPP0];
+    
+    
+params = inline_script('model_params');
+rhs_str = inline_script('eval_Rx');
+
+str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
+
+fid=fopen('rhs_fun.m','w');
+fwrite(fid,str,'char');
+fclose(fid);
+
+[T,Y] = ode15s(@ rhs_fun,[0 1e4],N0(1,1:N_species));
+    m0=sum( N0(1,:));
+%     N0(1,1:N_species)=Y(end,:);
+    m0-sum( N0(1,:))
+    
+    N0(1,2)/Rac_Square
+    N0(1,4)/Rho_Square
+    N0(1,6)/Pax_Square
+    
+    figure(3);clf();
+    plot(T,Y);
+    drawnow;
 else
     
     
@@ -227,14 +216,15 @@ i_induced=tmp+tmp2;
 
 x=zeros([shape ,N_species]); % where the chemical information is stored
 
-x(i_induced)=repmat(N0(2,:),nnz(mask),1);
+x(i_induced)=repmat(N0(2,1:N_species),nnz(mask),1);
 
 mask=~induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
-x(tmp+tmp2)=repmat(N0(1,:),nnz(mask),1);
+x(tmp+tmp2)=repmat(N0(1,1:N_species),nnz(mask),1);
 
-x=round(x);
-
+% x=round(x);
+x=(1+noise*rand(size(x))).*x;
+x(x<0)=0;
 % reaction=zeros(N,N,9);
 %
 % reaction(:,:,3) = delta_rho;                                             %From active rho to inactive rho
@@ -263,6 +253,8 @@ Q_rho=zeros(shape);
 Q_P=zeros(shape);
 vox=cell_inds(1:A);
 
+eval_model
+
 % [x,sz,alpha_rx,...
 %     alpha_chem,PaxRatio,RhoRatio,K_is,K,...
 %     RacRatio,RbarRatio,I_Ks,reaction,ir0,...
@@ -274,7 +266,7 @@ vox=cell_inds(1:A);
 %     PAKtot,i);
 
 % update_all=true;
-update_alpha_chem
+% update_alpha_chem
 
 % RhoRatio0=RhoRatio;
 % RacRatio0=RacRatio;
