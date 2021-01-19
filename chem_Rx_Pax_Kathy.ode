@@ -6,7 +6,7 @@ K=alpha_R*RacRatio0.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio)
 I_Ks=I_K*(1-K_is.*(1+alpha_R*RacRatio0))
 RacRatio = (Rac + alpha_PAK*K) / Rac_Square
 Q_R = (I_R+I_Ks).*(L_rho^m./(L_rho^m+RhoRatio.^m))
-Q_rho = I_rho*(L_R^m./(L_R^m +(RacRatio).^m))
+Q_rho = I_rho*(L_R^m./(L_R^m +(RacRatio + alpha_PAK*K).^m))
 Q_P = B_1*(K.^n./(L_K^n+K.^n))
 f_Raci = -(Q_R.*Raci)+(delta_R.*Rac)
 f_Rhoi = -(Q_rho.*Rhoi)+(delta_rho.*Rho)
@@ -19,5 +19,5 @@ dRho/dt=-f_Rhoi
 dPaxi/dt=f_Paxi
 dPax/dt=-f_Paxi
 
-par B_1=5, I_rho=0.016, L_rho=0.34, delta_rho=0.016, L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5, delta_P=0.0004, I_K=0.009, L_K=5.77, k_X=41.7, k_G=5.71, k_C=5, GIT=0.11, PIX=0.069, Paxtot=2.3, n=4, m=4, alpha_PAK=0.3, PAKtot= Rtot*alpha_PAK, Rho_Square= 1.6141e+03, Rac_Square= 1.6141e+03, Pax_Square= 494.9785, 
+par B_1=0.5, I_rho=0.016, L_rho=0.34, delta_rho=0.016, L_R=0.415, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5, delta_P=0.004, I_K=0.009, L_K=5.77, k_X=41.7, k_G=5.71, k_C=5, GIT=0.11, PIX=0.069, Paxtot=2.3, n=4, m=4, alpha_PAK=0.3, PAKtot= Rtot*alpha_PAK, Rho_Square= 1.6141e+03, Rac_Square= 1.6141e+03, Pax_Square= 494.9785, 
 

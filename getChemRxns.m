@@ -42,10 +42,10 @@ function [chems,S,rates,fast_species,fast_pairs,fast_affinity] = getChems(f)
             rhs_species=cf2(@(x) x{2},rhs);                                       %cellfun(@(x) cellfun(@(y) y{2},x,'UniformOutput',0),rhs,'UniformOutput',0)
             
             rates=cellfun(@(x) regexp(x(2),chem_set,"split",'once'),rxn_split);
+            rates=cellfun(@(x) regexprep(x(end),'[\;\n\r]',''),rates,'UniformOutput',0);
             
             if strcmp(trans,rvsbl_rxn)
                 
-                rates=cellfun(@(x) regexprep(x(end),'[\;\n\r]',''),rates,'UniformOutput',0);
                 rates=cellfun(@(x) strsplit(x{1},','),rates,'UniformOutput',0);
                 rates=strtrim([rates{:}]);
                 
@@ -56,8 +56,11 @@ function [chems,S,rates,fast_species,fast_pairs,fast_affinity] = getChems(f)
                 stoic=[stoic; cf2(@(x) -x,stoic)];
                 stoic=stoic(:)';
             else
-                species=[lhs_species, rhs_species];
-                stoic=[lhs_stoic rhs_stoic];
+                nonempty = @(x) x(~cellfun(@isempty,x));
+                rates=[rates{:}];
+                rates=regexprep(rates,'[ ]+','');
+                species=cellfun(@(l,r) [l r],lhs_species,rhs_species,'UniformOutput',false);
+                stoic=cellfun(@(l,r) [l r],lhs_stoic,rhs_stoic,'UniformOutput',false);
             end
         else
             species={};
@@ -75,7 +78,7 @@ str=regexprep(str,"\'[^\'\n\r]+\'",""); %remove hardcoded strings with single qu
 str=regexprep(str,'\"[^\"\n\r]+\"',""); %remove hardcoded strings with double quotes
 str=regexprep(str,'function[^\=]+\=[^\=]+\)',""); %remove function definition
 
-name='[a-zA-Z_$][a-zA-Z_$0-9\-]*';
+name='[a-zA-Z_$][a-zA-Z_$0-9:\-]*';
 
 
 str=regexprep(str,['[^\n]*D\(' name '\)[^\n]*\n'],""); %remove diffusion rate declarations
@@ -87,9 +90,10 @@ empty_or_num='[ \f\t\v\.0-9]*';
 
 chem_set = ['(' empty_or_num '(' name '|' emptyset ')' whitespace '[+])*?' '(' empty_or_num name '|' emptyset ')' whitespace ];
 
+chem_set = ['((?:' empty_or_num '(' name '|' emptyset ')' whitespace '[+])*+(?:' empty_or_num name '|' emptyset '))' whitespace ];
 
-forw_rxn = [  '[^<]*-' whitespace '>' ];
-backw_rxn = [ '<' whitespace '-[^>]*'  ];
+forw_rxn = [  '[^<\na-zA-Z_$0-9]*-' whitespace '>' ];
+backw_rxn = [ '<' whitespace '-[^>\na-zA-Z_$0-9]*'  ];
 rvsbl_rxn = [ '<' whitespace '-' whitespace '>'];
 
 trans = [whitespace '(' forw_rxn '|' backw_rxn '|' rvsbl_rxn '){1}+' whitespace];
@@ -121,8 +125,7 @@ S=zeros(length(chems),Nrx);
 
 
 for i=1:Nrx
-    is_species=ismember([species{i}],chems);
-    S(ismember(chems,[species{i}]),i)=[stoic{i}{is_species}]';
+    S(:,i)=[cellfun(@(c) sum([stoic{i}{strcmp(c,species{i})}]),chems)]';
 end
 
 % S=[cell2mat(cellfun(@(x) ismember(chems,[x{:}]),lhs,'UniformOutput',0)');

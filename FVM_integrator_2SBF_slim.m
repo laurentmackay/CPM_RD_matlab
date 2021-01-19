@@ -36,8 +36,8 @@ u_prev = u;
 t0=time;
 
 eye = speye(A);
-MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D,'UniformOutput',0);
-
+MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D,'UniformOutput',0); % 2-SBDF
+% MAT_list = arrayfun(@(Di)( eye/dt-Di*u_xx*9/16),D,'UniformOutput',0); %MCNAB
 
 
 while time-t0<T_integration
@@ -47,7 +47,8 @@ while time-t0<T_integration
     Rx_prev=Rx;
     
     eval_Rx
-    b=(2*u-u_prev/2)/dt + 2*Rx-Rx_prev;
+    b=(2*u-u_prev/2)/dt + (2*Rx-Rx_prev); % 2-SBDF
+%     b=u/dt + 3/2*Rx-Rx_prev/2 + (D'.*(u_xx*(3*u/8 + u_prev/16))')'; %MCNAB
     u_prev=u;
 
     for i = 1:N_species

@@ -53,14 +53,14 @@ end
 
 % rough estimate of uninduced state
 
-RhoRatio_u = 0.6;
+RhoRatio_u = 0.8;
 RacRatio_u = 0.045;%0.085
 
 PaxRatio_u = 0.082;
 % PaxRatio_u = 0.002;
 
 % rough estimate of the induced state
-RhoRatio_i = 0.2;
+RhoRatio_i = 0.02;
 RacRatio_i = 0.35; %0.215;
 
 if length(D)==9
@@ -109,12 +109,7 @@ if length(D)~=9
     
     %inactive Rho that's ready to convert to active Rho
     
-    
-    if length(D)==8
-        Raci0 = Rac_Square*(1-RacRatio-gamma*K);        %inactive Rac that's ready to convert to active Rac
-    else
-        Raci0 = Rac_Square*(1-RacRatio);
-    end
+   
     
     Pax0 = Pax_Square*PaxRatio;           %active Rac
     if length(D)==6
@@ -123,7 +118,15 @@ if length(D)~=9
         Paxi0 = Pax_Square*P_i;        %inactive Rac that's ready to convert to active Rac
     end
     
-    RacPak0 = (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*Pax0/Pax_Square).*alpha_PAK*PAKtot.*K_is .* Rac0;
+    K_PAK = (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*Pax0/Pax_Square).*alpha_PAK*PAKtot.*K_is;
+    
+    if length(D)==8
+        Raci0 = Rac_Square*(1-(1+K_PAK).*RacRatio);        %inactive Rac that's ready to convert to active Rac
+    else
+        Raci0 = Rac_Square*(1-RacRatio);
+    end
+    
+    RacPak0 = K_PAK .* Rac0;
     GPP0 = (k_G*k_X*k_C*GIT*PIX*K_is*PAKtot.*(1+alpha_R*Rac0/Rac_Square)) .*Pax0;
     
     RacPak0 =  Rac_Square - Rac0 - Raci0;
@@ -144,17 +147,18 @@ fid=fopen('rhs_fun.m','w');
 fwrite(fid,str,'char');
 fclose(fid);
 
-[T,Y] = ode15s(@ rhs_fun,[0 1e4],N0(1,1:N_species));
+[T_vec,Y] = ode15s(@ rhs_fun,[0 1e4],N0(1,1:N_species),odeset('NonNegative',1:N_species));
     m0=sum( N0(1,:));
 %     N0(1,1:N_species)=Y(end,:);
-    m0-sum( N0(1,:))
+
     
     N0(1,2)/Rac_Square
     N0(1,4)/Rho_Square
     N0(1,6)/Pax_Square
     
     figure(3);clf();
-    plot(T,Y);
+    plot(T_vec,Y);
+    legend(chems)
     drawnow;
 else
     

@@ -5,7 +5,8 @@ predef_spatial = {'bndry_mask'}; %pre-defined spatial variables that will be pro
 
 [chems,S,rate_constants,fast_chems,fast_pair,fast_affinity] = getChemRxns(f);
 vars=getInitialized(f,true);
-
+chems=regexprep(chems,':','');
+chems=regexprep(chems,'-','_');
 
 str=fileread(f);
 
@@ -53,11 +54,17 @@ ass=cellfun(@(x) ['(?<![a-zA-Z_0-9])' x '(?:[ \t\f]*)?=([^\n\r\;]+)'],vars,'Unif
 
 
 model_defs = regexp(str,ass,'match');
-model_split = regexp([model_defs{:}],[name '[ \t\f]*=([^=]+)'],'tokens');
-model_params = cellfun(@(x) x{1}{2}, model_split, 'UniformOutput', false);
-model_params = regexp(model_params,name,'tokens');
-model_params = [model_params{:}];
-model_params = [model_params{:}];
+if ~isempty(model_defs)
+    model_split = regexp([model_defs{:}],[name '[ \t\f]*=([^=]+)'],'tokens');
+    model_params = cellfun(@(x) x{1}{2}, model_split, 'UniformOutput', false);
+    model_params = regexp(model_params,name,'tokens');
+    model_params = [model_params{:}];
+    model_params = [model_params{:}];
+else
+    
+    model_split = {};
+    model_params = {};
+end
 
 fast_params = regexp(fast_affinity,name,'tokens');
 fast_params = [fast_params{:}];
@@ -65,7 +72,7 @@ if ~isempty(fast_params)
     fast_params = [fast_params{:}];
 end
 
-model_params = unique([model_params fast_params],'stable');
+model_params = unique([model_params fast_params rate_constants],'stable');
 
 model_vars = cellfun(@(x) x{1}{1}, model_split, 'UniformOutput', false);
 
@@ -83,15 +90,18 @@ spatial_vars=[chems predef_spatial];
 ref=@(x) ['(:?[' code ']+|^)(?<var>' x ')(:?[' code ']+|$)'];
 
 spatial_ref=cellfun(@(x) ref(x),spatial_vars,'UniformOutput',0);
-tmp=cell2mat(cellfun(@(x) any(cellfun(@(y) ~isempty(y),regexp(x,spatial_ref,'tokens'))),rhs,'UniformOutput',0));
-
-while any(tmp~=spatial)
-    
-    spatial_vars=unique([spatial_vars vars(tmp)],'stable');
-    spatial(tmp&~spatial)=1;
-    
-    spatial_ref=cellfun(@(x) ref(x),spatial_vars,'UniformOutput',0);
+if ~isempty(rhs)
     tmp=cell2mat(cellfun(@(x) any(cellfun(@(y) ~isempty(y),regexp(x,spatial_ref,'tokens'))),rhs,'UniformOutput',0));
+    
+    while any(tmp~=spatial)
+        
+        spatial_vars=unique([spatial_vars vars(tmp)],'stable');
+        spatial(tmp&~spatial)=1;
+        
+        spatial_ref=cellfun(@(x) ref(x),spatial_vars,'UniformOutput',0);
+        tmp=cell2mat(cellfun(@(x) any(cellfun(@(y) ~isempty(y),regexp(x,spatial_ref,'tokens'))),rhs,'UniformOutput',0));
+        
+    end
     
 end
 
@@ -126,8 +136,13 @@ f_slow = cellfun(@(c) ['f_' c], {chems{is_slow}}, 'UniformOutput', false);
 chem_str = strjoin(chems(1:N_slow));
 
 chem_str2 = strjoin(chems(1:N_slow),',');
-
-eval([sym_str ' ' chem_str ' ' strjoin(f_slow,' ') newline strjoin([model_defs{:}],[';' newline]) ';'])
+if ~isempty(model_defs)
+    def_str=strjoin([model_defs{:}],[';' newline]);
+else
+    def_str='';
+end
+    
+eval([sym_str ' ' chem_str ' ' strjoin(f_slow,' ') newline def_str ';'])
 eval([ 'assume([' strjoin([[model_vars']' model_params]) ']>0)'])
 
 Gamma = eval([ ' [' strjoin( cellfun(@(aff, pair ) ['simplify(' aff '*' pair ',"Steps",10)'],fast_affinity, fast_pair,'UniformOutput',0),';') ']']   );
@@ -144,8 +159,8 @@ if ~isempty(J_gamma)
     J_gamma=reshape(J_gamma,[N_slow,size(Gamma,1)])';
 end
 J_gamma_0 = J_gamma;
-% 
-% 
+%
+%
 
 
 big = [Gamma_0 J_gamma];
@@ -154,30 +169,30 @@ nm = ['subs__' int2str(i)];
 
 sigma__reps={};
 if ~isempty(big)
-[big_simp,sigma__rep] = subexpr(big,nm);
-if ~isempty(sigma__rep)
-
-    while ~isempty(sigma__rep)
-
+    [big_simp,sigma__rep] = subexpr(big,nm);
+    if ~isempty(sigma__rep)
         
-        sigma__reps{end+1}=[nm  ' = ' char(simplify(sigma__rep,'Steps',10))];
-
-        i=i+1;
-        nm = ['subs__' int2str(i)];
-        [big_simp, sigma__rep] = subexpr(big_simp,nm);
-       
+        while ~isempty(sigma__rep)
+            
+            
+            sigma__reps{end+1}=[nm  ' = ' char(simplify(sigma__rep,'Steps',10))];
+            
+            i=i+1;
+            nm = ['subs__' int2str(i)];
+            [big_simp, sigma__rep] = subexpr(big_simp,nm);
+            
+            
+        end
         
     end
-
+    
+    big_simp = simplify(big_simp);
+    J_gamma = big_simp(:,2:end);
+    Gamma = big_simp(:,1);
 end
 
- big_simp = simplify(big_simp);
- J_gamma = big_simp(:,2:end);
- Gamma = big_simp(:,1);
-end
- 
 
- 
+
 fast_pair_sym = eval(['[' strjoin(fast_pair) ']'])';
 aff_simp =  Gamma ./ fast_pair_sym;
 
@@ -244,7 +259,7 @@ b__0 = eval(['[' strjoin( f_slow,'; ') ']'] );
 
 %finding a way to express our system that isnt undetermined
 A_mat=[double(lslow(:,is_slow)); m10(:,is_slow)]';
-[R_A,p_A]=rref(A_mat);
+[~,p_A]=rref(A_mat);
 A_li_rows = A_mat(:,p_A)';
 m10 = zeros(size(m10));
 m10(:,is_slow) = A_li_rows;
@@ -261,7 +276,7 @@ f_mix = eval(['[m10;m1]\[b__0;' strjoin(cellstr(string(zeros(1,size(J_gamma,1)))
 % f_mix2 = eval(['[m10;m0]\[' strjoin( f_slow,'; ') ';' strjoin(cellstr(string(zeros(1,size(J_gamma,1)))),'; ')  ']']);
 
 
-% 
+%
 f_fast =  m11*f_mix;
 m100 = m10(mask_slow_raw,is_slow);
 f_mix_simp = simplify([f_mix; f_fast],'Steps',20);
@@ -278,7 +293,7 @@ if ~isempty(sigma2__rep)
         [f_mix_simp, sigma2__rep] = subexpr(f_mix_simp,nm);
         
     end
-
+    
 end
 % sigma2__reps=sigma2__reps';
 f_mix=f_mix_simp;
@@ -299,7 +314,7 @@ if ~isempty(sigma3__rep)
         [f_fast_simp, sigma3__rep] = subexpr(f_fast_simp,nm);
         
     end
-
+    
 end
 % sigma2__reps=sigma2__reps';
 f_fast=f_fast_simp;
@@ -322,20 +337,24 @@ for i=1:size(S,2)
     inds = r>0;
     terms = strcat(chems(inds),cellstr(repmat('.^',[nnz(inds),1]))',cellstr(string(r(inds)))');
     terms = regexprep(terms,'\.\^1$',''); %remove exponent 1's from rate computation
-    rates{i} = [ rate_constants{i} '.*' strjoin(terms,'.*')];
+    rate_str = [ rate_constants{i} '.*' strjoin(terms,'.*')];
+    rates{i} = rate_str;
 end
 
 
 rates_slow={};
 ind_slow = find(is_slow);
 for chem_ind = ind_slow(i_slow_raw)
-%     chem_ind = find(m10(i,:),1);
+    %     chem_ind = find(m10(i,:),1);
     S_chem = S(chem_ind,:);
     inds = find(S_chem);
     terms = strcat(cellstr(num2str(S_chem(inds)')),repmat('*(',[length(inds),1]),rates(inds),repmat(')',[length(inds),1]));
     terms = regexprep(terms,'[^0-9\.\-\+]*1\*',''); %remove multiplication by 1's from rate computation
     sum_terms = strjoin(terms,'+'); % sum terms
     sum_terms = regexprep(sum_terms,'+-','-');% remove +-, replace with -
+    if length(sum_terms)==0
+        sum_terms='0';
+    end
     rates_slow{end+1} = ['f_' chems{chem_ind} ' = ' sum_terms];
     
 end
@@ -356,8 +375,11 @@ fid=fopen('eval_Rx.m','w');
 fwrite(fid,rxn_body,'char');
 fclose(fid);
 
-
-model_body = [strjoin([model_defs{:}]',[';' newline]) ';'];
+if ~isempty(model_defs)
+    model_body = [strjoin([model_defs{:}]',[';' newline]) ';'];
+else
+    model_body='';
+end
 chem_rep_full=arrayfun(@(i) ['$<pre>x\(:,:,' num2str(i) '\)$<post>'],1:length(chems),'UniformOutput',0);%this only works for 2d
 model_body = regexprep(model_body,chem_ref ,chem_rep_full);% reshape the chemical names
 
@@ -370,14 +392,16 @@ ode_body = [strjoin([[model_defs{:}]'; rates_slow'; sigma__reps'; predefs2'; pre
     ';' newline newline char(strjoin(strcat('d',chems,'/dt=',string(f_mix)'),newline))];
 
 
-str_par = fileread('model_params.m');
-str_par = regexprep(str_par,'%[^\n]+\n','');
-str_par = regexprep(str_par,'[\n]+','');
-str_par = regexprep(str_par,'[ ]+',' ');
-str_par = regexprep(str_par,'[\;]+',', ');
+
+if ~isempty(par_def)
+    str_par = ['par' strjoin(strcat(pars,'=',par_vals,';'),', ') newline]
+else
+    str_par=newline;
+end
+ode_body=regexprep(ode_body,'\.\*','\*');
 
 fid=fopen([f '.ode'],'w');
-fwrite(fid,[ode_body newline newline 'par ' str_par newline newline],'char');
+fwrite(fid,[ode_body newline newline str_par newline newline],'char');
 fclose(fid);
 
 
@@ -444,18 +468,20 @@ D=getDiffusionRates(f,chems);
 
 fid=fopen('initialize_chem_params.m','w');
 fwrite(fid,['N_species = ' int2str(length(chems)) ';' newline...
-            'N_rx = ' int2str(length(rate_constants)) ';' newline...
-            'D = [' num2str(D) '];'],'char');
+    'N_rx = ' int2str(length(rate_constants)) ';' newline...
+    'D = [' num2str(D) '];'],'char');
 fwrite(fid,[newline 'N_slow = ' int2str(N_slow) ';' newline...
-           ['chems={' char(strjoin(strcat("'",chems,"'"),',')) '};']],'char');
+    ['chems={' char(strjoin(strcat("'",chems,"'"),',')) '};']],'char');
 fwrite(fid,[repelem(newline,4)  newline], 'char');
 
 fclose(fid);
 
 
-fid=fopen('model_params.m','w');
-fwrite(fid, strjoin(strcat(pars,'=',par_vals,';'),newline),'char');
-fclose(fid);
+if ~isempty(par_def)
+    fid=fopen('model_params.m','w');
+    fwrite(fid, strjoin(strcat(pars,'=',par_vals,';'),newline),'char');
+    fclose(fid);
+end
 
 end
 

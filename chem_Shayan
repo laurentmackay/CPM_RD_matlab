@@ -1,0 +1,47 @@
+RhoGDP + GEFRho + GTP <-> GEFRho:RhoGDP:GTP; k1, k2
+GEFRho:RhoGDP:GTP -> RhoGTP + GEFRho + GDP; k3
+
+RhoGTP + GAPRho + ADP <-> GAPRho:RhoGTP; k4, k5
+GAPRho:RhoGTP -> RhoGDP + GAPRho + ATP; k6
+
+RacGDP + GEFRac + GTP <-> GEFRac:RacGDP:GTP; k7, k8
+GEFRac:RacGDP:GTP -> RacGTP + GEFRac + GDP; k9
+
+RacGTP + GAPRac + ADP <-> GAPRac:RacGTP; k10, k11
+GAPRac:RacGTP -> RacGDP + GAPRac + ATP; k12
+
+GDP + somekinase + ATP <-> GTP + somekinase + ADP; k13, k14
+
+RacGTP + PAK <-> RacGTP:PAK; k15, k16
+
+Paxillin + RacGTP:PAK + ATP <-> Paxillin-P + RacGTP:PAK + ADP; k17, k18
+Paxillin + FAK + ATP <-> Paxillin-TP + FAK + ADP; k19, k20
+Paxillin-P + PP2A + ADP <-> Paxillin + PP2A + ATP; k21, k22
+Paxillin-TP + someTppase + ADP <-> Paxillin + someTppase + ATP; k23, k24
+
+Paxillin + FAK <-> Paxillin:FAK; k25, k26
+Paxillin-P + FAK <-> Paxillin-P:FAK; k27, k28
+Paxillin-TP + FAK <-> Paxillin-TP:FAK; k29, k30
+
+GIT + FAK + ATP <-> GIT-P + FAK + ADP; k31, k32
+PIX:GIT + FAK + ATP <-> PIX:GIT-P + FAK + ADP; k33, k34
+PAK:PIX:GIT + FAK + ATP <-> PAK:PIX:GIT-P + FAK + ADP; k35, k36
+
+PAK + PIX <-> PAK:PIX; k37, k38
+
+PIX + GIT <-> PIX:GIT; k39, k40
+PIX + GIT-P <-> PIX:GIT-P; k41, k42
+
+PAK + PIX:GIT <-> PAK:PIX:GIT; k43, k44
+PAK + PIX:GIT-P <-> PAK:PIX:GIT-P; k45, k46
+
+PAK:PIX + GIT <-> PAK:PIX:GIT; k47, k48
+PAK:PIX + GIT-P <-> PAK:PIX:GIT-P; k49, k50
+
+PAK:PIX:GIT-P + Paxillin-P <-> PAK:PIX:GIT-P:Paxillin-P; k51, k52
+RacGTP + PAK:PIX:GIT-P:Paxillin-P <-> RacGTP:PAK:PIX:GIT-P:Paxillin-P; k53, k54
+
+Paxillin + RacGTP:PAK:PIX:GIT-P:Paxillin-P + ATP <-> Paxillin-P + RacGTP:PAK:PIX:GIT-P:Paxillin-P + ADP; k55, k56
+
+Paxillin-TP + Crk <-> Paxillin-TP:Crk; k57, k58
+Paxillin-TP:Crk + xGEFRac <-> Paxillin-TP:Crk + GEFRac; k59, k60

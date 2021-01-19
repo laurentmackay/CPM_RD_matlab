@@ -20,8 +20,8 @@ end
 
 nrx=3e4; 
 
-noise=0.5;
-dt=0.05;
+noise=0.00005;
+dt=0.1;
 Ttot=16*3.6e3; 
 
 SF=2; 
@@ -100,34 +100,9 @@ bndry_ud= bndry_up | bndry_down;
 bndry_lr= bndry_l | bndry_r;
 
 bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
-
-
-
-lam_a=3*h^4; 
-lam_p=60*h^2; 
-J=0*h; 
-
-B_rho=2e3*h^2;
-B_R=2e3*(.18/.13)*h^2; 
-
-
-a=A; 
-per=Per; 
-Hb=0; 
-T=1200; 
-
-
-
-
-
-
-H0=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; 
-dH_chem=0; 
-
-grow_count=0;
-shrink_count=0;N_species = 6;
+N_species = 6;
 N_rx = 6;
-D = [0.43         0.02         0.43         0.02           20          0.1];
+D = [0.43         0.02         0.43         0.02          0.1           20];
 N_slow = 6;
 chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax'};
 
@@ -136,7 +111,7 @@ chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax'};
 
 N_species = 6;
 N_rx = 6;
-D = [0.43         0.02         0.43         0.02           20          0.1];
+D = [0.43         0.02         0.43         0.02          0.1           20];
 N_slow = 6;
 chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax'};
 
@@ -159,16 +134,16 @@ Rac_Square = totalRac/(A);
 Pax_Square = totalPax/(A);    
 
 N_instantaneous=50;
-B_1=5;
+B_1=0.5;
 I_rho=0.016;
 L_rho=0.34;
 delta_rho=0.016;
-L_R=0.34;
+L_R=0.415;
 I_R=0.003;
 delta_R=0.025;
 alpha_R=15;
 Rtot=7.5;
-delta_P=0.0004;
+delta_P=0.004;
 I_K=0.009;
 L_K=5.77;
 k_X=41.7;
@@ -205,12 +180,12 @@ end
 
 
 
-RhoRatio_u = 0.6;
+RhoRatio_u = 0.8;
 RacRatio_u = 0.045;
 
 PaxRatio_u = 0.082;
 
-RhoRatio_i = 0.2;
+RhoRatio_i = 0.02;
 RacRatio_i = 0.35; 
 
 if length(D)==9
@@ -256,12 +231,7 @@ if length(D)~=9
     
     
     
-    
-    if length(D)==8
-        Raci0 = Rac_Square*(1-RacRatio-gamma*K);        
-    else
-        Raci0 = Rac_Square*(1-RacRatio);
-    end
+   
     
     Pax0 = Pax_Square*PaxRatio;           
     if length(D)==6
@@ -270,7 +240,15 @@ if length(D)~=9
         Paxi0 = Pax_Square*P_i;        
     end
     
-    RacPak0 = (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*Pax0/Pax_Square).*alpha_PAK*PAKtot.*K_is .* Rac0;
+    K_PAK = (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*Pax0/Pax_Square).*alpha_PAK*PAKtot.*K_is;
+    
+    if length(D)==8
+        Raci0 = Rac_Square*(1-(1+K_PAK).*RacRatio);        
+    else
+        Raci0 = Rac_Square*(1-RacRatio);
+    end
+    
+    RacPak0 = K_PAK .* Rac0;
     GPP0 = (k_G*k_X*k_C*GIT*PIX*K_is*PAKtot.*(1+alpha_R*Rac0/Rac_Square)) .*Pax0;
     
     RacPak0 =  Rac_Square - Rac0 - Raci0;
@@ -291,16 +269,17 @@ fid=fopen('rhs_fun.m','w');
 fwrite(fid,str,'char');
 fclose(fid);
 
-[T,Y] = ode15s(@ rhs_fun,[0 1e4],N0(1,1:N_species));
+[T_vec,Y] = ode15s(@ rhs_fun,[0 1e4],N0(1,1:N_species),odeset('NonNegative',1:N_species));
     m0=sum( N0(1,:));
-    m0-sum( N0(1,:))
+
     
     N0(1,2)/Rac_Square
     N0(1,4)/Rho_Square
     N0(1,6)/Pax_Square
     
     figure(3);clf();
-    plot(T,Y);
+    plot(T_vec,Y);
+    legend(chems)
     drawnow;
 else
     
@@ -397,9 +376,35 @@ K=alpha_R*RacRatio0.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);
 I_Ks=I_K*(1-K_is.*(1+alpha_R*RacRatio0));
 RacRatio = (x(:,:,2) + alpha_PAK*K) / Rac_Square;
 Q_R = (I_R+I_Ks).*(L_rho^m./(L_rho^m+RhoRatio.^m));
-Q_rho = I_rho*(L_R^m./(L_R^m +(RacRatio).^m));
+Q_rho = I_rho*(L_R^m./(L_R^m +(RacRatio + alpha_PAK*K).^m));
 Q_P = B_1*(K.^n./(L_K^n+K.^n));
 
+
+
+lam_a=1*h^4; 
+lam_p=0.1*h^2; 
+J=0*h; 
+
+B_0=1.5;
+B_rho=(B_0/0.3)*h^2;
+B_R=(B_0/0.3)*(.18/.13)*h^2; 
+
+
+a=A; 
+per=Per; 
+Hb=0; 
+T=0.3; 
+
+
+
+
+
+
+H0=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; 
+dH_chem=0; 
+
+grow_count=0;
+shrink_count=0;
 end
 
 lastplot=0;
@@ -497,6 +502,7 @@ if plotting
 
 end
 if usejava('desktop') && isempty(getCurrentTask())
+    delete test.gif
     gif('test.gif','frame',panelC)
 end
 reactions=0; 
@@ -596,11 +602,10 @@ j=[ vox(:)';  jump(row)';];
 Delta=repmat([-1/h; +1/h],N_ind,1);
 u_x = sparse(i,j,Delta,numel(interior),sz);
 
-
-
 [i2,j2,v ] = find(u_x);
 i2=mod(i2-1,sz)+1;
 u_xx = sparse(i2,j2,v/h,sz,sz);
+
 u_xx=u_xx(cell_inds(1:A),cell_inds(1:A));
 
 
@@ -613,7 +618,7 @@ K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRati
 I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
 RacRatio = (u(:,2) + alpha_PAK.*K) ./ Rac_Square;
 Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
-Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
+Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio + alpha_PAK.*K).^m));
 Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
 f_Raci = -(Q_R.*u(:,1))+(delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+(delta_rho.*u(:,4));
@@ -626,12 +631,11 @@ f_Rhoi,...
 f_Paxi,...
 -f_Paxi];
 u_prev = u;
+
 t0=time;
+
 eye = speye(A);
-MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D,'UniformOutput',0);
-
-
-
+MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D,'UniformOutput',0); 
 
 
 while time-t0<T_integration
@@ -648,7 +652,7 @@ K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRati
 I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
 RacRatio = (u(:,2) + alpha_PAK.*K) ./ Rac_Square;
 Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
-Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
+Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio + alpha_PAK.*K).^m));
 Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
 f_Raci = -(Q_R.*u(:,1))+(delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+(delta_rho.*u(:,4));
@@ -660,16 +664,15 @@ f_Rhoi,...
 -f_Rhoi,...
 f_Paxi,...
 -f_Paxi];
-b=(2*u-u_prev/2)/dt + 2*Rx-Rx_prev;
+b=(2*u-u_prev/2)/dt + (2*Rx-Rx_prev); 
     u_prev=u;
+
     for i = 1:N_species
         u(:,i) = MAT_list{i}\b(:,i);
     end
-
+  
     time=time+dt;
 
-
-       
 
 end
 x(cell_inds(1:A) + i_chem_0) = u(:);
@@ -681,7 +684,7 @@ K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRati
 I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
 RacRatio = (u(:,2) + alpha_PAK.*K) ./ Rac_Square;
 Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
-Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
+Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio + alpha_PAK.*K).^m));
 Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
 f_Raci = -(Q_R.*u(:,1))+(delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+(delta_rho.*u(:,4));
@@ -696,8 +699,240 @@ f_Paxi,...
 
 if time>=lastcpm+cpmstep
             
+            for kk=1:(2*Per)/cpmsteps 
+                try
+                   adj_empty = ~cell_mask(up) | ~cell_mask(down) | ~cell_mask(left) | ~cell_mask(right); 
+adj_full = cell_mask(up) | cell_mask(down) | cell_mask(left) | cell_mask(right); 
+
+bndry_cell = cell_mask & adj_empty;
+bndry_empty = ~cell_mask & adj_full;
+bndry_mask = bndry_cell | bndry_empty;
+bndry = find( bndry_mask );
+
+bndry_up=cell_mask  & ~cell_mask(up);
+bndry_down=cell_mask  & ~cell_mask(down);
+bndry_l=cell_mask  & ~cell_mask(left);
+bndry_r=cell_mask  & ~cell_mask(right);
+
+bndry_ud= bndry_up | bndry_down;
+bndry_lr= bndry_l | bndry_r;
+
+bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
+is_discrete = all(mod(x(cell_inds(1:A)),1)==0);
+
+if any(cell_maskp~=cell_mask)
+    error('not reseting')
+end
+
+
+rho_eq=mean(RhoRatio(find(cell_mask)));
+R_eq=mean(RacRatio(find(cell_mask)));
+Ncell_mask=squeeze(sum(sum(x))); 
+A0=A;
+
+no_holes=false;
+
+while ~no_holes
+    vox_trial = bndry(randi(length(bndry)));
+    
+    r=randi(size(jump,2));
+    vox_ref=jump(sub2ind([sz,4],vox_trial,r));
+    cell_maskp(vox_trial) = cell_mask(vox_ref);
+    
+    Per=perim(cell_maskp); 
+    A=nnz(cell_maskp); 
+    HA=lam_a*(a-A)^2+lam_p*(per-Per)^2+J*Per; 
+    dH=HA-H0;
+    no_holes = getfield(bwconncomp(cell_maskp,4),'NumObjects')==1 && getfield(bwconncomp(~cell_maskp,4),'NumObjects')==1 ;
+    if ~no_holes
+        cell_maskp(vox_trial)=cell_mask(vox_trial);
+    end
+end
+
+
+reacted = 0;
+if  no_holes
+    
+    grow= cell_maskp(vox_trial) & ~cell_mask(vox_trial);
+    shrink= ~cell_maskp(vox_trial) & cell_mask(vox_trial);
+    
+    
+    if grow
+        f=1;
+        dH_chem=B_rho*(RhoRatio(vox_ref)-rho_eq)-B_R*(RacRatio(vox_ref)-R_eq);
+        
+    elseif shrink
+        f=-1;
+        dH_chem=-B_rho*(RhoRatio(vox_trial)-rho_eq)+B_R*(RacRatio(vox_trial)-R_eq);
+       
+    end
+    
+    
+    if (grow || shrink) && rand<exp(-(dH+dH_chem+Hb)/T)
+        reacted=1;
+            cm0=cell_mask;
+        cell_mask=cell_maskp; 
+        
+        if shrink
+            bndry_up=cell_mask  & ~cell_mask(up);
+            bndry_down=cell_mask  & ~cell_mask(down);
+            bndry_l=cell_mask  & ~cell_mask(left);
+            bndry_r=cell_mask  & ~cell_mask(right);
+
+            bndry_ud= bndry_up | bndry_down;
+            bndry_lr= bndry_l | bndry_r;
+
+        end
+        
             
-            lastcpm=time;
+        Per=perim(cell_mask);
+        A=nnz(cell_mask);
+
+        
+        
+        if grow
+            inds=cell_inds(1:A-1);
+            cell_inds(1:A)=find(cell_mask);
+        else
+            cell_inds(1:A)=find(cell_mask);
+            inds=cell_inds(1:A);
+        end
+        
+        
+        
+            if grow
+                dist=max(abs(i0(vox_ref)-i0(inds)),abs(j0(vox_ref)-j0(inds)));
+            else
+                dist=max(abs(i0(vox_trial)-i0(inds)),abs(j0(vox_trial)-j0(inds)));
+            end
+
+            min_dist=5600;
+            transport_mask=((D~=0).*D/min(D(D~=0))+(D==0).*prod(shape))*min_dist>dist;
+
+            transport_mask(find(vox_trial==inds),:)=false;
+            
+        x0=x;
+            inds2=inds+i_chem_0;
+            i_trial=vox_trial+i_chem_0;
+            
+            
+            if grow
+                us=x(vox_ref+i_chem_0);
+                Ts=sum(x(inds2));
+                f=Ts./(Ts+us);
+                x(i_trial)=us;
+                inds2=[inds2; i_trial];
+            else
+                ut=x(i_trial);
+                f=1+(ut./sum(x(inds2)));
+                x(i_trial)=0;
+            end
+
+            if is_discrete
+                x(inds2)=floor(x(inds2).*f)+[zeros(1,N_species); diff(floor(cumsum(rem(x(inds2).*f,1.0))+1e-5))]; 
+            else
+                x(inds2)=x(inds2).*f;
+            end
+            
+        
+        
+        I=[vox_trial vox_ref]; 
+        H0=HA; 
+        
+        
+        Per=perim(cell_mask);
+        A=nnz(cell_mask);
+        cell_inds(1:A)=find(cell_mask);
+
+        
+        if grow
+            vox=cell_inds(1:A);
+        else
+            vox=[cell_inds(1:A); vox_trial];
+        end
+        
+        
+        alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
+        if grow
+            grow_count=grow_count+1;
+        else
+            shrink_count=shrink_count+1;
+        end
+        
+    end
+end
+
+if ~reacted
+    
+    cell_maskp=cell_mask;
+    Per=perim(cell_mask); 
+    A=nnz(cell_mask); 
+    cell_inds(1:A)=find(cell_mask);
+else
+   RacRatio0 = x(:,:,2) / Rac_Square;
+RhoRatio = x(:,:,4) / Rho_Square;
+PaxRatio = x(:,:,6) / Pax_Square;
+K_is=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio).*(1+alpha_R*RacRatio0)+k_G*k_X*GIT*PIX);
+K=alpha_R*RacRatio0.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);
+I_Ks=I_K*(1-K_is.*(1+alpha_R*RacRatio0));
+RacRatio = (x(:,:,2) + alpha_PAK*K) / Rac_Square;
+Q_R = (I_R+I_Ks).*(L_rho^m./(L_rho^m+RhoRatio.^m));
+Q_rho = I_rho*(L_R^m./(L_R^m +(RacRatio + alpha_PAK*K).^m));
+Q_P = B_1*(K.^n./(L_K^n+K.^n));
+end
+
+
+
+Ncell_maskp=squeeze(sum(sum(x)));
+if (is_discrete & any(Ncell_mask~=Ncell_maskp)) | (~is_discrete & any(abs(Ncell_mask-Ncell_maskp)>1e-5))
+    error('molecule loss')
+end
+
+if min(cell_mask(:))<0
+    error('Oh no! D: (negtive numbers)')
+end
+catch err
+                    rethrow(err)
+                    break;
+                end
+                
+               adj_empty = ~cell_mask(up) | ~cell_mask(down) | ~cell_mask(left) | ~cell_mask(right); 
+adj_full = cell_mask(up) | cell_mask(down) | cell_mask(left) | cell_mask(right); 
+
+bndry_cell = cell_mask & adj_empty;
+bndry_empty = ~cell_mask & adj_full;
+bndry_mask = bndry_cell | bndry_empty;
+bndry = find( bndry_mask );
+
+bndry_up=cell_mask  & ~cell_mask(up);
+bndry_down=cell_mask  & ~cell_mask(down);
+bndry_l=cell_mask  & ~cell_mask(left);
+bndry_r=cell_mask  & ~cell_mask(right);
+
+bndry_ud= bndry_up | bndry_down;
+bndry_lr= bndry_l | bndry_r;
+
+bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
+end
+            
+           diffusing_species=1:N_species; 
+
+
+for drx=1:size(jump,2) 
+    diffuse_mask(drx,:)=cell_mask(jump(:,drx))&cell_mask(:); 
+    
+end
+
+for vox=1:size(diffuse_mask,2)
+    num_vox_diff(vox)=nnz(diffuse_mask(:,vox)); 
+end
+
+for i=1:A
+    vox=cell_inds(i);
+    pT0(vox,:) = num_vox_diff(vox)*D/(h^2);
+    pi(:,vox)=diffuse_mask(:,vox)'./sum(diffuse_mask(:,vox));
+end
+lastcpm=time;
             cpmcounter=cpmcounter+1;
         end
                 

@@ -18,24 +18,24 @@ while time<Ttot
         
         if time>=lastcpm+cpmstep
             
-%             for kk=1:(2*Per)/cpmsteps %itterates CPM step Per times
-% %                 disp('doing CPM')
-%                 try
-%                     CPM_step
-%                 catch err
-%                     disp(err)
-% %                     time=Ttot;
-%                     break;
+            for kk=1:(2*Per)/cpmsteps %itterates CPM step Per times
+%                 disp('doing CPM')
+                try
+                    CPM_step
+                catch err
+                    rethrow(err)
+%                     time=Ttot;
+                    break;
+                end
+                
+                detect_bndrys
+                
+%                 if sum(x(:))~=d0
+%                     disp(['molecules changed, delta = ' num2str(sum(x(:))-d0) ])
 %                 end
-%                 
-%                 detect_bndrys
-%                 
-% %                 if sum(x(:))~=d0
-% %                     disp(['molecules changed, delta = ' num2str(sum(x(:))-d0) ])
-% %                 end
-%             end
+            end
             
-%             enumerate_diffusion %recalcluates diffusable sites
+            enumerate_diffusion %recalcluates diffusable sites
             lastcpm=time;
             cpmcounter=cpmcounter+1;
         end

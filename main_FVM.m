@@ -20,8 +20,8 @@ end
 
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
-noise=0.5;
-dt=0.05;
+noise=0.00005;
+dt=0.1;
 Ttot=16*3.6e3; %Total simulation time
 
 SF=2; % speed factor I divide molecule number by this for speed
@@ -53,9 +53,9 @@ tic
 
 if ~restart
     initialize_cell_geometry
-    initialize_cellular_potts
     initialize_chem_params
     initialize_chem %all reaction parameters are getting initialized
+    initialize_cellular_potts
 end
 
 lastplot=0;
@@ -69,6 +69,7 @@ initialize_results
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
 pic %takes a frame for the video
 if usejava('desktop') && isempty(getCurrentTask())
+    delete test.gif
     gif('test.gif','frame',panelC)
 end
 reactions=0; %intializing a reaction counter
