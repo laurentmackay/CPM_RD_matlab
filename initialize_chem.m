@@ -139,15 +139,15 @@ if length(D)~=9
     
     
 params = inline_script('model_params');
-rhs_str = inline_script('eval_Rx');
+eval_rhs_str = inline_script('eval_Rx');
 
-str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
+str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
 
 fid=fopen('rhs_fun.m','w');
 fwrite(fid,str,'char');
 fclose(fid);
 
-[T_vec,Y] = ode15s(@ rhs_fun,[0 1e4],N0(1,1:N_species),odeset('NonNegative',1:N_species));
+[T_vec,Y_vec] = ode15s(@ rhs_fun,[0 1e4],ones(1,N_species),odeset('NonNegative',1:N_species));
     m0=sum( N0(1,:));
 %     N0(1,1:N_species)=Y(end,:);
 

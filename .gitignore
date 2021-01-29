@@ -6,3 +6,10 @@
 *.gif
 results
 codegen
+*.ode
+*.rxns
+fort.*
+/*.exe
+/*.o
+*.f90
+c.*

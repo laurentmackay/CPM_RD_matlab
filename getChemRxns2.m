@@ -1,4 +1,4 @@
-function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat, species_fast, stoic_fast, S_fast, S_cat_fast] = getChems(f)
+function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat] = getChems(f)
 
     function [species,stoic,rates]=parseRxns(trans,fast)
         if nargin==1
@@ -19,7 +19,7 @@ function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat, species_fas
             if ~fast
                 rxn_trans = [chem_set  trans  chem_set '[^\r\n]*\,[^\r\n]*'];
             else
-                 rxn_trans = [chem_set  trans  chem_set '[^\,\n]*(\n|$)'];
+                 rxn_trans = [chem_set  trans  chem_set '[^\,\n]*\n'];
             end
         else
             rxn_trans = [chem_set  trans  chem_set '[^\r\n]*'];
@@ -129,54 +129,41 @@ for i=1:Nrx
     S_cat(:,i) = cellfun(@(c) ~isempty([stoic{i}{strcmp(c,species{i})}]),chems) == (0==S(:,i))';
 end
 
-
 % S=[cell2mat(cellfun(@(x) ismember(chems,[x{:}]),lhs,'UniformOutput',0)');
 % cell2mat(cellfun(@(x) ismember(chems,[x{:}]),rhs,'UniformOutput',0)')]
 
 [species_fast,stoic_fast,affinity]=parseRxns(rvsbl_rxn,true);
 
-
-
-Nrx_fast=size(species_fast,2);
-
-S_fast=zeros(length(chems),Nrx_fast);
-S_cat_fast=logical(S_fast);
-
-for i=1:Nrx_fast
-    S_fast(:,i)=[cellfun(@(c) sum([stoic_fast{i}{strcmp(c,species_fast{i})}]),chems)]';
-    S_cat_fast(:,i) = cellfun(@(c) ~isempty([stoic_fast{i}{strcmp(c,species_fast{i})}]),chems) == (0==S_fast(:,i))';
-end
-
 fast_species=setdiff([species_fast{:}],[species{:}],'stable');
 
 if any(abs(cell2mat([stoic_fast{:}]))~=1)
 
-     error('only first-order instantaneous reactions are currently supported')
+     error('only unimolecular instantaneous reactions are currently supported')
 
 end
 
 fast_pairs=cell(length(affinity),1);
 fast_affinity=cell(length(affinity),1);
 
-% for i=1:2:length(species_fast)
-%     try
-%         fast_boy=any(reshape(cell2mat(cellfun(@(x) strcmp(fast_species,x),species_fast{i},'UniformOutput',false)),[length(fast_species),2]));
-%     catch e
-%         error(['Shape inconsistency in fast reaction processing.' newline 'Multiple reactions (unpaired) on the same line?'])
-%     end
-%     if nnz(fast_boy)>1
-%         error('Intraconversion between fast species not currently supported')
-%     end
-%     j=ceil(i/2);
-%     if fast_boy(1)
-%         affinity{j}=['1/(' affinity{ceil(i/2)} ')'];
-%     end
-%     
-%     fast_pairs{j}=species_fast{i}{~fast_boy};
-%     fast_affinity{j}=affinity{ceil(i/2)};
-%       
-% 
-% end
+for i=1:2:length(species_fast)
+    try
+        fast_boy=any(reshape(cell2mat(cellfun(@(x) strcmp(fast_species,x),species_fast{i},'UniformOutput',false)),[length(fast_species),2]));
+    catch e
+        error(['Shape inconsistency in fast reaction processing.' newline 'Multiple reactions (unpaired) on the same line?'])
+    end
+    if nnz(fast_boy)>1
+        error('Intraconversion between fast species not currently supported')
+    end
+    j=ceil(i/2);
+    if fast_boy(1)
+        affinity{j}=['1/(' affinity{ceil(i/2)} ')'];
+    end
+    
+    fast_pairs{j}=species_fast{i}{~fast_boy};
+    fast_affinity{j}=affinity{ceil(i/2)};
+      
+
+end
 
 
 end
