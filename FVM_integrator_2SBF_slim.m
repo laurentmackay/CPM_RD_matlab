@@ -45,7 +45,6 @@ while time-t0<T_integration
 
     
     Rx_prev=Rx;
-    
     eval_Rx
     b=(2*u-u_prev/2)/dt + (2*Rx-Rx_prev); % 2-SBDF
 %     b=u/dt + 3/2*Rx-Rx_prev/2 + (D'.*(u_xx*(3*u/8 + u_prev/16))')'; %MCNAB

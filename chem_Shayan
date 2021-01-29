@@ -25,17 +25,17 @@ Paxillin-TP + FAK <-> Paxillin-TP:FAK; k29, k30
 
 GIT + FAK + ATP <-> GIT-P + FAK + ADP; k31, k32
 PIX:GIT + FAK + ATP <-> PIX:GIT-P + FAK + ADP; k33, k34
-PAK:PIX:GIT + FAK + ATP <-> PAK:PIX:GIT-P + FAK + ADP; k35, k36
+PAK:PIX:GIT + FAK + ATP <-> PAK:PIX:GIT-P + FAK + ADP; k36
 
 PAK + PIX <-> PAK:PIX; k37, k38
 
 PIX + GIT <-> PIX:GIT; k39, k40
 PIX + GIT-P <-> PIX:GIT-P; k41, k42
 
-PAK + PIX:GIT <-> PAK:PIX:GIT; k43, k44
+PAK + PIX:GIT <-> PAK:PIX:GIT;  k44
 PAK + PIX:GIT-P <-> PAK:PIX:GIT-P; k45, k46
 
-PAK:PIX + GIT <-> PAK:PIX:GIT; k47, k48
+PAK:PIX + GIT <-> PAK:PIX:GIT;  k48
 PAK:PIX + GIT-P <-> PAK:PIX:GIT-P; k49, k50
 
 PAK:PIX:GIT-P + Paxillin-P <-> PAK:PIX:GIT-P:Paxillin-P; k51, k52

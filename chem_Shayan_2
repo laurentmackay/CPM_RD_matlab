@@ -1,0 +1,51 @@
+RhoGDP + GEFRho <-> GEFRho + RhoGTP; k1, k2
+RhoGTP + GAPRho <-> GAPRho + RhoGDP; k4, k5
+
+RacGDP + GEFRac <-> GEFRac + RacGTP; k7, k8
+RacGTP + GAPRac <-> GAPRac + RacGDP; k10, k11
+
+RacGTP + PAK <-> RacGTPPAK; k15, k16
+
+Paxillin + RacGTPPAK <-> PaxillinP + RacGTPPAK; k17, k18
+Paxillin + FAK <-> PaxillinTP + FAK; k19, k20
+PaxillinP + PP2A <-> Paxillin + PP2A; k21, k22
+PaxillinTP + someTppase <-> Paxillin + someTppase; k23, k24
+
+Paxillin + FAK <-> PaxillinFAK; k25, k26
+PaxillinP + FAK <-> PaxillinPFAK; k27, k28
+PaxillinTP + FAK <-> PaxillinTPFAK; k29, k30
+
+GIT + FAK <-> GITP + FAK; k31, k32
+PIXGIT + FAK <-> PIXGITP + FAK; k33, k34
+PAKPIXGIT + FAK <-> PAKPIXGITP + FAK; k35, k36
+
+PAK + PIX <-> PAKPIX; k37, k38
+
+PIX + GIT <-> PIXGIT; k39, k40
+PIX + GITP <-> PIXGITP; k41, k42
+
+PAK + PIXGIT <-> PAKPIXGIT; k43, k44
+PAK + PIXGITP <-> PAKPIXGITP; k45, k46
+
+PAKPIX + GIT <-> PAKPIXGIT; k47, k48
+PAKPIX + GITP <-> PAKPIXGITP; k49, k50
+
+PAKPIXGITP + PaxillinP <-> PAKPIXGITPPaxillinP; k51, k52
+RacGTP + PAKPIXGITPPaxillinP <-> RacGTPPAKPIXGITPPaxillinP; k53, k54
+
+Paxillin + RacGTPPAKPIXGITPPaxillinP <-> PaxillinP + RacGTPPAKPIXGITPPaxillinP; k55, k56
+
+PaxillinTP + Crk <-> PaxillinTPCrk; k57, k58
+PaxillinTPCrk + xnGEFRac <-> PaxillinTPCrk + nGEFRac; k59, k60
+
+
+#Conservation stuff
+
+totGEFRac = GEFRac + nGEFRac + totPIX
+totPaxillin = Paxillin + PaxillinP + PaxillinTP + PaxillinFAK + PaxillinPFAK + PaxillinTPFAK + PaxillinTPCrk + PAKPIXGITPPaxillinP + RacGTPPAKPIXGITPPaxillinP
+totGIT = GIT + GITP + PIXGIT + PAKPIXGIT + PIXGITP + PAKPIXGITP + PAKPIXGITPPaxillinP + RacGTPPAKPIXGITPPaxillinP
+totPIX = PIX + PIXGIT + PAKPIX + PAKPIXGIT + PIXGITP + PAKPIXGITP + PAKPIXGITPPaxillinP + RacGTPPAKPIXGITPPaxillinP
+totPAK = PAK + RacGTPPAK + PAKPIX + PAKPIXGIT + PAKPIXGITP + PAKPIXGITPPaxillinP + RacGTPPAKPIXGITPPaxillinP
+totRacGTP = RacGTP + RacGTPPAK
+totFAK = FAK + PaxillinFAK + PaxillinPFAK + PAxillinTPFAK
+totCrk = Crk + PaxillinTPCrk
