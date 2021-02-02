@@ -1,141 +1,81 @@
 function Rx = rhs_fun(t,u)
 u=transpose(u);
-k5=0.75;
-k6=1.0532;
-k11=1.0716;
-k12=1.0179;
-k13=1.0337;
-k14=1.0188;
-k15=1.0322;
-k16=1.0404;
-k23=1.0549;
-k24=1.0049;
-k25=1.0553;
-k26=1.0275;
-k27=1.0242;
-k28=1.0243;
-k29=1.0154;
-k30=1.0956;
-k31=1.0936;
-k32=1.0819;
-k33=1.0728;
-k34=1.0176;
-k35=1.036;
-k36=1.0189;
-k37=1.0001;
-k38=1.0316;
-k39=1.07;
-k40=1.0625;
-k42=1.0543;
-k43=1.0439;
-k44=1.0287;
-k45=1.0502;
-k1=1.0762;
-k2=1.0762;
-k4=1.0576;
-k46=1.0748;
-k47=1.0646;
-k48=1.0123;
-k49=1.0504;
-k50=1.0347;
-k51=1.0092;
-k52=1.0148;
-k53=1.0198;
-k54=1.0672;
-k7=1.0432;
-k8=1.0694;
-k9=1.0257;
-k10=1.001;
-k17=1.0532;
-k18=1.0279;
-k19=1.0946;
-k20=1.0906;
-k21=1.0393;
-k22=1.0025;
-k41=1.0671;
-cnsrv_1=2;
-cnsrv_2=1;
-cnsrv_3=1;
-cnsrv_4=4;
-cnsrv_5=1;
-cnsrv_6=10;
-cnsrv_7=2;
-cnsrv_8=8;
-cnsrv_9=5;
-cnsrv_10=6;
-cnsrv_11=4;
-cnsrv_12=1;
-cnsrv_13=1;
-cnsrv_14=1;
-cnsrv_15=2;
-f_RhoGDP = -(k1.*(cnsrv_1 - u(:,3)).*(cnsrv_2))+(k2.*u(:,3).*(cnsrv_3));
-f_GEFRho = 0;
-f_RhoGTP = (k1.*(cnsrv_1 - u(:,3)).*(cnsrv_2))-(k2.*u(:,3).*(cnsrv_3));
-f_GAPRho = 0;
-f_RacGTP = -(k5.*u(:,5).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))+(k6.*u(:,18))-(k39.*u(:,5).*u(:,16))+(k40.*u(:,31))-(k4.*u(:,5).*(cnsrv_5))+(k46.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*(cnsrv_6 - u(:,19) - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,31) - u(:,16)))+(k47.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*(cnsrv_7 - u(:,34)))+(k48.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)))+(k49.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,11))+(k50.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,12))+(k51.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,13))+(k52.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,14))+(k53.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,15))+(k54.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,16));
-f_GAPRac = 0;
-f_RacGDP = (k4.*u(:,5).*(cnsrv_5))-(k46.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*(cnsrv_6 - u(:,19) - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,31) - u(:,16)))-(k47.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*(cnsrv_7 - u(:,34)))-(k48.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)))-(k49.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,11))-(k50.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,12))-(k51.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,13))-(k52.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,14))-(k53.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,15))-(k54.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,16));
-f_GEFRac = (k54.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,16));
-f_nGEFRac = (k44.*u(:,34).*u(:,33))-(k45.*(cnsrv_7 - u(:,34)).*u(:,33));
-f_PIX = -(k23.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))+(k24.*u(:,11))-(k25.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*(cnsrv_10 - u(:,14) - u(:,15) - u(:,12) - u(:,13) - u(:,29)))+(k26.*u(:,12))-(k27.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*u(:,29))+(k28.*u(:,13));
-f_PAKPIX = (k23.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))-(k24.*u(:,11))-(k33.*u(:,11).*(cnsrv_10 - u(:,14) - u(:,15) - u(:,12) - u(:,13) - u(:,29)))+(k34.*u(:,14))-(k35.*u(:,11).*u(:,29))+(k36.*u(:,15));
-f_PIXGIT = (k25.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*(cnsrv_10 - u(:,14) - u(:,15) - u(:,12) - u(:,13) - u(:,29)))-(k26.*u(:,12))-(k29.*u(:,12).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))+(k30.*u(:,14))-(k19.*u(:,12).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))+(k20.*u(:,13).*(cnsrv_14));
-f_PIXGITP = (k27.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*u(:,29))-(k28.*u(:,13))-(k31.*u(:,13).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))+(k32.*u(:,15))+(k19.*u(:,12).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))-(k20.*u(:,13).*(cnsrv_14));
-f_PAKPIXGIT = (k29.*u(:,12).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))-(k30.*u(:,14))+(k33.*u(:,11).*(cnsrv_10 - u(:,14) - u(:,15) - u(:,12) - u(:,13) - u(:,29)))-(k34.*u(:,14))-(k21.*u(:,14).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))+(k22.*u(:,15).*(cnsrv_14));
-f_PAKPIXGITP = (k31.*u(:,13).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))-(k32.*u(:,15))+(k35.*u(:,11).*u(:,29))-(k36.*u(:,15))-(k37.*u(:,15).*u(:,20))+(k38.*u(:,16))+(k21.*u(:,14).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))-(k22.*u(:,15).*(cnsrv_14));
-f_PAKPIXGITPPaxillinP = (k37.*u(:,15).*u(:,20))-(k38.*u(:,16))-(k39.*u(:,5).*u(:,16))+(k40.*u(:,31))-(k54.*(cnsrv_4 - u(:,18) - u(:,31) - u(:,5)).*u(:,16));
-f_PAK = -(k5.*u(:,5).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))+(k6.*u(:,18))-(k23.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))+(k24.*u(:,11))-(k29.*u(:,12).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))+(k30.*u(:,14))-(k31.*u(:,13).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))+(k32.*u(:,15));
-f_RacGTPPAK = (k5.*u(:,5).*(cnsrv_9 - u(:,14) - u(:,15) - u(:,18) - u(:,11)))-(k6.*u(:,18));
-f_Paxillin = -(k11.*u(:,19).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))+(k12.*u(:,25))-(k7.*u(:,19).*u(:,18))-(k8.*u(:,19).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))+(k9.*u(:,20).*(cnsrv_12))+(k10.*u(:,22).*(cnsrv_13))-(k41.*u(:,19).*u(:,31));
-f_PaxillinP = -(k13.*u(:,20).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))+(k14.*u(:,26))-(k37.*u(:,15).*u(:,20))+(k38.*u(:,16))+(k7.*u(:,19).*u(:,18))-(k9.*u(:,20).*(cnsrv_12))+(k41.*u(:,19).*u(:,31));
-f_FAK = -(k11.*u(:,19).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))+(k12.*u(:,25))-(k13.*u(:,20).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))+(k14.*u(:,26))-(k15.*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)).*u(:,22))+(k16.*u(:,27));
-f_PaxillinTP = -(k15.*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)).*u(:,22))+(k16.*u(:,27))-(k42.*u(:,22).*(cnsrv_15 - u(:,33)))+(k43.*u(:,33))+(k8.*u(:,19).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))-(k10.*u(:,22).*(cnsrv_13));
-f_PP2A = 0;
-f_someTppase = 0;
-f_PaxillinFAK = (k11.*u(:,19).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))-(k12.*u(:,25));
-f_PaxillinPFAK = (k13.*u(:,20).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))-(k14.*u(:,26));
-f_PaxillinTPFAK = (k15.*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)).*u(:,22))-(k16.*u(:,27));
-f_GIT = -(k25.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*(cnsrv_10 - u(:,14) - u(:,15) - u(:,12) - u(:,13) - u(:,29)))+(k26.*u(:,12))-(k33.*u(:,11).*(cnsrv_10 - u(:,14) - u(:,15) - u(:,12) - u(:,13) - u(:,29)))+(k34.*u(:,14))-(k17.*(cnsrv_10 - u(:,14) - u(:,15) - u(:,12) - u(:,13) - u(:,29)).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))+(k18.*u(:,29).*(cnsrv_14));
-f_GITP = -(k27.*(cnsrv_8 - u(:,20) - u(:,22) - u(:,25) - u(:,26) - u(:,27) - u(:,33) - u(:,19)).*u(:,29))+(k28.*u(:,13))-(k35.*u(:,11).*u(:,29))+(k36.*u(:,15))+(k17.*(cnsrv_10 - u(:,14) - u(:,15) - u(:,12) - u(:,13) - u(:,29)).*(cnsrv_11 - u(:,26) - u(:,27) - u(:,25)))-(k18.*u(:,29).*(cnsrv_14));
-f_someotherTppase = 0;
-f_RacGTPPAKPIXGITPPaxillinP = (k39.*u(:,5).*u(:,16))-(k40.*u(:,31));
-f_Crk = -(k42.*u(:,22).*(cnsrv_15 - u(:,33)))+(k43.*u(:,33));
-f_PaxillinTPCrk = (k42.*u(:,22).*(cnsrv_15 - u(:,33)))-(k43.*u(:,33));
-f_xnGEFRac = -(k44.*u(:,34).*u(:,33))+(k45.*(cnsrv_7 - u(:,34)).*u(:,33));
+B_1=0.5;
+GIT=0.11;
+I_K=0.009;
+I_R=0.003;
+I_rho=0.016;
+L_K=5.77;
+L_R=0.34;
+L_rho=0.34;
+PAKtot=4.5;
+PIX=0.069;
+Pax=0;
+Pax_Square=494.9785;
+Paxtot=2.3;
+Rac=0;
+RacPAK=0;
+Rac_Square=1614.1;
+Rho=0;
+Rho_Square=1614.1;
+alpha_PAK=0.3;
+alpha_R=15;
+delta_P=0.004;
+delta_R=0.025;
+delta_rho=0.016;
+k_C=5;
+k_G=5.71;
+k_X=41.7;
+m=4;
+n=4;
+cnsrv_1=3.0892;
+cnsrv_2=2;
+cnsrv_3=2.1404;
+RacRatio0 = u(:,2) ./ Rac_Square;
+RacRatio = (u(:,2) + ((Rac.*(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)))) ./ Rac_Square;
+RhoRatio = u(:,4) ./ Rho_Square;
+PaxRatio = u(:,6) ./ Pax_Square;
+K_is=1./((1+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*RacRatio0)+k_G.*k_X.*GIT.*PIX);
+K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
+I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
+Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
+Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
+Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
+f_Raci = -(Q_R.*(cnsrv_1 - u(:,2) - (Rac.*(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X))))+(delta_R.*u(:,2));
+f_Rhoi = -(Q_rho.*u(:,3))+(delta_rho.*u(:,4));
+f_Paxi = -(Q_P.*u(:,5))+(delta_P.*u(:,6));
+subs__0 = GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X;
+subs__1 = Pax_Square.*Rac_Square + Rac_Square.*subs__0 + Pax_Square.*u(:,2).*alpha_R + u(:,2).*alpha_R.*subs__0 + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X;
+subs__2 = PIX.*Pax_Square.*k_X;
+subs__3 = 1./(Rac_Square + u(:,2).*alpha_R);
+subs__4 = 1./PAKtot;
+subs__5 = 1./(Pax_Square + subs__0 + subs__2);
+subs__6 = 1./k_C;
+subs__7 = 1./alpha_PAK;
+subs__8 = 1./k_G;
+subs__9 = 1./GIT;
+subs__10 = 1./subs__2;
+subs__11 = 1./Rac_Square;
+subs__12 = u(:,2).*alpha_R;
+subs__13 = PIX.*Rac_Square.*k_X;
+subs__14 = subs__0.*subs__12;
+J_gamma_1_2=(Pax_Square.*Rac_Square + 2.*Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + 2.*PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + 2.*GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X)./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X));
+J_gamma_2_2=-(u(:,6).*Rac_Square.*alpha_R)./(PAKtot.*k_C.*(Rac_Square + u(:,2).*alpha_R).^2);
+J_gamma_1_6=-(GIT.^2.*PIX.^2.*Paxtot.*Pax_Square.*u(:,2).*k_C.*k_G.^2.*k_X.^2)./(PAKtot.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X).^2);
+J_gamma_2_6=(Rac_Square + u(:,2).*alpha_R + PIX.*Rac_Square.*k_X + PIX.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Rac_Square.*k_G.*k_X)./(GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*(Rac_Square + u(:,2).*alpha_R)) + (2.*GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + 2.*GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X)./(GIT.*PAKtot.*PIX.*Pax_Square.*k_C.*k_G.*k_X.*(Rac_Square + u(:,2).*alpha_R));
+subs2__0 = 1./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1);
+subs2__1 = J_gamma_2_2.*f_Raci;
+subs2__2 = J_gamma_1_6.*f_Paxi;
+subs2__3 = -subs2__2;
+subs2__4 = -subs2__1;
+subs2__5 = J_gamma_1_2.*f_Raci;
+subs2__6 = J_gamma_1_2.*f_Paxi;
 
-Rx = [f_RhoGDP,...
-f_GEFRho,...
-f_RhoGTP,...
-f_GAPRho,...
-f_RacGTP,...
-f_GAPRac,...
-f_RacGDP,...
-f_GEFRac,...
-f_nGEFRac,...
-f_PIX,...
-f_PAKPIX,...
-f_PIXGIT,...
-f_PIXGITP,...
-f_PAKPIXGIT,...
-f_PAKPIXGITP,...
-f_PAKPIXGITPPaxillinP,...
-f_PAK,...
-f_RacGTPPAK,...
-f_Paxillin,...
-f_PaxillinP,...
-f_FAK,...
-f_PaxillinTP,...
-f_PP2A,...
-f_someTppase,...
-f_PaxillinFAK,...
-f_PaxillinPFAK,...
-f_PaxillinTPFAK,...
-f_GIT,...
-f_GITP,...
-f_someotherTppase,...
-f_RacGTPPAKPIXGITPPaxillinP,...
-f_Crk,...
-f_PaxillinTPCrk,...
-f_xnGEFRac];
+Rx = [f_Raci,...
+-(f_Raci - J_gamma_1_6.*f_Paxi + J_gamma_2_6.*f_Raci)./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1),...
+f_Rhoi,...
+-f_Rhoi,...
+f_Paxi,...
+-(f_Paxi + J_gamma_1_2.*f_Paxi - J_gamma_2_2.*f_Raci)./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1)];
 Rx=transpose(Rx);
 end

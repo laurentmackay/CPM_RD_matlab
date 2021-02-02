@@ -156,7 +156,7 @@ if any(abs(cell2mat([stoic_fast{:}]))~=1)
 end
 
 fast_pairs=cell(length(affinity),1);
-fast_affinity=cell(length(affinity),1);
+fast_affinity=affinity;
 
 % for i=1:2:length(species_fast)
 %     try

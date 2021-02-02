@@ -43,10 +43,10 @@ param k_X=41.7, k_G=5.71, k_C=5
 param GIT=0.11, PIX=0.069, Paxtot=2.3
 param n=4, m=4
 param alpha_PAK=0.3
-param PAKtot = Rtot*alpha_PAK
+param PAKtot = 15*0.3
 param Rho_Square = 1.6141e+03
 param Rac_Square = 1.6141e+03
 param Pax_Square = 494.9785
 
 
-
+*(0)=1
