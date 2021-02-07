@@ -1,5 +1,5 @@
 RacRatio0 = u(:,2) ./ Rac_Square;
-RacRatio = (u(:,2) + ((Rac.*(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)))) ./ Rac_Square;
+RacRatio = (u(:,2) + ((u(:,2).*(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)))) ./ Rac_Square;
 RhoRatio = u(:,4) ./ Rho_Square;
 PaxRatio = u(:,6) ./ Pax_Square;
 K_is=1./((1+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*RacRatio0)+k_G.*k_X.*GIT.*PIX);
@@ -8,7 +8,7 @@ I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
 Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
 Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
-f_Raci = -(Q_R.*(cnsrv_1 - u(:,2) - (Rac.*(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X))))+(delta_R.*u(:,2));
+f_Raci = -(Q_R.*(cnsrv_1 - u(:,2) - (u(:,2).*(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X))))+(delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+(delta_rho.*u(:,4));
 f_Paxi = -(Q_P.*u(:,5))+(delta_P.*u(:,6));
 subs__0 = GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X;
