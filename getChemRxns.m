@@ -82,6 +82,7 @@ name='[a-zA-Z_$][a-zA-Z_$0-9:\-]*';
 
 
 str=regexprep(str,['[^\n]*D\(' name '\)[^\n]*\n'],""); %remove diffusion rate declarations
+str=regexprep(str,['[^\n]*QSS(A?)\(' name '[^\n]*\n'],""); %remove QSS declarations
 
 whitespace='[ \f\t\v]*';
 nada={'0','{}'};

@@ -19,7 +19,7 @@ end
 
 
 if ~isempty(local)
-    local_hdr = [newline 'DOUBLE PRECISION ' strjoin(local,', ') ];
+    local_hdr = [newline 'DOUBLE PRECISION ' char(strjoin(local,', ')) ];
 else
     local_hdr='';
 end

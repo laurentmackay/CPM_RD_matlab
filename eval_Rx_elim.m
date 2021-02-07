@@ -1,32 +1,3 @@
-function Rx = rhs_fun(t,u)
-u=transpose(u);
-B_1=0.5;
-GIT=0.11;
-I_K=0.009;
-I_R=0.003;
-I_rho=0.016;
-L_K=5.77;
-L_R=0.34;
-L_rho=0.34;
-PAKtot=4.5;
-PIX=0.069;
-Pax_Square=494.9785;
-Paxtot=2.3;
-Rac_Square=1614.1;
-Rho_Square=1614.1;
-alpha_PAK=0.3;
-alpha_R=15;
-delta_P=0.004;
-delta_R=0.025;
-delta_rho=0.016;
-k_C=5;
-k_G=5.71;
-k_X=41.7;
-m=4;
-n=4;
-cnsrv_1=3.0892;
-cnsrv_2=2;
-cnsrv_3=2.1404;
 RacRatio0 = u(:,1) ./ Rac_Square;
 RacRatio = (u(:,1) + ((u(:,1).*(Pax_Square.*Rac_Square + Pax_Square.*u(:,1).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,1).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*u(:,1).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*k_C.*k_G.*k_X)))) ./ Rac_Square;
 RhoRatio = u(:,3) ./ Rho_Square;
@@ -72,5 +43,3 @@ f_Rhoi,...
 -f_Rhoi,...
 f_Paxi,...
 -(f_Paxi + J_gamma_1_2.*f_Paxi - J_gamma_2_2.*f_Raci)./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1)];
-Rx=transpose(Rx);
-end
