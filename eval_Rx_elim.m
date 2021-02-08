@@ -1,45 +1,48 @@
-RacRatio0 = u(:,1) ./ Rac_Square;
-RacRatio = (u(:,1) + ((u(:,1).*(Pax_Square.*Rac_Square + Pax_Square.*u(:,1).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,1).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*u(:,1).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*k_C.*k_G.*k_X)))) ./ Rac_Square;
-RhoRatio = u(:,3) ./ Rho_Square;
-PaxRatio = u(:,5) ./ Pax_Square;
-K_is=1./((1+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*RacRatio0)+k_G.*k_X.*GIT.*PIX);
-K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
-I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
-Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
-Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
-Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
-f_Raci = -(Q_R.*(cnsrv_1 - u(:,1) - (u(:,1).*(Pax_Square.*Rac_Square + Pax_Square.*u(:,1).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,1).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*u(:,1).*alpha_R.*k_C.*k_G.*k_X))./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*k_C.*k_G.*k_X))))+(delta_R.*u(:,1));
-f_Rhoi = -(Q_rho.*u(:,2))+(delta_rho.*u(:,3));
-f_Paxi = -(Q_P.*u(:,4))+(delta_P.*u(:,5));
-subs__0 = GIT.*PIX.*u(:,5).*Paxtot.*k_C.*k_G.*k_X;
-subs__1 = Pax_Square.*Rac_Square + Rac_Square.*subs__0 + Pax_Square.*u(:,1).*alpha_R + u(:,1).*alpha_R.*subs__0 + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,1).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X;
-subs__2 = PIX.*Pax_Square.*k_X;
-subs__3 = 1./(Rac_Square + u(:,1).*alpha_R);
-subs__4 = 1./PAKtot;
-subs__5 = 1./(Pax_Square + subs__0 + subs__2);
-subs__6 = 1./k_C;
-subs__7 = 1./alpha_PAK;
-subs__8 = 1./k_G;
-subs__9 = 1./GIT;
-subs__10 = 1./subs__2;
-subs__11 = 1./Rac_Square;
-subs__12 = u(:,1).*alpha_R;
-subs__13 = PIX.*Rac_Square.*k_X;
-subs__14 = subs__0.*subs__12;
-J_gamma_1_2=(Pax_Square.*Rac_Square + 2.*Pax_Square.*u(:,1).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + 2.*PIX.*Pax_Square.*u(:,1).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + 2.*GIT.*PIX.*u(:,5).*Paxtot.*u(:,1).*alpha_R.*k_C.*k_G.*k_X)./(PAKtot.*Rac_Square.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*k_C.*k_G.*k_X));
-J_gamma_2_2=-(u(:,5).*Rac_Square.*alpha_R)./(PAKtot.*k_C.*(Rac_Square + u(:,1).*alpha_R).^2);
-J_gamma_1_6=-(GIT.^2.*PIX.^2.*Paxtot.*Pax_Square.*u(:,1).*k_C.*k_G.^2.*k_X.^2)./(PAKtot.*alpha_PAK.*(Pax_Square + PIX.*Pax_Square.*k_X + GIT.*PIX.*u(:,5).*Paxtot.*k_C.*k_G.*k_X).^2);
-J_gamma_2_6=(Rac_Square + u(:,1).*alpha_R + PIX.*Rac_Square.*k_X + PIX.*u(:,1).*alpha_R.*k_X + GIT.*PIX.*Rac_Square.*k_G.*k_X)./(GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*(Rac_Square + u(:,1).*alpha_R)) + (2.*GIT.*PIX.*u(:,5).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + 2.*GIT.*PIX.*u(:,5).*Paxtot.*u(:,1).*alpha_R.*k_C.*k_G.*k_X)./(GIT.*PAKtot.*PIX.*Pax_Square.*k_C.*k_G.*k_X.*(Rac_Square + u(:,1).*alpha_R));
-subs2__0 = 1./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1);
-subs2__1 = J_gamma_2_2.*f_Raci;
-subs2__2 = J_gamma_1_6.*f_Paxi;
-subs2__3 = -subs2__2;
-subs2__4 = -subs2__1;
-subs2__5 = J_gamma_1_2.*f_Raci;
-subs2__6 = J_gamma_1_2.*f_Paxi;
+f_RhoGTP = (k1.*(cnsrv_1 - u(:,1)).*(cnsrv_2))-(k2.*u(:,1).*(cnsrv_3));
+f_RacGDP = (k4.*(cnsrv_4 - u(:,8) - u(:,16) - u(:,2)).*(cnsrv_5))-(k46.*u(:,2).*(cnsrv_6 - u(:,9) - u(:,10) - u(:,11) - u(:,12) - u(:,13) - u(:,18) - u(:,16) - u(:,6) - (u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))))-(k47.*u(:,2).*(cnsrv_7 - u(:,19)))-(k48.*u(:,2).*(cnsrv_8 - u(:,10) - u(:,11) - u(:,12) - u(:,13) - u(:,18) - u(:,9) - (u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))))-(k49.*u(:,2).*(cnsrv_9 - u(:,4) - u(:,5) - u(:,8) - u(:,7)))-(k50.*u(:,2).*(cnsrv_10 - u(:,15) - u(:,4) - u(:,5) - u(:,3) - u(:,14)))-(k51.*u(:,2).*u(:,3))-(k52.*u(:,2).*u(:,4))-(k53.*u(:,2).*u(:,5))-(k54.*u(:,2).*u(:,6));
+f_PIXGITP = (k27.*(cnsrv_8 - u(:,10) - u(:,11) - u(:,12) - u(:,13) - u(:,18) - u(:,9) - (u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))).*u(:,15))-(k28.*u(:,3))-(k31.*u(:,3).*u(:,7))+(k32.*u(:,5))+(k19.*(cnsrv_10 - u(:,15) - u(:,4) - u(:,5) - u(:,3) - u(:,14)).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))-(k20.*u(:,3).*(cnsrv_14));
+f_PAKPIXGIT = (k29.*(cnsrv_10 - u(:,15) - u(:,4) - u(:,5) - u(:,3) - u(:,14)).*u(:,7))-(k30.*u(:,4))+(k33.*(cnsrv_9 - u(:,4) - u(:,5) - u(:,8) - u(:,7)).*u(:,14))-(k34.*u(:,4))-(k21.*u(:,4).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))+(k22.*u(:,5).*(cnsrv_14));
+f_PAKPIXGITP = (k31.*u(:,3).*u(:,7))-(k32.*u(:,5))+(k35.*(cnsrv_9 - u(:,4) - u(:,5) - u(:,8) - u(:,7)).*u(:,15))-(k36.*u(:,5))-(k37.*u(:,5).*u(:,10))+(k38.*u(:,6))+(k21.*u(:,4).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))-(k22.*u(:,5).*(cnsrv_14));
+f_PAKPIXGITPPaxillinP = (k37.*u(:,5).*u(:,10))-(k38.*u(:,6))-(k39.*(cnsrv_4 - u(:,8) - u(:,16) - u(:,2)).*u(:,6))+(k40.*u(:,16))-(k54.*u(:,2).*u(:,6));
+f_PAK = -(k5.*(cnsrv_4 - u(:,8) - u(:,16) - u(:,2)).*u(:,7))+(k6.*u(:,8))-(k23.*(cnsrv_8 - u(:,10) - u(:,11) - u(:,12) - u(:,13) - u(:,18) - u(:,9) - (u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))).*u(:,7))+(k24.*(cnsrv_9 - u(:,4) - u(:,5) - u(:,8) - u(:,7)))-(k29.*(cnsrv_10 - u(:,15) - u(:,4) - u(:,5) - u(:,3) - u(:,14)).*u(:,7))+(k30.*u(:,4))-(k31.*u(:,3).*u(:,7))+(k32.*u(:,5));
+f_RacGTPPAK = (k5.*(cnsrv_4 - u(:,8) - u(:,16) - u(:,2)).*u(:,7))-(k6.*u(:,8));
+f_Paxillin = -(k11.*u(:,9).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))+(k12.*u(:,11))-(k7.*u(:,9).*u(:,8))-(k8.*u(:,9).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))+(k9.*u(:,10).*(cnsrv_12))+(k10.*((u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))).*(cnsrv_13))-(k41.*u(:,9).*u(:,16));
+f_PaxillinP = -(k13.*u(:,10).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))+(k14.*u(:,12))-(k37.*u(:,5).*u(:,10))+(k38.*u(:,6))+(k7.*u(:,9).*u(:,8))-(k9.*u(:,10).*(cnsrv_12))+(k41.*u(:,9).*u(:,16));
+f_PaxillinFAK = (k11.*u(:,9).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))-(k12.*u(:,11));
+f_PaxillinPFAK = (k13.*u(:,10).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))-(k14.*u(:,12));
+f_PaxillinTPFAK = (k15.*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*((u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))))-(k16.*u(:,13));
+f_GIT = -(k25.*(cnsrv_8 - u(:,10) - u(:,11) - u(:,12) - u(:,13) - u(:,18) - u(:,9) - (u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))).*u(:,14))+(k26.*(cnsrv_10 - u(:,15) - u(:,4) - u(:,5) - u(:,3) - u(:,14)))-(k33.*(cnsrv_9 - u(:,4) - u(:,5) - u(:,8) - u(:,7)).*u(:,14))+(k34.*u(:,4))-(k17.*u(:,14).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))+(k18.*u(:,15).*(cnsrv_14));
+f_GITP = -(k27.*(cnsrv_8 - u(:,10) - u(:,11) - u(:,12) - u(:,13) - u(:,18) - u(:,9) - (u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))).*u(:,15))+(k28.*u(:,3))-(k35.*(cnsrv_9 - u(:,4) - u(:,5) - u(:,8) - u(:,7)).*u(:,15))+(k36.*u(:,5))+(k17.*u(:,14).*(cnsrv_11 - u(:,12) - u(:,13) - u(:,11)))-(k18.*u(:,15).*(cnsrv_14));
+f_RacGTPPAKPIXGITPPaxillinP = (k39.*(cnsrv_4 - u(:,8) - u(:,16) - u(:,2)).*u(:,6))-(k40.*u(:,16));
+f_Crk = -(k42.*((u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))).*u(:,17))+(k43.*u(:,18));
+f_PaxillinTPCrk = (k42.*((u(:,13).*k16 + u(:,18).*k43 - u(:,9).*k8.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))./(u(:,17).*k42 + cnsrv_13.*k10 - k15.*(u(:,11) + u(:,12) + u(:,13) - cnsrv_11))).*u(:,17))-(k43.*u(:,18));
+f_xnGEFRac = -(k44.*u(:,19).*u(:,18))+(k45.*(cnsrv_7 - u(:,19)).*u(:,18));
+subs__0 = 1./(u(:,17).*k42 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*k15 + k10.*(cnsrv_13));
+subs__1 = u(:,13).*k16 + u(:,18).*k43 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*u(:,9).*k8;
+subs__2 = subs__0.^2;
+J_gamma_19=((cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*k8)./(u(:,17).*k42 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*k15 + k10.*(cnsrv_13));
+J_gamma_21=(u(:,17).*u(:,9).*k8.*k42 - k15.*(u(:,13).*k16 + u(:,18).*k43) + u(:,9).*k8.*k10.*(cnsrv_13))./(u(:,17).*k42 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*k15 + k10.*(cnsrv_13)).^2;
+J_gamma_23=-(k10.*(u(:,13).*k16 + u(:,18).*k43 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*u(:,9).*k8))./(u(:,17).*k42 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*k15 + k10.*(cnsrv_13)).^2;
+J_gamma_26=k16./(u(:,17).*k42 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*k15 + k10.*(cnsrv_13));
+J_gamma_31=-(k42.*(u(:,13).*k16 + u(:,18).*k43 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*u(:,9).*k8))./(u(:,17).*k42 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*k15 + k10.*(cnsrv_13)).^2;
+J_gamma_32=k43./(u(:,17).*k42 + (cnsrv_11 - u(:,12) - u(:,13) - u(:,11)).*k15 + k10.*(cnsrv_13));
 
-Rx = [-(f_Raci - J_gamma_1_6.*f_Paxi + J_gamma_2_6.*f_Raci)./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1),...
-f_Rhoi,...
--f_Rhoi,...
-f_Paxi,...
--(f_Paxi + J_gamma_1_2.*f_Paxi - J_gamma_2_2.*f_Raci)./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1)];
+Rx = [f_RhoGTP,...
+f_RacGDP,...
+f_PIXGITP,...
+f_PAKPIXGIT,...
+f_PAKPIXGITP,...
+f_PAKPIXGITPPaxillinP,...
+f_PAK,...
+f_RacGTPPAK,...
+f_Paxillin,...
+f_PaxillinP,...
+f_PaxillinFAK,...
+f_PaxillinPFAK,...
+f_PaxillinTPFAK,...
+f_GIT,...
+f_GITP,...
+f_RacGTPPAKPIXGITPPaxillinP,...
+f_Crk,...
+f_PaxillinTPCrk,...
+f_xnGEFRac];

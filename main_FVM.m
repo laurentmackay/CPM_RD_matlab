@@ -46,7 +46,7 @@ cpmstep=cpmstep0/cpmsteps;
 div=0.1;
 
 %prepare some .m files to model the chemical reactions from the reactions specified in `chem_Rx` file
-% mk_rxn_files('chem_Rx_Pax2')
+mk_rxn_files('chem_Rx_Pax_Asheesh')
 
 restart=false;
 tic

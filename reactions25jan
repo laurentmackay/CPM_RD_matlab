@@ -49,6 +49,7 @@ Paxillin + RacGTPPAKPIXGITPPaxillinP -> PaxillinP + RacGTPPAKPIXGITPPaxillinP; k
 PaxillinTP + Crk <-> PaxillinTPCrk; k42, k43
 PaxillinTPCrk + xnGEFRac <-> PaxillinTPCrk + nGEFRac; k44, k45
 
+QSSA(PaxillinTP)
 
 *(0)=1
 par *=1+0.1*rand(), k5=0.75

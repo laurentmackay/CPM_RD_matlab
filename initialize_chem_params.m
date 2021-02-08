@@ -1,8 +1,8 @@
-N_species = 8;
-N_rx = 6;
-D = [0.43         0.02         0.43         0.02           20          0.1         0.02          0.1];
-N_slow = 6;
-chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
+N_species = 34;
+N_rx = 53;
+D = [0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0];
+N_slow = 33;
+chems={'RhoGDP','GEFRho','RhoGTP','GAPRho','RacGTP','GAPRac','RacGDP','GEFRac','nGEFRac','PIX','PAKPIX','PIXGIT','PIXGITP','PAKPIXGIT','PAKPIXGITP','PAKPIXGITPPaxillinP','PAK','RacGTPPAK','Paxillin','PaxillinP','FAK','PaxillinTP','PP2A','someTppase','PaxillinFAK','PaxillinPFAK','PaxillinTPFAK','GIT','GITP','someotherTppase','RacGTPPAKPIXGITPPaxillinP','Crk','PaxillinTPCrk','xnGEFRac'};
 
 
 

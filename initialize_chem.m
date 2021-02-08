@@ -147,7 +147,10 @@ fid=fopen('rhs_fun.m','w');
 fwrite(fid,str,'char');
 fclose(fid);
 
-[T_vec,Y_vec] = ode15s(@ rhs_fun,[0 1e4],ones(1,N_species),odeset('NonNegative',1:N_species));
+model_ic
+
+
+[T_vec,Y_vec] = ode15s(@ rhs_fun,[0 1e4],ic,odeset('NonNegative',1:N_species));
     m0=sum( N0(1,:));
 %     N0(1,1:N_species)=Y(end,:);
 
@@ -157,7 +160,7 @@ fclose(fid);
     N0(1,6)/Pax_Square
     
     figure(3);clf();
-    plot(T_vec,Y);
+    plot(T_vec,Y_vec);
     legend(chems)
     drawnow;
 else
