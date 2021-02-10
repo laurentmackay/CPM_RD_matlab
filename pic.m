@@ -7,9 +7,9 @@ if plotting
     tp__0=tic;
 
 %     imagesc(cell_mask,[0 1]);
-    plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
+%     plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
 %     plotCellIm(panelA,alpha_chem(:,:,5),cell_mask,i0,j0)
-%      plotCellIm(panelA,I_Ks,cell_mask,i0,j0)
+     plotCellIm(panelA,reshape(K,shape),cell_mask,i0,j0)
 
     hold(panelA,'on')
     try

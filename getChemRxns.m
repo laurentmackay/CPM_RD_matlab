@@ -1,6 +1,6 @@
-function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat, species_fast, stoic_fast, S_fast, S_cat_fast] = getChems(f)
+function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat, species_fast, stoic_fast, S_fast, S_cat_fast, r,p,r_fast,p_fast] = getChems(f)
 
-    function [species,stoic,rates]=parseRxns(trans,fast)
+    function [species,stoic,rates,r_species,r_stoic,p_species,p_stoic]=parseRxns(trans,fast)
         if nargin==1
             fast=false;
         end
@@ -44,6 +44,10 @@ function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat, species_fas
             rates=cellfun(@(x) regexp(x(2),chem_set,"split",'once'),rxn_split);
             rates=cellfun(@(x) regexprep(x(end),'[\;\n\r]',''),rates,'UniformOutput',0);
             
+            r_stoic=cf2(@(x)abs(x),lhs_stoic);
+            p_stoic=cf2(@(x)abs(x),rhs_stoic);
+            r_species=lhs_species;
+            p_species=rhs_species;
             if strcmp(trans,rvsbl_rxn)
                 
                 rates=cellfun(@(x) strsplit(x{1},','),rates,'UniformOutput',0);
@@ -51,10 +55,24 @@ function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat, species_fas
                 
                 species=cellfun(@(x,y) [x,y],lhs_species,rhs_species,'UniformOutput',0);
                 stoic=cellfun(@(x,y) [x,y],lhs_stoic,rhs_stoic,'UniformOutput',0);
+
                 
                 species=repelem(species,2);
                 stoic=[stoic; cf2(@(x) -x,stoic)];
                 stoic=stoic(:)';
+%                 r_stoic=[r_stoic; cf2(@(x) -x,r_stoic)];
+%                 r_stoic=r_stoic(:)';
+%                 p_stoic=[p_stoic; cf2(@(x) -x,p_stoic)];
+%                 p_stoic=p_stoic(:)';
+                tmp=[r_stoic; p_stoic];
+                p_stoic =[p_stoic; r_stoic];
+                r_stoic=tmp(:)';
+                p_stoic = p_stoic(:)';
+                tmp = [r_species; p_species];
+                p_species=[p_species; r_species];
+                r_species = tmp(:)';
+                p_species = p_species(:)';
+%                 p_species = flipud(r_species);
             else
                 nonempty = @(x) x(~cellfun(@isempty,x));
                 rates=[rates{:}];
@@ -66,6 +84,10 @@ function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat, species_fas
             species={};
             stoic={};
             rates={};
+            r_stoic={};
+            p_stoic={};
+            r_species={};
+            p_species={};
         end
         
         
@@ -109,43 +131,72 @@ chems=unique(cellfun(@(x) x(1),[chems{:}]),'stable');
 
 species=cell(1,3);
 stoic=cell(1,3);
+p_stoic=cell(1,3);
+r_stoic=cell(1,3);
+p_species=cell(1,3);
+r_species=cell(1,3);
 rates=cell(1,3);
 
-[species{1},stoic{1},rates{1}]=parseRxns(rvsbl_rxn);
-[species{2},stoic{2},rates{2}]=parseRxns(forw_rxn);
-[species{3},stoic{3},rates{3}]=parseRxns(backw_rxn);
+[species{1},stoic{1},rates{1},r_species{1},r_stoic{1},p_species{1},p_stoic{1}]=parseRxns(rvsbl_rxn);
+[species{2},stoic{2},rates{2},r_species{2},r_stoic{2},p_species{2},p_stoic{2}]=parseRxns(forw_rxn);
+[species{3},stoic{3},rates{3},r_species{3},r_stoic{3},p_species{3},p_stoic{3}]=parseRxns(backw_rxn);
 %
 
 species=[species{:}];
 stoic=[stoic{:}];
 rates=[rates{:}];
+r_stoic=[r_stoic{:}];
+p_stoic=[p_stoic{:}];
+r_species=[r_species{:}];
+p_species=[p_species{:}];
 
 Nrx=size(species,2);
 S=zeros(length(chems),Nrx);
+r=zeros(length(chems),Nrx);
+p=zeros(length(chems),Nrx);
 S_cat=false(length(chems),Nrx);
 
 
 for i=1:Nrx
-    S(:,i)=[cellfun(@(c) sum([stoic{i}{strcmp(c,species{i})}]),chems)]';
+    S(:,i)=cellfun(@(c) sum([stoic{i}{strcmp(c,species{i})}]),chems)';
+    r(:,i)=cellfun(@(c) sum([r_stoic{i}{strcmp(c,r_species{i})}]),chems)';
+    p(:,i)=cellfun(@(c) sum([p_stoic{i}{strcmp(c,p_species{i})}]),chems)';
     S_cat(:,i) = cellfun(@(c) ~isempty([stoic{i}{strcmp(c,species{i})}]),chems) == (0==S(:,i))';
 end
+
+if any(S(:)~=p(:)-r(:))
+    error('Inconsistency in construction of stoichiometric matrix')
+else
+    S=p-r;
+end
+
 
 
 % S=[cell2mat(cellfun(@(x) ismember(chems,[x{:}]),lhs,'UniformOutput',0)');
 % cell2mat(cellfun(@(x) ismember(chems,[x{:}]),rhs,'UniformOutput',0)')]
 
-[species_fast,stoic_fast,affinity]=parseRxns(rvsbl_rxn,true);
+[species_fast,stoic_fast,affinity,r_species_fast,r_stoic_fast,p_species_fast, p_stoic_fast]=parseRxns(rvsbl_rxn,true);
 
 
 
 Nrx_fast=size(species_fast,2);
 
 S_fast=zeros(length(chems),Nrx_fast);
+r_fast=zeros(length(chems),Nrx_fast);
+p_fast=zeros(length(chems),Nrx_fast);
 S_cat_fast=logical(S_fast);
 
 for i=1:Nrx_fast
-    S_fast(:,i)=[cellfun(@(c) sum([stoic_fast{i}{strcmp(c,species_fast{i})}]),chems)]';
+    S_fast(:,i)=cellfun(@(c) sum([stoic_fast{i}{strcmp(c,species_fast{i})}]),chems)';
+    r_fast(:,i)=cellfun(@(c) sum([r_stoic_fast{i}{strcmp(c,r_species_fast{i})}]),chems)';
+    p_fast(:,i)=cellfun(@(c) sum([p_stoic_fast{i}{strcmp(c,p_species_fast{i})}]),chems)';
     S_cat_fast(:,i) = cellfun(@(c) ~isempty([stoic_fast{i}{strcmp(c,species_fast{i})}]),chems) == (0==S_fast(:,i))';
+end
+
+if any(S(:)~=p(:)-r(:))
+    error('Inconsistency in construction of stoichiometric matrix for fast reactions')
+else
+    S_fast=p_fast-r_fast;
 end
 
 fast_species=setdiff([species_fast{:}],[species{:}],'stable');

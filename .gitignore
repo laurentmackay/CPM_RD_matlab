@@ -13,3 +13,7 @@ fort.*
 /*.o
 *.f90
 c.*
+eval_Rx.m
+eval_Rx_elim.m
+eval_model.m
+

@@ -19,7 +19,7 @@ D=zeros(1,N);
 dbl='0-9edf\.';
 for i=1:N
     chem=chems{i};
-    Dstr=regexp(str,['D\(' chem '\)[ \t\f]*=[^\n\;]*?([' dbl '])+[ \t\f]*[\n\;]'],'tokens');
+    Dstr=regexp(str,['D\(' chem '\)[ \t\f]*=[^\n\;]*?([' dbl '])+[ \t\f]*[\r\n\;]'],'tokens');
     if ~isempty(Dstr)
         D(i)=str2double(Dstr{1}{1});
     end

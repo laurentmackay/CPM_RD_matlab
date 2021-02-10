@@ -26,6 +26,10 @@ Rho_Square = totalRho/(A);    %Average number of Rho per square
 Rac_Square = totalRac/(A);    %Average number of Rac per square
 Pax_Square = totalPax/(A);    %Average number of Pax per square
 
+Rho_Square = 1;    %Average number of Rho per square
+Rac_Square = 1;    %Average number of Rac per square
+Pax_Square = 1;    %Average number of Pax per square
+
 N_instantaneous=50;
 
 model_params
@@ -155,9 +159,9 @@ model_ic
 %     N0(1,1:N_species)=Y(end,:);
 
     
-    N0(1,2)/Rac_Square
-    N0(1,4)/Rho_Square
-    N0(1,6)/Pax_Square
+%     N0(1,2)/Rac_Square
+%     N0(1,4)/Rho_Square
+%     N0(1,6)/Pax_Square
     
     figure(3);clf();
     plot(T_vec,Y_vec);
