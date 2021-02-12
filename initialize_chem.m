@@ -26,6 +26,10 @@ Rho_Square = totalRho/(A);    %Average number of Rho per square
 Rac_Square = totalRac/(A);    %Average number of Rac per square
 Pax_Square = totalPax/(A);    %Average number of Pax per square
 
+Rho_Square = 1;    %Average number of Rho per square
+Rac_Square = 1;    %Average number of Rac per square
+Pax_Square = 1;    %Average number of Pax per square
+
 N_instantaneous=50;
 
 model_params
@@ -147,17 +151,20 @@ fid=fopen('rhs_fun.m','w');
 fwrite(fid,str,'char');
 fclose(fid);
 
-[T_vec,Y_vec] = ode15s(@ rhs_fun,[0 1e4],ones(1,N_species),odeset('NonNegative',1:N_species));
+model_ic
+
+
+[T_vec,Y_vec] = ode15s(@ rhs_fun,[0 1e4],ic,odeset('NonNegative',1:N_species));
     m0=sum( N0(1,:));
 %     N0(1,1:N_species)=Y(end,:);
 
     
-    N0(1,2)/Rac_Square
-    N0(1,4)/Rho_Square
-    N0(1,6)/Pax_Square
+%     N0(1,2)/Rac_Square
+%     N0(1,4)/Rho_Square
+%     N0(1,6)/Pax_Square
     
     figure(3);clf();
-    plot(T_vec,Y);
+    plot(T_vec,Y_vec);
     legend(chems)
     drawnow;
 else

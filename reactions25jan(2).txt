@@ -1,8 +1,11 @@
-RhoGDP + GEFRho -> GEFRho + RhoGTP; k1
+#RhoGDP + GEFRho <-> RhoGDPGEFRho; k0,kk
+
+RhoGDP + GEFRho-> GEFRho + RhoGTP; k1
 RhoGTP + GAPRho -> GAPRho + RhoGDP; k2
 
 RacGTP + GAPRac -> GAPRac + RacGDP; k4
 RacGDP + GEFRac -> GEFRac + RacGTP; k46
+
 RacGDP + nGEFRac -> nGEFRac + RacGTP; k47
 RacGDP + PIX -> PIX + RacGTP; k48
 RacGDP + PAKPIX -> PAKPIX + RacGTP; k49
@@ -49,7 +52,7 @@ Paxillin + RacGTPPAKPIXGITPPaxillinP -> PaxillinP + RacGTPPAKPIXGITPPaxillinP; k
 PaxillinTP + Crk <-> PaxillinTPCrk; k42, k43
 PaxillinTPCrk + xnGEFRac <-> PaxillinTPCrk + nGEFRac; k44, k45
 
-QSSA(PaxillinTP)
 
+#Conservation stuff
+par *=1
 *(0)=1
-par *=1+0.1*rand(), k5=0.75
