@@ -40,8 +40,7 @@ D(Paxi)=20        %fast for paxillin
 D(Pax)=0.1       %fast for paxillin
 D(GPP)=0.1 
 
-param KR=1, KP=1;
-param B_1=1.5
+param B_1=0.5
 
 param I_rho=0.016, I_R=0.003, I_K=0.009,
 param L_rho=0.34, L_R=0.34
@@ -49,14 +48,16 @@ param delta_rho=0.016, delta_R=0.025, delta_P=0.004,
 param alpha_R=15, Rtot=7.5
 param L_K=5.77
 
-param k_X=41.7, k_G=5.71, k_C=5
+param k_X=41.7, k_G=5.71, k_C=5.0
 param GIT=0.11, PIX=0.069, Paxtot=2.3
-param n=4, m=4
+param n=4.0, m=4.0
 param alpha_PAK=0.3
 param PAKtot = 15*0.3
-param Rho_Square = 1
-param Rac_Square = 1
-param Pax_Square = 1
-Rac(0) = Rho(0) = Rac_Square
-Raci(0) = Rhoi(0) = Paxi(0) = 0
-Pax(0) = Pax_Square
+param Rho_Square = 1.0
+param Rac_Square = 1.0
+param Pax_Square = 1.0
+
+% uninduced steady state
+Raci(0) = Rho(0) = Rac_Square 
+Rac(0) = Rhoi(0) = Pax(0) = 0
+Paxi(0) = Pax_Square

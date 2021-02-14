@@ -156,8 +156,13 @@ model_ic
 
 [T_vec,Y_vec] = ode15s(@ rhs_fun,[0 1e4],ic,odeset('NonNegative',1:N_species));
     m0=sum( N0(1,:));
-%     N0(1,1:N_species)=Y(end,:);
-
+    if  nnz(induced_mask)==0
+        N0(1,1:N_species)=Y_vec(end,:);
+        
+%             N0(1,2)/Rac_Square
+%     N0(1,4)/Rho_Square
+%     N0(1,6)/Pax_Square
+    end
     
 %     N0(1,2)/Rac_Square
 %     N0(1,4)/Rho_Square
