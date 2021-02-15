@@ -72,6 +72,7 @@ com = @(x) [sum(sum(i.*x)),sum(sum(j.*x))]/nnz(x);
 R=0.2*N/2;
 cell_mask=(i-N/2).^2 +(j-N/2).^2 < R^2;
 induced_mask=cell_mask & (i-min(i(cell_mask)))<=2*div*(max(i(cell_mask))-min(i(cell_mask)));
+induced_mask(:)=0;
 
 i0=i;
 j0=j;
@@ -137,35 +138,37 @@ Rho_Square = totalRho/(A);
 Rac_Square = totalRac/(A);    
 Pax_Square = totalPax/(A);    
 
+Rho_Square = 1;    
+Rac_Square = 1;    
+Pax_Square = 1;    
+
 N_instantaneous=50;
 
-KR=1;
-KP=1;
-B_1=5;
-I_rho=0.016;
-I_R=0.003;
-I_K=0.009;
-L_rho=0.34;
-L_R=0.34;
-delta_rho=0.016;
-delta_R=0.025;
-delta_P=0.0004;
-alpha_R=15;
+B_1=0.500000000;
+I_rho=0.016000000;
+I_R=0.003000000;
+I_K=0.009000000;
+L_rho=0.340000000;
+L_R=0.340000000;
+delta_rho=0.016000000;
+delta_R=0.025000000;
+delta_P=0.004000000;
+alpha_R=15.000000000;
+L_K=5.770000000;
+k_X=41.700000000;
+k_G=5.710000000;
+k_C=5.000000000;
+GIT=0.110000000;
+PIX=0.069000000;
+Paxtot=2.300000000;
+n=4.000000000;
+m=4.000000000;
+alpha_PAK=0.300000000;
+Rho_Square=1.000000000;
+Rac_Square=1.000000000;
+Pax_Square=1.000000000;
 Rtot=7.5;
-L_K=5.77;
-k_X=41.7;
-k_G=5.71;
-k_C=5;
-GIT=0.11;
-PIX=0.069;
-Paxtot=2.3;
-n=4;
-m=4;
-alpha_PAK=0.3;
 PAKtot= 15*0.3;
-Rho_Square= 1.6141e+03;
-Rac_Square= 1.6141e+03;
-Pax_Square= 494.9785;
 cnsrv_1=Rac_Square;
 cnsrv_2=Rac_Square;
 cnsrv_3=Pax_Square;
@@ -279,14 +282,14 @@ fid=fopen('rhs_fun.m','w');
 fwrite(fid,str,'char');
 fclose(fid);
 
-ic = [0 1614.1 0 1614.1 0 494.9785]
+ic = [1 0 0 1 1 0];
 [T_vec,Y_vec] = ode15s(@ rhs_fun,[0 1e4],ic,odeset('NonNegative',1:N_species));
     m0=sum( N0(1,:));
-
+    if  nnz(induced_mask)==0
+        N0(1,1:N_species)=Y_vec(end,:);
+        
+    end
     
-    N0(1,2)/Rac_Square
-    N0(1,4)/Rho_Square
-    N0(1,6)/Pax_Square
     
     figure(3);clf();
     plot(T_vec,Y_vec);
@@ -639,12 +642,12 @@ I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
 Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
 Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
-f_Raci = -(Q_R.*(cnsrv_1 - u(:,2)))+(delta_R.*u(:,2));
-f_Rac = (Q_R.*(cnsrv_1 - u(:,2)))-(delta_R.*u(:,2));
-f_Rhoi = -(Q_rho.*(cnsrv_2 - u(:,4)))+(delta_rho.*u(:,4));
-f_Rho = (Q_rho.*(cnsrv_2 - u(:,4)))-(delta_rho.*u(:,4));
-f_Paxi = -(Q_P.*(cnsrv_3 - u(:,6)))+(delta_P.*u(:,6));
-f_Pax = (Q_P.*(cnsrv_3 - u(:,6)))-(delta_P.*u(:,6));
+f_Raci = -(Q_R.*u(:,1))+ (delta_R.*u(:,2));
+f_Rac =  (Q_R.*u(:,1))-(delta_R.*u(:,2));
+f_Rhoi = -(Q_rho.*u(:,3))+ (delta_rho.*u(:,4));
+f_Rho =  (Q_rho.*u(:,3))-(delta_rho.*u(:,4));
+f_Paxi = -(Q_P.*u(:,5))+ (delta_P.*u(:,6));
+f_Pax =  (Q_P.*u(:,5))-(delta_P.*u(:,6));
 
 Rx = [f_Raci,...
 -f_Raci,...
@@ -675,12 +678,12 @@ I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
 Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
 Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
-f_Raci = -(Q_R.*(cnsrv_1 - u(:,2)))+(delta_R.*u(:,2));
-f_Rac = (Q_R.*(cnsrv_1 - u(:,2)))-(delta_R.*u(:,2));
-f_Rhoi = -(Q_rho.*(cnsrv_2 - u(:,4)))+(delta_rho.*u(:,4));
-f_Rho = (Q_rho.*(cnsrv_2 - u(:,4)))-(delta_rho.*u(:,4));
-f_Paxi = -(Q_P.*(cnsrv_3 - u(:,6)))+(delta_P.*u(:,6));
-f_Pax = (Q_P.*(cnsrv_3 - u(:,6)))-(delta_P.*u(:,6));
+f_Raci = -(Q_R.*u(:,1))+ (delta_R.*u(:,2));
+f_Rac =  (Q_R.*u(:,1))-(delta_R.*u(:,2));
+f_Rhoi = -(Q_rho.*u(:,3))+ (delta_rho.*u(:,4));
+f_Rho =  (Q_rho.*u(:,3))-(delta_rho.*u(:,4));
+f_Paxi = -(Q_P.*u(:,5))+ (delta_P.*u(:,6));
+f_Pax =  (Q_P.*u(:,5))-(delta_P.*u(:,6));
 
 Rx = [f_Raci,...
 -f_Raci,...
@@ -711,12 +714,12 @@ I_Ks=I_K.*(1-K_is.*(1+alpha_R.*RacRatio0));
 Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
 Q_P = B_1.*(K.^n./(L_K.^n+K.^n));
-f_Raci = -(Q_R.*(cnsrv_1 - u(:,2)))+(delta_R.*u(:,2));
-f_Rac = (Q_R.*(cnsrv_1 - u(:,2)))-(delta_R.*u(:,2));
-f_Rhoi = -(Q_rho.*(cnsrv_2 - u(:,4)))+(delta_rho.*u(:,4));
-f_Rho = (Q_rho.*(cnsrv_2 - u(:,4)))-(delta_rho.*u(:,4));
-f_Paxi = -(Q_P.*(cnsrv_3 - u(:,6)))+(delta_P.*u(:,6));
-f_Pax = (Q_P.*(cnsrv_3 - u(:,6)))-(delta_P.*u(:,6));
+f_Raci = -(Q_R.*u(:,1))+ (delta_R.*u(:,2));
+f_Rac =  (Q_R.*u(:,1))-(delta_R.*u(:,2));
+f_Rhoi = -(Q_rho.*u(:,3))+ (delta_rho.*u(:,4));
+f_Rho =  (Q_rho.*u(:,3))-(delta_rho.*u(:,4));
+f_Paxi = -(Q_P.*u(:,5))+ (delta_P.*u(:,6));
+f_Pax =  (Q_P.*u(:,5))-(delta_P.*u(:,6));
 
 Rx = [f_Raci,...
 -f_Raci,...
