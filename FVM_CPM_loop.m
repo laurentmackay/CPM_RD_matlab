@@ -51,7 +51,7 @@ while time<Ttot
                     gif
                 end
                 if ~isempty(getCurrentTask())
-                    disp([num2str(copyNum) ': B=' num2str(B_1) ', t=' num2str(time)])
+                    disp([num2str(copyNum) ': B=' num2str(B) ', t=' num2str(time)])
                 end
                 save_results
                 cpmcounter=0;

@@ -37,7 +37,7 @@ if plotting
     % xlabel('X')
     % ylabel('Y')
     
-    plotCellIm(panelC,reshape(RacRatio0,shape),cell_mask,i0,j0)
+    plotCellIm(panelC,reshape(R,shape),cell_mask,i0,j0)
     ax = panelC;
     colorbar(ax);
     caxis(ax,'auto')

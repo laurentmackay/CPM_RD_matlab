@@ -1,6 +1,6 @@
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
-
+% plotting=false;
 if plotting %do not display pictures when running in parallel...i.e., on the cluster
     
     figure(1);clf();
@@ -20,7 +20,7 @@ end
 
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
-noise=0.00005;
+noise=0.05;
 dt=0.1;
 Ttot=16*3.6e3; %Total simulation time
 
@@ -68,7 +68,7 @@ initialize_results
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
 pic %takes a frame for the video
-if usejava('desktop') && isempty(getCurrentTask())
+if plotting && usejava('desktop') && isempty(getCurrentTask())
     delete test.gif
     gif('test.gif','frame',panelC)
 end
@@ -147,18 +147,18 @@ if isempty(getCurrentTask()); copyNum=[]; end
 
 % run(scr)
 
-FVM_CPM
+FVM_CPM_loop
 
 toc
 
 if isempty(getCurrentTask())  
 %     close(vid);
-    fn=['results/final_B_' num2str(B_1) '.mat'];
+    fn=['results/final_B_' num2str(B) '.mat'];
     ls results
     disp(['saving to: ' fn]);
     save(fn, '-v7.3');
 else
-    fn=['results/final_B_' num2str(B_1) '_copy' int2str(copyNum) '.mat'];
+    fn=['results/final_B_' num2str(B) '_copy' int2str(copyNum) '.mat'];
     disp(['saving to: ' fn]);
     ls results
     save(fn, '-v7.3');

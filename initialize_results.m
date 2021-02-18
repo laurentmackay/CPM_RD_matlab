@@ -7,7 +7,7 @@ Nsteps=floor(Ttot/min(cpmstep0))+1;
 
 
 center=zeros(2,Nsteps);
-Results=zeros([shape,N_species,Nsteps]);
+Results=zeros([shape,N_species+1,Nsteps]);
 Times=zeros(1,Nsteps);
 
 areas=zeros(1,Nsteps);

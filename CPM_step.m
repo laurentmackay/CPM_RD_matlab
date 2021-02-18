@@ -25,7 +25,7 @@ end
 %higher RhoRatio contributes to retraction
 %vice versa
 rho_eq=mean(RhoRatio(find(cell_mask)));
-R_eq=mean(RacRatio(find(cell_mask)));
+R_eq=mean(R(find(cell_mask)));
 Ncell_mask=squeeze(sum(sum(x))); %for a sanity check
 A0=A;
 
@@ -58,11 +58,11 @@ if  no_holes
     
     if grow
         f=1;
-        dH_chem=B_rho*(RhoRatio(vox_ref)-rho_eq)-B_R*(RacRatio(vox_ref)-R_eq);
+        dH_chem=B_rho*(RhoRatio(vox_ref)-rho_eq)-B_R*(R(vox_ref)-R_eq);
         
     elseif shrink
         f=-1;
-        dH_chem=-B_rho*(RhoRatio(vox_trial)-rho_eq)+B_R*(RacRatio(vox_trial)-R_eq);
+        dH_chem=-B_rho*(RhoRatio(vox_trial)-rho_eq)+B_R*(R(vox_trial)-R_eq);
        
     end
     
