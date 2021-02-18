@@ -113,7 +113,7 @@ if length(D)~=9
     
     %inactive Rho that's ready to convert to active Rho
     
-   
+    
     
     Pax0 = Pax_Square*PaxRatio;           %active Rac
     if length(D)==6
@@ -142,36 +142,56 @@ if length(D)~=9
     N0=[Raci0 Rac0 Rhoi0 Rho0 Paxi0 Pax0 RacPak0 GPP0];
     
     
-params = inline_script('model_params');
-eval_rhs_str = inline_script('eval_Rx');
-
-str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
-
-fid=fopen('rhs_fun.m','w');
-fwrite(fid,str,'char');
-fclose(fid);
-
-model_ic
-
-
-[T_vec,Y_vec] = ode15s(@ rhs_fun,[0 1e4],ic,odeset('NonNegative',1:N_species));
-    m0=sum( N0(1,:));
+    % params = inline_script('model_params');
+    % eval_rhs_str = inline_script('eval_Rx');
+    %
+    % str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
+    
+    
+    fp=0; %trick for inlining
+    eval('model_fp');
+    
+    eval('model_anon')
+    tol=1e-14;
+    
+    relax=any(abs(rhs_anon(fp))>tol);
+    
+    fp0=fp;
+    while any(abs(rhs_anon(fp))>tol)
+        
+        [T_vec,Y_vec] = ode15s(@(t,u) rhs_anon(u)',[0 1e4],fp,odeset('NonNegative',1:N_species));
+        fp=Y_vec(end,:);
+        
+        
+    end
+    
+    if relax
+        disp('Relaxed to a new fixed point:')
+        disp(strjoin(strcat(chems,'=',string(fp))),', ')
+        fid=fopen('model_fp.m','w');
+        fwrite(fid,['fp = [' num2str(fp,12) '];'],'char');
+        fclose(fid);
+    end
     if  nnz(induced_mask)==0
         N0(1,1:N_species)=Y_vec(end,:);
         
-%             N0(1,2)/Rac_Square
-%     N0(1,4)/Rho_Square
-%     N0(1,6)/Pax_Square
+        %             N0(1,2)/Rac_Square
+        %     N0(1,4)/Rho_Square
+        %     N0(1,6)/Pax_Square
     end
     
-%     N0(1,2)/Rac_Square
-%     N0(1,4)/Rho_Square
-%     N0(1,6)/Pax_Square
-    
-    figure(3);clf();
-    plot(T_vec,Y_vec);
-    legend(chems)
-    drawnow;
+    %     N0(1,2)/Rac_Square
+    %     N0(1,4)/Rho_Square
+    %     N0(1,6)/Pax_Square
+    if plotting
+        figure(3);clf();
+        plot(T_vec,Y_vec);
+        legend(chems)
+        drawnow;
+        
+        yl=ylim();
+        ylim([0 yl(end)]);
+    end
 else
     
     
@@ -253,36 +273,22 @@ alpha_rx=zeros(1,N_rx);
 alpha_diff=zeros(6,1); %the 6 here is not the same as N_rx...need to figure out a system
 ir0=((1:N_rx)-1)*sz;
 
-RacRatio0=zeros(shape);
-RhoRatio=zeros(shape);
-RacRatio=zeros(shape);
-RbarRatio=zeros(shape);
-PaxRatio=zeros(shape);
-K=zeros(shape);
-K_is=zeros(shape);
-I_Ks=zeros(shape);
-
-feedback=zeros(shape);
-Q_R=zeros(shape);
-Q_C=zeros(shape);
-Q_rho=zeros(shape);
-Q_P=zeros(shape);
+% RacRatio0=zeros(shape);
+% RhoRatio=zeros(shape);
+% RacRatio=zeros(shape);
+% RbarRatio=zeros(shape);
+% PaxRatio=zeros(shape);
+% K=zeros(shape);
+% K_is=zeros(shape);
+% I_Ks=zeros(shape);
+% 
+% feedback=zeros(shape);
+% Q_R=zeros(shape);
+% Q_C=zeros(shape);
+% Q_rho=zeros(shape);
+% Q_P=zeros(shape);
 vox=cell_inds(1:A);
 
 eval_model
 
-% [x,sz,alpha_rx,...
-%     alpha_chem,PaxRatio,RhoRatio,K_is,K,...
-%     RacRatio,RbarRatio,I_Ks,reaction,ir0,...
-%     k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-%     PAKtot,i]=update_alpha_chem(x,sz,alpha_rx,...
-%     alpha_chem,PaxRatio,RhoRatio,K_is,K,...
-%     RacRatio,RbarRatio,I_Ks,reaction,ir0,...
-%     k_X,PIX,k_G,k_C,GIT,Paxtot,alpha_R,I_K,I_rho,I_R,L_R,m,L_rho,B_1,L_K,...
-%     PAKtot,i);
 
-% update_all=true;
-% update_alpha_chem
-
-% RhoRatio0=RhoRatio;
-% RacRatio0=RacRatio;
