@@ -22,7 +22,7 @@ Q_P = (P_i/(1-PaxRatio))*B*(K^n/(L_K^n+K^n));
 
 
 
-
+plot(RacRatio0,RacRatio,RhoRatio,PaxRatio)
 
 
 D(Raci)=D(Rhoi)=0.43       %fast diffusion for inactive RhoGTPases
@@ -31,7 +31,7 @@ D(Paxi)=0.1       %fast for paxillin
 D(Pax)=20       %fast for paxillin
 
 
-param B=0
+param B=3
 
 param I_rho=0.016, L_rho=0.34, delta_rho=0.016
 param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5

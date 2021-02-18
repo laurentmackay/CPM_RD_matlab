@@ -150,7 +150,7 @@ if length(D)~=9
     
     fp=0; %trick for inlining
     eval('model_fp');
-    
+    rhs_anon=0; %trick for inlining
     eval('model_anon')
     tol=1e-14;
     

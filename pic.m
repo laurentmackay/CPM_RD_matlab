@@ -1,66 +1,23 @@
-if plotting
-%     close all
-    % to make a video all frames must be the same size setting its position just
-    % stops some bugs
-%     figure('Position', [200 75 1000 900])
-    fs=14; %axis font size
-    tp__0=tic;
+tp__0=tic;
 
-%     imagesc(cell_mask,[0 1]);
-%     plotCellIm(panelA,double(cell_mask),cell_mask,i0,j0)
-%     plotCellIm(panelA,alpha_chem(:,:,5),cell_mask,i0,j0)
-     plotCellIm(panelA,reshape(K,shape),cell_mask,i0,j0)
+plotCellIm(panel1,reshape(RacRatio0,shape),cell_mask,i0,j0);
+caxis(panel1,'auto');
+colorbar(panel1);
+title(panel1,'RacRatio0', 'Fontsize', 24);
 
-    hold(panelA,'on')
-    try
-    plot(panelA, center(2,1:iter),center(1,1:iter),'r')
-    catch e
-        disp(e)
-    end
-    hold(panelA, 'off')
-    ax = panelA;
-    ax.FontSize = fs;
-    colorbar(ax);
-    % title('Cell', 'Fontsize', 24)
-    % xlabel('X')
-    % ylabel('Y')
-    
-    
-%     subplot(2,2,2)
-    plotCellIm(panelB,reshape(RhoRatio,shape),cell_mask,i0,j0)
+plotCellIm(panel2,reshape(RacRatio,shape),cell_mask,i0,j0);
+caxis(panel2,'auto');
+colorbar(panel2);
+title(panel2,'RacRatio', 'Fontsize', 24);
 
-    ax = panelB;
-    caxis(ax,'auto')
-    colorbar(ax);
-    ax.FontSize = fs;
-    title(panelB,'Rho', 'Fontsize', 24)
-    % xlabel('X')
-    % ylabel('Y')
-    
-    plotCellIm(panelC,reshape(R,shape),cell_mask,i0,j0)
-    ax = panelC;
-    colorbar(ax);
-    caxis(ax,'auto')
-    ax.FontSize = fs;
-    set(ax,'Color',[1 1 1]*1)
-    title(ax, 'Rac', 'Fontsize', 24)
-    axis(ax,'tight')
-    
-    
-    plotCellIm(panelD,reshape(PaxRatio,shape),cell_mask,i0,j0)
-    ax = panelD;
-    caxis(ax,'auto')
-    colorbar(ax)
-    ax.FontSize = fs;
-    set(ax,'Color',[1 1 1]*1)
-    title(ax,'Pax', 'Fontsize', 24)
-    axis tight
-    
-    
+plotCellIm(panel3,reshape(RhoRatio,shape),cell_mask,i0,j0);
+caxis(panel3,'auto');
+colorbar(panel3);
+title(panel3,'RhoRatio', 'Fontsize', 24);
 
-    
-    
-    title(panelA,['t=' num2str(time) ', t_{plot}=' num2str(double(tic-tp__0)*1e-6), ', t_{sim}=' num2str(toc)], 'Fontsize', 10)
-    drawnow
+plotCellIm(panel4,reshape(PaxRatio,shape),cell_mask,i0,j0);
+caxis(panel4,'auto');
+colorbar(panel4);
+title(panel4,'PaxRatio', 'Fontsize', 24);
 
-end
+sgtitle(pic_fig,['t=' num2str(time) ', t_{plot}=' num2str(double(tic-tp__0)*1e-6), ', t_{sim}=' num2str(toc)], 'Fontsize', 10,'FontWeight','bold')

@@ -1146,10 +1146,10 @@ end
 params = inline_script('model_params');
 eval_rhs_str = inline_script('eval_Rx_elim');
 
-str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
+rhs_str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
 
 fid=fopen('rhs_fun.m','w');
-fwrite(fid,str,'char');
+fwrite(fid,rhs_str,'char');
 fclose(fid);
 
 init_vals = eval(strcat("[",strjoin(regexprep(init(~ismissing(init)),par_refs,par_reps)),"]"));
@@ -1294,7 +1294,22 @@ fwrite(fid,[repelem(newline,4)  newline], 'char');
 
 fclose(fid);
 
+extra_files=dir('rxn_files/*.m');
+extra_files = {extra_files.name};
+if ~isempty(extra_files)
+addpath(genpath('rxn_files'));
 
+M=struct();
+M.chems = chems;
+M.is_fast = is_fast;
+
+for file=extra_files
+    file = regexprep(file{1},'\..*','');
+    eval([file '(str,M)']);
+end
+
+rmpath(genpath('rxn_files'))
+end
 
 end
 

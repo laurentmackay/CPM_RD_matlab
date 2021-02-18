@@ -1,15 +1,18 @@
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
+mk_rxn_files('chem_Rx_Pax_Kathy');
 % plotting=false;
 if plotting %do not display pictures when running in parallel...i.e., on the cluster
     
-    figure(1);clf();
-    set(gcf,'defaultaxesfontsize',14);
-    d=[0.04, 0.04];
-    panelA=subplot(2,2,1); annotatePlot('A',22,d);
-    panelB=subplot(2,2,2); annotatePlot('B',22,d);
-    panelC=subplot(2,2,3); annotatePlot('C',22,d);
-    panelD=subplot(2,2,4); annotatePlot('D',22,d);
+%     figure(1);clf();
+%     set(gcf,'defaultaxesfontsize',14);
+%     d=[0.04, 0.04];
+%     panelA=subplot(2,2,1); annotatePlot('A',22,d);
+%     panelB=subplot(2,2,2); annotatePlot('B',22,d);
+%     panelC=subplot(2,2,3); annotatePlot('C',22,d);
+%     panelD=subplot(2,2,4); annotatePlot('D',22,d);
+
+initialize_pic
     
 end
 
@@ -20,7 +23,7 @@ end
 
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
-noise=0.05;
+noise=0.0005;
 dt=0.1;
 Ttot=16*3.6e3; %Total simulation time
 
@@ -46,7 +49,7 @@ cpmstep=cpmstep0/cpmsteps;
 div=0.1;
 
 %prepare some .m files to model the chemical reactions from the reactions specified in `chem_Rx` file
-mk_rxn_files('chem_Rx_Pax_Asheesh')
+
 
 restart=false;
 tic
@@ -70,7 +73,7 @@ initialize_results
 pic %takes a frame for the video
 if plotting && usejava('desktop') && isempty(getCurrentTask())
     delete test.gif
-    gif('test.gif','frame',panelC)
+    gif('test.gif','frame',panel1)
 end
 reactions=0; %intializing a reaction counter
 
