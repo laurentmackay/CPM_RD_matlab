@@ -183,6 +183,23 @@ fast_inds = arrayfun(@(i) strcmp(chems,fast_chems{i})',1:length(fast_chems),'Uni
 
 S_tot = [S_ S_fast];
 
+exp_def = regexp(str,['(?<=(?:^|\n|[ \t\f]))' name '[ \t\f]*\=[ \t\f]*((?:[ \t\f]*'  name(2:end-1) '[ \t\f]*\+)*(?:[ \t\f]*' name(2:end-1) '))'],'tokens');
+if ~isempty(exp_def)
+    is_exp = cellfun(@(x) any(strcmp(x{1},chems)), exp_def);
+    exp_def=exp_def(is_exp);
+    exp_nm = cellfun(@(x) x{1},exp_def,'UniformOutput',0);
+    exp_def = cellfun(@(x) x{2},exp_def,'UniformOutput',0);
+    [exp_stoic, exp_chems] = str2stoic(exp_def)
+    cf2
+    
+    
+end
+
+
+
+ regexp(str,[ name '[ \t\f]*\=[ \t\f]*'],'match')
+
+
 lcon = null(S_tot','r');
 lcon=rref(lcon')';
 

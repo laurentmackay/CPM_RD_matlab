@@ -34,10 +34,10 @@ cpm_wait=5;
 
 vmax=3/60; %max speed of the cell
 picstep=5;
-cpmsteps=5;
+cpm_sub_steps=5;
 
 cpmstep0=h/vmax;
-cpmstep=cpmstep0/cpmsteps;
+cpmstep=cpmstep0/cpm_sub_steps;
 
 
 

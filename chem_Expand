@@ -1,0 +1,12 @@
+totGEF + xA -> totGEF + A; k1
+xA <- A; delta
+B + FAK <-> D + FAK; k3, k4
+C <-> A; Kc
+
+totGEF = C + B
+Kc = B/(B+1)
+
+
+
+par *=1
+*(0)=1
