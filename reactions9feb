@@ -76,6 +76,8 @@ PxTP + Crk <-> PxTPCrk; k96, k97
 PxTPCrk + xnRaE <-> PxTPCrkxnRaE; k98, k99
 PxTPCrkxnRaE -> PxTPCrk + nRaE; k100
 
+QSSA(RaDRaE)
+
 
 *(0)=1
 par *=1

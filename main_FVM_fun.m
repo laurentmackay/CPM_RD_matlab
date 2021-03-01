@@ -1,4 +1,4 @@
-function [B,lam_p_0,dt] = main_FVM_fun(B,lam_p_0,dt)
+function [B,lam_p_0,dt,copyNum] = main_FVM_fun(B,lam_p_0,dt,copyNum)
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 mk_rxn_files('chem_Rx_Pax_Kathy');
@@ -20,7 +20,7 @@ nrx=3e4;
 
 noise=0.0005;
 
-Ttot=16*3.6e3; 
+Ttot=2e5; 
 
 SF=2; 
 Gsize=80; 
@@ -474,6 +474,8 @@ Ham0(iter)=H0;
 Hchem(iter)=dH_chem;
 
 
+if plotting
+
 tp__0=tic;
 
 plotCellIm(panel1,reshape(RacRatio0,shape),cell_mask,i0,j0);
@@ -497,6 +499,8 @@ colorbar(panel4);
 title(panel4,'PaxRatio', 'Fontsize', 24);
 
 sgtitle(pic_fig,['t=' num2str(time) ', t_{plot}=' num2str(double(tic-tp__0)*1e-6), ', t_{sim}=' num2str(toc)], 'Fontsize', 10,'FontWeight','bold')
+
+end
 if plotting && usejava('desktop') && isempty(getCurrentTask())
     delete test.gif
     gif('test.gif','frame',panel1)
@@ -564,18 +568,19 @@ P_diff=0.5;
 d0=sum(x(:));
 
 
-if isempty(getCurrentTask()); copyNum=[]; end
+if isempty(getCurrentTask()); 
 
 
 
 T_integration = cpmstep;
+disp('entering_main_loop')
 while time<Ttot
     A=nnz(cell_mask); 
     cell_inds(1:A)=find(cell_mask); 
     
     while (time-last_time)<Ttot
         
-
+    disp(time)
         
         
        
@@ -1022,7 +1027,9 @@ lastcpm=time;
         if time>=lastplot+picstep || time==lastcpm 
  
             if cpmcounter==cpmsteps*cpm_wait
-              tp__0=tic;
+              if plotting
+
+tp__0=tic;
 
 plotCellIm(panel1,reshape(RacRatio0,shape),cell_mask,i0,j0);
 caxis(panel1,'auto');
@@ -1045,6 +1052,8 @@ colorbar(panel4);
 title(panel4,'PaxRatio', 'Fontsize', 24);
 
 sgtitle(pic_fig,['t=' num2str(time) ', t_{plot}=' num2str(double(tic-tp__0)*1e-6), ', t_{sim}=' num2str(toc)], 'Fontsize', 10,'FontWeight','bold')
+
+end
 lastplot=time; 
             
  
@@ -1098,18 +1107,10 @@ for i=1:A
 end
 end
 toc
-
-if isempty(getCurrentTask())  
-    fn=['results/final_B_' num2str(B) '.mat'];
-    ls results
-    disp(['saving to: ' fn]);
-    save(fn, '-v7.3');
-else
     fn=['results/final_B_' num2str(B) '_copy' int2str(copyNum) '.mat'];
     disp(['saving to: ' fn]);
     ls results
     save(fn, '-v7.3');
 
-end
 
 end

@@ -1,5 +1,13 @@
 pic_fig=figure(1);clf();
-panel1=subplot(2,2,1);
-panel2=subplot(2,2,2);
-panel3=subplot(2,2,3);
-panel4=subplot(2,2,4);
+panel 1=subplot(4,3, 1);
+panel 2=subplot(4,3, 2);
+panel 3=subplot(4,3, 3);
+panel 4=subplot(4,3, 4);
+panel 5=subplot(4,3, 5);
+panel 6=subplot(4,3, 6);
+panel 7=subplot(4,3, 7);
+panel 8=subplot(4,3, 8);
+panel 9=subplot(4,3, 9);
+panel10=subplot(4,3,10);
+panel11=subplot(4,3,11);
+panel12=subplot(4,3,12);

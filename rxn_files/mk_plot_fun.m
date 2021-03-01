@@ -23,6 +23,8 @@ nl = string(newline);
 
 init_str = ['pic_fig=figure(1);clf();' newline strjoin(cellstr(strcat('panel',int2str((1:N_plot)'),'=subplot(',int2str(m),',',int2str(n),',',int2str((1:N_plot)'),');')), newline)];
 fid = fopen('initialize_pic.m','w');
+
+
 fwrite(fid,init_str,'char');
 
 fclose(fid);
@@ -37,7 +39,7 @@ plot_str=compose(strcat('plotCellIm(panel%i,reshape(%s,shape),cell_mask,i0,j0);'
 plot_str = regexprep(plot_str,nameref(slow_chems),cellstr(strcat('u(:,',int2str((1:length(slow_chems))'),')'))); %replace literal chem names by their state in the `u` array
           
 fid = fopen('pic.m','w');
-
+fwrite(fid,['if plotting' newline newline],'char');
 fwrite(fid,['tp__0=tic;' newline newline],'char');
 fwrite(fid,strjoin(plot_str,nl+nl),'char');
 if exist('sgtitle')~=0
@@ -45,6 +47,8 @@ fwrite(fid,...
        nl+nl+"sgtitle(pic_fig,['t=' num2str(time) ', t_{plot}=' num2str(double(tic-tp__0)*1e-6), ', t_{sim}=' num2str(toc)], 'Fontsize', 10,'FontWeight','bold')",...
        'char');
 end
+
+fwrite(fid,[newline newline 'end'],'char');
 fclose(fid);
     
           

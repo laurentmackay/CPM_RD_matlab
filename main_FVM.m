@@ -25,7 +25,7 @@ nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 noise=0.0005;
 dt=0.1;
-Ttot=16*3.6e3; %Total simulation time
+Ttot=2e5; %Total simulation time
 
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=80; %length of the grid in um
@@ -153,17 +153,17 @@ if isempty(getCurrentTask()); copyNum=[]; end
 FVM_CPM_loop
 
 toc
-
-if isempty(getCurrentTask())  
-%     close(vid);
-    fn=['results/final_B_' num2str(B) '.mat'];
-    ls results
-    disp(['saving to: ' fn]);
-    save(fn, '-v7.3');
-else
+% 
+% if isempty(getCurrentTask())  
+% %     close(vid);
+%     fn=['results/final_B_' num2str(B) '.mat'];
+%     ls results
+%     disp(['saving to: ' fn]);
+%     save(fn, '-v7.3');
+% else
     fn=['results/final_B_' num2str(B) '_copy' int2str(copyNum) '.mat'];
     disp(['saving to: ' fn]);
     ls results
     save(fn, '-v7.3');
 
-end
+% end

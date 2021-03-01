@@ -2,6 +2,7 @@
 Raci <->  Rac; Q_R, delta_R;
 Rhoi <-> Rho; Q_rho, delta_rho;
 Paxi <-> Pax; Q_P, delta_P;
+
 RacPAK <-> Rac; alpha_PAK*K0/Rac_Square
 GPP <-> Pax; (k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R))/Pax_Square
 
