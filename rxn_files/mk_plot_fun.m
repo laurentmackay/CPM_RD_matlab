@@ -21,7 +21,7 @@ m = ceil(sqrt(N_plot ));
 n = ceil(N_plot/m);
 nl = string(newline);
 
-init_str = ['pic_fig=figure(1);clf();' newline strjoin(cellstr(strcat('panel',int2str((1:N_plot)'),'=subplot(',int2str(m),',',int2str(n),',',int2str((1:N_plot)'),');')), newline)];
+init_str = ['pic_fig=figure(1);clf();' newline strjoin(cellstr(strcat('panel',string((1:N_plot)'),'=subplot(',int2str(m),',',int2str(n),',',int2str((1:N_plot)'),');')), newline)];
 fid = fopen('initialize_pic.m','w');
 
 

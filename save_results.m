@@ -2,7 +2,7 @@ iter=iter+1;
 
 center(:,iter)=com(cell_mask);
 Results(:,:,1,iter)=cell_mask;
-Results(:,:,2:(N_species+1),iter)=x; %storing the results
+Results(:,:,2:end,iter)=x; %storing the results
 Times(iter)=time;
 
 areas(iter)=A;

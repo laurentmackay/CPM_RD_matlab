@@ -1,7 +1,7 @@
-% mk_rxn_files('chem_Rx_Pax_Kathy');
-mk_fun2('main_FVM',{},{'B','lam_p_0','dt','copyNum'})
+mk_rxn_files('chem_Rx_Pax_Kathy');
+mk_fun2('main_FVM',{},{'B','lam_p_0','dt','copyNum','cpmstep0'})
 
-B_vals=linspace(2,3,1);
+B_vals=linspace(2,3,5);
 
 N_reps=2;
 
@@ -10,5 +10,5 @@ N_reps=2;
 parfor i0=1:length(B_vals)*N_reps
     i=ceil(i0/N_reps);
     j=mod(i0-1,N_reps)+1;
-    main_FVM_fun(B_vals(i), Inf,10,j);
+    main_FVM_fun(B_vals(i), Inf,10,j,2e2);
 end

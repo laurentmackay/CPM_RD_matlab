@@ -1,4 +1,5 @@
-function [B,lam_p_0,dt,copyNum] = main_FVM_fun(B,lam_p_0,dt,copyNum)
+function [B,lam_p_0,dt,copyNum,cpmstep0] = main_FVM_fun(B,lam_p_0,dt,copyNum,...
+cpmstep0)
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 mk_rxn_files('chem_Rx_Pax_Kathy');
@@ -36,7 +37,7 @@ vmax=3/60;
 picstep=5;
 cpmsteps=5;
 
-cpmstep0=h/vmax;
+
 cpmstep=cpmstep0/cpmsteps;
 
 
@@ -509,11 +510,11 @@ if plotting && usejava('desktop') && isempty(getCurrentTask())
     delete test.gif
     gif('test.gif','frame',panel1)
 end
-reactions=0; 
+
+time=0;
 
 
-eps=0.00005;
-pmax=50;
+
 
 
 
@@ -526,7 +527,6 @@ diffusing_species_sum=zeros(N_dim,length(D));
 num_vox_diff=zeros(1,sz);
 pT0 = zeros(sz,length(D));
 pi = zeros(N_dim,sz);
-dt_diff=zeros(size(D));
 
 diffusing_species=1:N_species; 
 
@@ -572,25 +572,19 @@ P_diff=0.5;
 d0=sum(x(:));
 
 
-disp('entering that weird if statement')
 
 if isempty(getCurrentTask());  end
 
 
 
-disp('done initializing')
-
-
 T_integration = cpmstep;
-disp('!!!!!!!!!!!!!!!!!entering_main_loop!!!!!!!!!!!!!')
+
 while time<Ttot
     A=nnz(cell_mask); 
     cell_inds(1:A)=find(cell_mask); 
     
     while (time-last_time)<Ttot
-        
-        
-        
+
        
         
 
@@ -1114,12 +1108,12 @@ for i=1:A
     pi(:,vox)=diffuse_mask(:,vox)'./sum(diffuse_mask(:,vox));
 end
 end
-disp('--------------EXITING MAIN LOOP--------------')
+
 toc
     fn=['results/final_B_' num2str(B) '_copy' int2str(copyNum) '.mat'];
     disp(['saving to: ' fn]);
     ls results
-    save(fn, '-v7.3');
+    save(fn);
 
 
 end

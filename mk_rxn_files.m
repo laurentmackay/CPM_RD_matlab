@@ -1,5 +1,7 @@
-function  mk_rxn_files(f)
-
+function  mk_rxn_files(f,save_dir)
+if nargin<2
+    save_dir='.'
+end
 simp=false;
 predef_spatial = {'bndry_mask'}; %pre-defined spatial variables that will be provided at runtime
 elementwise_operations = @(str) regexprep(str,'(?<pre>[^\.])(?<op>\/|\*|\^)','$<pre>.$<op>');  %make multiplication, division, and exponentiation element-wise operations
@@ -16,6 +18,8 @@ chems=regexprep(chems,':','');
 chems=regexprep(chems,'-','_');
 
 str=fileread(f);
+
+[~,f,~]=fileparts(f);
 
 str=regexprep(str,"%[^\n]*(\n)?",'$1'); %remove block comments
 str=regexprep(str,"\.\.\.\n",""); %remove elipses
@@ -282,8 +286,7 @@ eval(['syms ' char(strjoin(consrv_nm,' '))])
 
 eval(['assume([ ' char(strjoin(consrv_nm,', ')) ']>0)'])
 consrv_eqns = eval(['[' char(strjoin(strcat(consrv_nm,'==',con_str),';')) ']']);
-% consrv_defs = regexprep(string(consrv_eqns),[name '(?![A-z0-9]* ==) '],'$1(0)');
-% consrv_reps = cellfun(@(x) x(2),  regexp(consrv_defs,'==','split'));
+
 
 eqns=sym2cell([consrv_eqns; fast_eqns ]);
 
@@ -817,7 +820,7 @@ consrv_refs = strcat('(?<=(?:^|[\+\- \*\(]))(',elim_con,')(?=(?:$|[\+\- \*\.\)\^
 consrv_reps = cellfun(@(x) strcat("(",x,")"),  string(sol_consrv));
 rates_consrv = regexprep(rates_naive,consrv_refs,consrv_reps);
  
-fid=fopen([f '.rxns'],'w');
+fid=fopen(strcat(save_dir,filesep, f,'.rxns'),'w');
 
 for i=1:length(paired)
     if paired(i)~=-1
@@ -974,7 +977,7 @@ rxn_body = elementwise_operations(rxn_body); %make multiplication, division, and
 
 % fast_affinity_FVM = regexprep(fast_affinity_0,chem_ref ,chem_rep_FVM);
 % fast_affinity_FVM=regexprep(fast_affinity_FVM,spatial_ref,'$<pre>$<var>\(:\)$<post>')
-fid=fopen('eval_Rx.m','w');
+fid=fopen(strcat(save_dir,filesep,'eval_Rx.m'),'w');
 fwrite(fid,rxn_body,'char');
 fclose(fid);
 
@@ -989,7 +992,7 @@ end
 chem_rep_full=arrayfun(@(i) ['$<pre>x\(:,:,' num2str(i) '\)$<post>'],1:length(chems),'UniformOutput',0);%this only works for 2d
 model_body = regexprep(model_body,chem_ref ,chem_rep_full);% reshape the chemical names
 model_body = elementwise_operations(model_body);
-fid=fopen('eval_model.m','w');
+fid=fopen(strcat(save_dir,filesep,'eval_model.m'),'w');
 fwrite(fid,model_body,'char');
 fclose(fid);
 
@@ -1033,7 +1036,7 @@ anon_str = strjoin(regexprep(string(f_tot_explicit),...
                    arrayfun(@(i) ['u(' int2str(i) ')'],1:length(chems),'UniformOutput',false)),', ');
 
 
-fid=fopen('model_anon.m','w');
+fid=fopen(strcat(save_dir,filesep,'model_anon.m'),'w');
 fwrite(fid,['rhs_anon = @(u) [' char(anon_str) '];'],'char');
 fclose(fid);
 
@@ -1119,7 +1122,7 @@ if nnz(too_long)>0
         char(strjoin(strcat("# ",nms(too_long)," -> ",too_long_reps), newline)) ];
     
 end
-fid=fopen([f '.ode'],'w');
+fid=fopen(strcat(save_dir,filesep,f, '.ode'),'w');
 fwrite(fid,ode_str,'char');
 fclose(fid);
 
@@ -1155,7 +1158,7 @@ rxn_body_elim = regexprep(rxn_body_elim,'(?<pre>[^\.])(?<op>\/|\*|\^)','$<pre>.$
 
 % fast_affinity_FVM = regexprep(fast_affinity_0,chem_ref ,chem_rep_FVM);
 % fast_affinity_FVM=regexprep(fast_affinity_FVM,spatial_ref,'$<pre>$<var>\(:\)$<post>')
-fid=fopen('eval_Rx_elim.m','w');
+fid=fopen(strcat(save_dir,filesep,'eval_Rx_elim.m'),'w');
 fwrite(fid,rxn_body_elim,'char');
 fclose(fid);
 
@@ -1177,7 +1180,7 @@ tmp2 = [model_par_vals par_vals];
 par_vals_tot = tmp2(i);
 pars_tot = pars_tot(i);
 if ~isempty(pars_tot)
-    fid=fopen('model_params.m','w');
+    fid=fopen(strcat(save_dir,filesep,'model_params.m'),'w');
     fwrite(fid, strjoin(strcat([pars_tot cellstr(consrv_nm)],'=',[par_vals_tot consrv_def_vals'],';'),newline),'char');
     fclose(fid);
 end
@@ -1191,14 +1194,14 @@ eval_rhs_str = inline_script('eval_Rx_elim');
 
 rhs_str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
 
-fid=fopen('rhs_fun.m','w');
+fid=fopen(strcat(save_dir,filesep,'rhs_fun.m'),'w');
 fwrite(fid,rhs_str,'char');
 fclose(fid);
 
 init_vals = eval(strcat("[",strjoin(regexprep(init(~ismissing(init)),par_refs,par_reps)),"]"));
 
 
-fid=fopen('model_ic.m','w');
+fid=fopen(strcat(save_dir,filesep,'model_ic.m'),'w');
 fwrite(fid,strcat("ic = [", strjoin(string(init_vals)), "];"),'char');
 fclose(fid);
 
@@ -1227,7 +1230,7 @@ fp = eval(strcat('[',strjoin(fp),']'));
 t1=toc(t0);
 fprintf(['Done (' num2str(t1) ' seconds elapsed, final time = ' num2str(T_vec(end)) ')' newline]);
 
-fid=fopen('model_fp.m','w');
+fid=fopen(strcat(save_dir,filesep,'model_fp.m'),'w');
 fwrite(fid,['fp = [' num2str(fp,12) '];'],'char');
 fclose(fid);
 
@@ -1276,14 +1279,14 @@ auto_str = [ func_str stpnt_str fortran_subroutine('BCND') fortran_subroutine('I
 auto_str = breaklines(auto_str,80,'&');
 auto_str = strrep(auto_str,"^","**");
 
-fid=fopen([f '.f90'],'w');
+fid=fopen(strcat(save_dir,filesep,f,'.f90'),'w');
 fwrite(fid,auto_str,'char');
 fclose(fid);
 
-fid=fopen(['c.' f ],'w');
+fid=fopen(strcat(save_dir,filesep,'c.',f),'w');
 fwrite(fid,...
 ['NDIM=   ' int2str(length(ic_ode)) ', NPAR=   ' int2str(length(valid_ind)) ', IPS =   1, IRS =   0, ILP =   1' newline ...
-'parnames = {'  char(strjoin(strcat(int2str((1:nnz(valid_ind))'),": '",model_pars(1:nnz(valid_ind))',"'"),','))  '}' newline ...
+'parnames = {'  char(strjoin(strcat(int2str(find(valid_ind)'),": '",model_pars(1:nnz(valid_ind))',"'"),','))  '}' newline ...
 'unames = {' char(strjoin(strcat(int2str((1:nnz(~is_elim_con0 & ~is_fast))'),": '",chems(~is_elim_con0 & ~is_fast)',"'"),','))  '}' newline...
 'ICP =  [1]' newline ...
 'NTST=  50, NCOL=   4, IAD =   3, ISP =   2, ISW = 1, IPLT= 0, NBC= 0, NINT= 0' newline...
@@ -1311,13 +1314,13 @@ preamble={'if length(vox)>1'...
 out=strjoin( [preamble lines {''  'alpha_rx=alpha_rx+sum(alpha_chem(I_rx)-a_c_0,1);'}],'\n');
 
 
-fid=fopen('update_alpha_chem.m','w');
+fid=fopen(strcat(save_dir,filesep,'update_alpha_chem.m'),'w');
 fwrite(fid,out,'char');
 fclose(fid);
 
 
-tmp=arrayfun(@(i) ['x(vox+[' num2str(find(S_(:,i))'-1) ']*sz)' ],1:length(rate_constants),'UniformOutput',0);
-tmp=arrayfun(@(i) [tmp{i} '=' tmp{i} '+[' num2str(S_(S_(:,i)~=0,i)') '];'] ,1:length(tmp),'UniformOutput',0);
+% tmp=arrayfun(@(i) ['x(vox+[' num2str(find(S_(:,i))'-1) ']*sz)' ],1:length(rate_constants),'UniformOutput',0);
+% tmp=arrayfun(@(i) [tmp{i} '=' tmp{i} '+[' num2str(S_(S_(:,i)~=0,i)') '];'] ,1:length(tmp),'UniformOutput',0);
 % 
 % slow_rx=['if rx==1' newline '    ' tmp{1} newline ....
 %     strjoin(arrayfun(@(i) ['elseif rx==' int2str(i)  newline '    ' tmp{i}],2:length(tmp),'UniformOutput',0),newline)...
@@ -1329,7 +1332,7 @@ D=getDiffusionRates(f,chems);
 
 
 
-fid=fopen('initialize_chem_params.m','w');
+fid=fopen(strcat(save_dir,filesep,'initialize_chem_params.m'),'w');
 fwrite(fid,['N_species = ' int2str(length(chems)) ';' newline...
     'N_rx = ' int2str(length(rate_constants)) ';' newline...
     'D = [' num2str(D) '];'],'char');

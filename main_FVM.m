@@ -1,6 +1,6 @@
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
-mk_rxn_files('chem_Rx_Pax_Kathy');
+deploy_model('chem_Rx_Pax_Kathy',1);
 
 
 % plotting=false;
@@ -79,12 +79,13 @@ if plotting && usejava('desktop') && isempty(getCurrentTask())
     delete test.gif
     gif('test.gif','frame',panel1)
 end
-reactions=0; %intializing a reaction counter
+
+time=0;
+% reactions=0; %intializing a reaction counter
 
 
 %diffusion timestep
-eps=0.00005;
-pmax=50;%0.5;%max allowed pT for one cell
+
 
 % dt=pmax*(h^2)/(max(D)*size(jump,2));%auto-determine timestep
 
@@ -100,7 +101,7 @@ diffusing_species_sum=zeros(N_dim,length(D));
 num_vox_diff=zeros(1,sz);
 pT0 = zeros(sz,length(D));
 pi = zeros(N_dim,sz);
-dt_diff=zeros(size(D));
+% dt_diff=zeros(size(D));
 
 enumerate_diffusion %determines the possible diffusion reactions in a way that be convereted to c
 
@@ -144,13 +145,9 @@ d0=sum(x(:));
 
 % disp(FVM_call)
 
-disp('entering that weird if statement')
 
 if isempty(getCurrentTask()); copyNum=[]; end
 
-
-
-disp('done initializing')
 % eval(['try' newline...
 %     FVM_call newline...
 %     'catch err' newline...
@@ -173,6 +170,6 @@ toc
     fn=['results/final_B_' num2str(B) '_copy' int2str(copyNum) '.mat'];
     disp(['saving to: ' fn]);
     ls results
-    save(fn, '-v7.3');
+    save(fn);
 
 % end

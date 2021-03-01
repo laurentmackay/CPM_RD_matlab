@@ -3,7 +3,7 @@ iter=0;
 time=0;
 reactions=0;
 
-Nsteps=floor(Ttot/min(cpmstep0))+1;
+Nsteps=floor(Ttot/min(cpmstep0*cpm_wait))+1;
 
 
 center=zeros(2,Nsteps);

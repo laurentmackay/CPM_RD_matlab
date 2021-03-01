@@ -1,17 +1,11 @@
 T_integration = cpmstep;
-disp('!!!!!!!!!!!!!!!!!entering_main_loop!!!!!!!!!!!!!')
+
 while time<Ttot
     A=nnz(cell_mask); %current area
     cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s (initially)
     
     while (time-last_time)<Ttot
-        
-%     disp(time)
-        
-%         x0=x;
-%         detect_bndrys
-%         disp('tryng SSA')    
-        %run the SSA
+
        
         FVM_integrator_2SBF_slim
  
@@ -25,15 +19,12 @@ while time<Ttot
                     CPM_step
                 catch err
                     rethrow(err)
-%                     time=Ttot;
                     break;
                 end
                 
                 detect_bndrys
                 
-%                 if sum(x(:))~=d0
-%                     disp(['molecules changed, delta = ' num2str(sum(x(:))-d0) ])
-%                 end
+
             end
             
             enumerate_diffusion %recalcluates diffusable sites
@@ -69,4 +60,3 @@ while time<Ttot
     
     enumerate_diffusion %recaucluates diffusable sites
 end
-disp('--------------EXITING MAIN LOOP--------------')
