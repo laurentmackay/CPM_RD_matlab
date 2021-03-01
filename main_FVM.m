@@ -1,6 +1,8 @@
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 mk_rxn_files('chem_Rx_Pax_Kathy');
+
+
 % plotting=false;
 if plotting %do not display pictures when running in parallel...i.e., on the cluster
     
@@ -60,6 +62,8 @@ if ~restart
     initialize_chem %all reaction parameters are getting initialized
     initialize_cellular_potts
 end
+
+
 
 lastplot=0;
 lastcpm=0;
@@ -140,8 +144,13 @@ d0=sum(x(:));
 
 % disp(FVM_call)
 
+disp('entering that weird if statement')
+
 if isempty(getCurrentTask()); copyNum=[]; end
 
+
+
+disp('done initializing')
 % eval(['try' newline...
 %     FVM_call newline...
 %     'catch err' newline...

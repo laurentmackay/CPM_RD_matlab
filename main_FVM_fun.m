@@ -2,6 +2,8 @@ function [B,lam_p_0,dt,copyNum] = main_FVM_fun(B,lam_p_0,dt,copyNum)
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 mk_rxn_files('chem_Rx_Pax_Kathy');
+
+
 if plotting 
     
 
@@ -302,7 +304,7 @@ if length(D)~=9
         fclose(fid);
     end
     if  nnz(induced_mask)==0
-        N0(1,1:N_species)=Y_vec(end,:);
+        N0(1,1:N_species)=fp;
         
         
         
@@ -437,6 +439,8 @@ grow_count=0;
 shrink_count=0;
 end
 
+
+
 lastplot=0;
 lastcpm=0;
 
@@ -568,19 +572,23 @@ P_diff=0.5;
 d0=sum(x(:));
 
 
-if isempty(getCurrentTask()); 
+disp('entering that weird if statement')
 
+if isempty(getCurrentTask());  end
+
+
+
+disp('done initializing')
 
 
 T_integration = cpmstep;
-disp('entering_main_loop')
+disp('!!!!!!!!!!!!!!!!!entering_main_loop!!!!!!!!!!!!!')
 while time<Ttot
     A=nnz(cell_mask); 
     cell_inds(1:A)=find(cell_mask); 
     
     while (time-last_time)<Ttot
         
-    disp(time)
         
         
        
@@ -1106,6 +1114,7 @@ for i=1:A
     pi(:,vox)=diffuse_mask(:,vox)'./sum(diffuse_mask(:,vox));
 end
 end
+disp('--------------EXITING MAIN LOOP--------------')
 toc
     fn=['results/final_B_' num2str(B) '_copy' int2str(copyNum) '.mat'];
     disp(['saving to: ' fn]);

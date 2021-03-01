@@ -51,7 +51,7 @@ source=regexprep(source,"%[^\n]*\n","\n"); %remove end of line comments
 
 
 if ~isempty(override) %remove overrides
-    override_refs=strcat('(?<=(?:^|\n|\;)[ \t\f]*)',override,'(?=[ \t\f]*\=)[^\n]+');
+    override_refs=strcat('(?<=(?:^|\n|\;)[ \t\f]*)',override,'(?=[ \t\f]*\=)[^\n\;]+[\;]?');
     source=regexprep(source,override_refs,'');
 end
 

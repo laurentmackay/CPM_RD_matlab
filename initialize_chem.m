@@ -173,7 +173,7 @@ if length(D)~=9
         fclose(fid);
     end
     if  nnz(induced_mask)==0
-        N0(1,1:N_species)=Y_vec(end,:);
+        N0(1,1:N_species)=fp;
         
         %             N0(1,2)/Rac_Square
         %     N0(1,4)/Rho_Square

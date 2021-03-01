@@ -1,12 +1,12 @@
 T_integration = cpmstep;
-disp('entering_main_loop')
+disp('!!!!!!!!!!!!!!!!!entering_main_loop!!!!!!!!!!!!!')
 while time<Ttot
     A=nnz(cell_mask); %current area
     cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s (initially)
     
     while (time-last_time)<Ttot
         
-    disp(time)
+%     disp(time)
         
 %         x0=x;
 %         detect_bndrys
@@ -69,3 +69,4 @@ while time<Ttot
     
     enumerate_diffusion %recaucluates diffusable sites
 end
+disp('--------------EXITING MAIN LOOP--------------')
