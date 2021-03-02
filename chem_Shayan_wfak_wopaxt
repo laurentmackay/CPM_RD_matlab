@@ -21,7 +21,7 @@ K=R*K0;
 I_Ks=I_K*(1.0-K_is*(1+alpha_R*R));
 P_i=1.0-PaxRatio*(1+k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R));
 
-I_FR = I_F*(1-(1.0/((k_F*FAKtot)*(1+alpha_R*R)+kk*Crk))*(1+alpha_R*R)));
+I_FR = I_F*(1-(1.0/((k_F*FAKtot)*(1+alpha_R*R)+kk*Crk))*(1+alpha_R*R));
 
 Rbar = (Rac + RacPAK) / Rac_Square;
 
@@ -61,5 +61,5 @@ param PAKtot=Rtot*alpha_PAK
 Raci(0) = Rho(0) = Rac_Square
 Rac(0) = Rhoi(0) = Paxs(0) = 0
 Paxi(0) = Pax_Square
-FAK = FP = xGPP = GPP = RacPAK = GPPP = 0
+FAK(0) = FP(0) = xGPP(0) = GPP(0) = RacPAK(0) = GPPP(0) = PaxS(0) = 0
 

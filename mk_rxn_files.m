@@ -225,16 +225,18 @@ lines=cellfun(@(x) [x ';'], lines,'UniformOutput',0);
 
 
 % chem_str2 = strjoin(chems(1:N_slow),',');
-if ~isempty(model_defs)
-    def_str=strjoin(strcat(model_defs,";"),newline);
-else
-    def_str='';
-end
-
+% if ~isempty(model_defs)
+%     def_str=strjoin(strcat(model_defs,";"),newline);
+% else
+%     def_str='';
+% end
+eval(strcat(sym_str,';'));
 try 
-    eval(strcat(sym_str,';',newline, def_str));
+    for def=model_defs
+        eval([def{1} ';']);
+    end
 catch
-   error(['Could not parse model definitions!!' newline 'Did you forget the (0) suffix for initial conditions?']) 
+   error(strcat('Could not parse model definition:', string(newline),  string(newline), def{1})) 
 end
 % eval([ 'assume([' strjoin([[model_vars']' model_pars chems]) ']>0)'])
 % eval([ 'assume([' strjoin([[model_vars']' model_pars chems]) ']>0)'])
@@ -243,7 +245,7 @@ end
 is_fast=~any(S_',1)&any(S_fast',1);
 
 if any(ismissing(init(~is_fast)))
-    error('Please specify some initial condtions for the system')
+    error(['Please specify some initial condtions for following species: ' strjoin(chems(ismissing(init(~is_fast))),', ')])
 end
 
 [rates_naive, rxn_naive] = rate_strings(chems,r,p,rate_constants);
