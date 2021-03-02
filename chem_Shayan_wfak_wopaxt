@@ -1,0 +1,65 @@
+
+Raci <->  Rac; Q_R, delta_R;
+Rhoi <-> Rho; Q_rho, delta_rho;
+Paxi <-> Paxs; Q_Ps, delta_P;
+
+FAK + PaxS <-> FP; Q_Pt, k7;
+xGPP + FAK <-> FAK + GPP; Q_Pt, k10
+
+RacPAK <-> Rac; kb8 ,k8;
+GPPP <-> GPP + Paxs; kb9 ,k9;
+
+
+
+R = Rac / Rac_Square;
+RhoRatio = Rho / Rho_Square;
+PaxRatio = Paxs / Pax_Square;
+
+K_is=1.0/((1.0+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio)*(1+alpha_R*R)+k_G*k_X*GIT*PIX);
+K0=alpha_R*K_is*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);
+K=R*K0;
+I_Ks=I_K*(1.0-K_is*(1+alpha_R*R));
+P_i=1.0-PaxRatio*(1+k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R));
+
+I_FR = I_F*(1-(1.0/((k_F*FAKtot)*(1+alpha_R*R)+kk*Crk))*(1+alpha_R*R)));
+
+Rbar = (Rac + RacPAK) / Rac_Square;
+
+Q_R = (I_R+I_Ks + I_FR)*(L_rho^m/(L_rho^m+RhoRatio^m));
+Q_rho = I_rho*(L_R^m/(L_R^m +(Rbar)^m));
+Q_Ps = B*(K^n/(L_K^n+K^n));
+Q_Pt = (k1)*(FAK^n/(L_F^n+FAK^n));
+
+kb8 = alpha_PAK*K0/Rac_Square;
+kb9 = (k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R))/Pax_Square;
+
+D(Raci)=D(Rhoi)=0.43
+D(Rac)=D(Rho)=D(RacPAK)=D(Paxs)=D(Paxs)=0.02
+D(Paxi)=0.02
+
+par *=1
+par Crk=1,k7=1,k10=1,k8=1,k9=1
+param k1=1, L_F=1, k_F=10, kk=10, I_F=0.01
+param FAKtot = 8
+
+param B=2
+
+param I_rho=0.016, L_rho=0.34, delta_rho=0.016
+param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5
+param delta_P=0.0004, I_K=0.009
+param L_K=5.77
+
+param k_X=41.7, k_G=5.71, k_C=5.0
+param GIT=0.11, PIX=0.069, Paxtot=2.3
+param n=4.0, m=4.0, alpha_PAK=0.3
+param Rho_Square = 1.0
+param Rac_Square = 1.0
+param Pax_Square = 1.0
+param PAKtot=Rtot*alpha_PAK
+
+
+Raci(0) = Rho(0) = Rac_Square
+Rac(0) = Rhoi(0) = Paxs(0) = 0
+Paxi(0) = Pax_Square
+FAK = FP = xGPP = GPP = RacPAK = GPPP = 0
+

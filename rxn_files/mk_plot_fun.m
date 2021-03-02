@@ -1,4 +1,4 @@
-function mk_plot_fun(str,M)
+function mk_plot_fun(str,M,save_dir)
 
 code=' \t\f\*\+\-\/\,\=\(\)\[\]\>\<\&\~\;\:\|\{\}\^\.';
 numer=['0-9' code(2:end)];
@@ -38,7 +38,7 @@ plot_str=compose(strcat('plotCellIm(panel%i,reshape(%s,shape),cell_mask,i0,j0);'
 
 plot_str = regexprep(plot_str,nameref(slow_chems),cellstr(strcat('u(:,',int2str((1:length(slow_chems))'),')'))); %replace literal chem names by their state in the `u` array
           
-fid = fopen('pic.m','w');
+fid = fopen(strcat('pic.m'),'w');
 fwrite(fid,['if plotting' newline newline],'char');
 fwrite(fid,['tp__0=tic;' newline newline],'char');
 fwrite(fid,strjoin(plot_str,nl+nl),'char');

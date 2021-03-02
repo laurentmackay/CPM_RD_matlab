@@ -1,6 +1,6 @@
 function  mk_rxn_files(f,save_dir)
 if nargin<2
-    save_dir='.'
+    save_dir='.';
 end
 simp=false;
 predef_spatial = {'bndry_mask'}; %pre-defined spatial variables that will be provided at runtime
@@ -76,7 +76,11 @@ end
 model_vars = cellfun(@(x) x{1}, model_split, 'UniformOutput', false);
 model_var_defs = cellfun(@(x) x{2}, model_split, 'UniformOutput', false);
 
-model_pars = unique([model_pars fast_params rate_constants],'stable');
+rate_constant_pars= regexp(rate_constants,name,'tokens');
+rate_constant_pars=[rate_constant_pars{:}];
+rate_constant_pars=[rate_constant_pars{:}];
+
+model_pars = unique([model_pars fast_params rate_constant_pars],'stable');
 model_pars = setdiff(model_pars, [model_vars chems],'stable');
 model_par_vals = cellstr(repmat('0.0',1,length(model_pars)));
 
@@ -227,8 +231,11 @@ else
     def_str='';
 end
 
-eval(strcat(sym_str,';',newline, def_str))
-
+try 
+    eval(strcat(sym_str,';',newline, def_str));
+catch
+   error(['Could not parse model definitions!!' newline 'Did you forget the (0) suffix for initial conditions?']) 
+end
 % eval([ 'assume([' strjoin([[model_vars']' model_pars chems]) ']>0)'])
 % eval([ 'assume([' strjoin([[model_vars']' model_pars chems]) ']>0)'])
 % S_fast  = [-[pair_inds{:}]+[fast_inds{:}] [pair_inds{:}]-[fast_inds{:}]]; %only simple reversible complexation is supported right now :(
@@ -1353,7 +1360,7 @@ M.is_fast = is_fast;
 
 for file=extra_files
     file = regexprep(file{1},'\..*','');
-    eval([file '(str,M)']);
+    eval([file '(str,M,save_dir)']);
 end
 
 rmpath(genpath('rxn_files'))

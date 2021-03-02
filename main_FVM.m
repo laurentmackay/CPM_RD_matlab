@@ -1,7 +1,11 @@
+model_name = 'chem_Rx_Pax_Kathy';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
-deploy_model('chem_Rx_Pax_Kathy',1);
-
+try
+    inputname(1);
+catch
+    deploy_model(model_name,1);
+end
 
 % plotting=false;
 if plotting %do not display pictures when running in parallel...i.e., on the cluster
@@ -167,7 +171,7 @@ toc
 %     disp(['saving to: ' fn]);
 %     save(fn, '-v7.3');
 % else
-    fn=['results/final_B_' num2str(B) '_copy' int2str(copyNum) '.mat'];
+    fn=strcat('_',model_name,'/results/final_B_', num2str(B), '_copy', int2str(copyNum), '.mat'];
     disp(['saving to: ' fn]);
     ls results
     save(fn);

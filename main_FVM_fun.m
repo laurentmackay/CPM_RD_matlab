@@ -1,9 +1,13 @@
-function [B,lam_p_0,dt,copyNum,cpmstep0] = main_FVM_fun(B,lam_p_0,dt,copyNum,...
-cpmstep0)
+function [B,lam_p_0,dt,copyNum,cpmstep0,model_name] = main_FVM_fun(B,lam_p_0,dt,...
+copyNum,cpmstep0,model_name)
+
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
-mk_rxn_files('chem_Rx_Pax_Kathy');
-
+try
+    inputname(1);
+catch
+    deploy_model(model_name,1);
+end
 
 if plotting 
     
@@ -315,7 +319,7 @@ if length(D)~=9
     
     
     
-    if plotting
+    if plotting && relax
         figure(3);clf();
         plot(T_vec,Y_vec);
         legend(chems)
@@ -451,7 +455,7 @@ iter=0;
 time=0;
 reactions=0;
 
-Nsteps=floor(Ttot/min(cpmstep0))+1;
+Nsteps=floor(Ttot/min(cpmstep0*cpm_wait))+1;
 
 
 center=zeros(2,Nsteps);
@@ -469,7 +473,7 @@ iter=iter+1;
 
 center(:,iter)=com(cell_mask);
 Results(:,:,1,iter)=cell_mask;
-Results(:,:,2:(N_species+1),iter)=x; 
+Results(:,:,2:end,iter)=x; 
 Times(iter)=time;
 
 areas(iter)=A;
@@ -1069,7 +1073,7 @@ lastplot=time;
 
 center(:,iter)=com(cell_mask);
 Results(:,:,1,iter)=cell_mask;
-Results(:,:,2:(N_species+1),iter)=x; 
+Results(:,:,2:end,iter)=x; 
 Times(iter)=time;
 
 areas(iter)=A;

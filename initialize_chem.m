@@ -183,7 +183,7 @@ if length(D)~=9
     %     N0(1,2)/Rac_Square
     %     N0(1,4)/Rho_Square
     %     N0(1,6)/Pax_Square
-    if plotting
+    if plotting && relax
         figure(3);clf();
         plot(T_vec,Y_vec);
         legend(chems)

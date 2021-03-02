@@ -1,5 +1,5 @@
 function deploy_model(f,force)
-persistent active_model
+global active_model
 
 if nargin<2
     force=false;
@@ -26,8 +26,15 @@ hash_file = strcat(work_dir,filesep,'model.hash');
 hash = string2hash(fileread(f));
 %check the model-description hash to see if it has changed
 if force || isempty(dir(hash_file)) || strcmp(fileread(hash_file), hash)
+    
+    try
+    mk_rxn_files(f, work_dir);
+    catch err
+        rmpath(genpath(work_dir));
+        active_model=[];
+        rethrow(err)
+    end
     dlmwrite( hash_file, hash, '');
-    mk_rxn_files(f, work_dir)
 end
 
 

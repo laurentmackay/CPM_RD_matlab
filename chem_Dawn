@@ -1,0 +1,21 @@
+Pax + FAK <-> PaxFAK; kon1, koff1
+Paxs + FAK <-> PaxsFAK; kon1, kfs*koff1
+
+Pax + GIT <-> PaxGIT; kon2, koff2
+Paxs + GIT <-> PaxsGIT; kon2, koff2
+
+Pax <-> Paxs; Q_ps, koffs
+
+
+serine_kinase = (PAK + PaxsGIT)
+Q_ps = kons*(serine_kinase^n)/(L^n+serine_kinase^n)
+
+par kon1=1.0, koff1=1.0, kon2=1.0, koff2=1.0, kons=1.0, koffs=0.01, kfs=50, L=0.75, n=4.0, PAK=0
+
+GIT(0)=2
+PaxGIT(0)=PaxsGIT(0)=Paxs(0)=PaxsFAK(0)=PaxFAK(0)==0
+Pax(0)=1
+FAK(0)=50
+
+
+
