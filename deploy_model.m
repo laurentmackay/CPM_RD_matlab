@@ -15,6 +15,7 @@ if isempty(active_model)
 elseif force || ~strcmp(active_model,fn)
     rmpath(genpath(mk_work_dir(active_model)));
     addpath(genpath(work_dir));
+    active_model=fn;
 end
 
 

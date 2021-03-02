@@ -8,7 +8,7 @@ str=regexprep(str,"\'[^\'\n\r]+\'",""); %remove hardcoded strings with single qu
 str=regexprep(str,'\"[^\"\n\r]+\"',""); %remove hardcoded strings with double quotes
 str=regexprep(str,'function[^\=]+\=[^\=]+\)',""); %remove function definition
 
-code='A-Za-z0-9_ \t\f\*\+\-\/\,\=\[\]\>\<\&\~\:\|\{\}\^\.\(\)';
+code='A-Za-z0-9_ \t\f\*\+\-\/\,\[\]\>\<\&\~\:\|\{\}\^\.\(\)';
 
 
 dbl='[0-9]+(?:(?:[edf\.][\+\-]?)?[0-9])?';
@@ -39,7 +39,7 @@ end
 
 for i=1:N
     chem=chems{i};
-    init_str=regexp(str,[chem '\(0\)[ \t\f]*=?[^\r\n\;]*=[ \t\f]*([' code ']+)'],'tokens');
+    [init_str, start]=regexp(str,['(?<![A-Za-z0-9])' chem '\(0\)[ \t\f]*=?[^\r\n\;]*=[ \t\f]*([' code ']+)'],'tokens','start');
     if ~isempty(init_str)
         init(i)=init_str{1}{1};
     end
