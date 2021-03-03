@@ -4,26 +4,11 @@ Paxs + FAK <-> PaxsFAK; kon1, kfs*koff1
 Pax + GIT <-> PaxGIT; kon2, koff2
 Paxs + GIT <-> PaxsGIT; kon2, koff2
 
-Pax <-> Paxs; Q_ps, koffs
-
-serine_kinase = (K + PaxsGIT + PaxGIT)
-Q_ps = kons*(serine_kinase^n)/(L^n+serine_kinase^n)
-
-
-
-
-
-par kon1=1.0, koff1=1.0, kon2=1.0, koff2=1.0, kons=1.0, koffs=0.01, kfs=50, L=0.75, n=4.0, PAK=0
-
-GIT(0)=2
-PaxGIT(0)=PaxsGIT(0)=Paxs(0)=PaxsFAK(0)=PaxFAK(0)=0
-Pax(0)=1
-FAK(0)=50
-
+Pax <-> Paxs; Q_ps, delta_P
 
 Raci <->  Rac; Q_R, delta_R;
 Rhoi <-> Rho; Q_rho, delta_rho;
-Pax <-> Paxs; Q_P, delta_P;
+
 
 RacPAK <-> Rac; alpha_PAK*K0/Rac_Square
 GPP <-> Pax; (k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R))/Pax_Square
@@ -44,15 +29,13 @@ Rbar = (Rac + RacPAK) / Rac_Square;
 
 Q_R = (I_R+I_Ks)*(L_rho^m/(L_rho^m+RhoRatio^m));
 Q_rho = I_rho*(L_R^m/(L_R^m +(Rbar)^m));
-Q_P = B*(K^n/(L_K^n+K^n));
 
 
+serine_kinase = (K + PaxsGIT + PaxGIT)
+Q_ps = B*(serine_kinase^n)/(L^n+serine_kinase^n)
 
 
-
-D(Raci)=D(Rhoi)=0.43       %fast diffusion for inactive RhoGTPases
-D(Rac)=D(Rho)=D(RacPAK)=D(Pax)=0.02          %slow for active forms
-D(Paxi)=0.02        %fast for paxillin
+par kon1=1.0, koff1=1.0, kon2=1.0, koff2=1.0, kons=1.0, koffs=0.01, kfs=50, L=0.75, n=4.0, PAK=0
 
 param B=2
 
@@ -72,8 +55,11 @@ param PAKtot=Rtot*alpha_PAK
 
 % uninduced steady state
 Raci(0) = Rho(0) = Rac_Square 
-Rac(0) = Rhoi(0) = Pax(0) = 0
-Paxi(0) = Pax_Square
+Rac(0) = Rhoi(0) = 0
+Pax(0) = Pax_Square
 
-
+GIT(0)=2
+PaxGIT(0)=PaxsGIT(0)=Paxs(0)=PaxsFAK(0)=PaxFAK(0)=0
+Pax(0)=1
+FAK(0)=50
 

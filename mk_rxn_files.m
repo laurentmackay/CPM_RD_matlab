@@ -483,14 +483,35 @@ end
 slow_refs = strcat('(?<=(?:^|[',code,']))(',chems(~is_fast),')(?=(?:$|[',code,']))')';
 fast_refs = strcat('(?<=(?:^|[',code,']))(',chems(is_fast),')(?=(?:$|[',code,']))')';
 consrv_rhs = regexprep(string(consrv_eqns),'^.*==','');
+consrv_rhs_elim = regexprep(string(ec0),'^.*==','');
 
 
 slow_init_reps = cellstr(string(init(~is_fast)));
 con_fast = cellfun(@(x) any(strcmp(x,fast_chems)),elim_con);
+
+
+
+consrv_rhs_init = subs(str2sym(consrv_rhs_elim), str2sym(elim_con'), cell2sym(sol_consrv));
+
+for i=1:length(consrv_eqns)
+    curr_sym  = str2sym(consrv_nm(i));
+    sol = solve(curr_sym == consrv_rhs_init(i), curr_sym );
+   if isequal(consrv_rhs_init(i),str2sym(consrv_nm(i))) || isempty(sol)
+        consrv_rhs_init(i) = curr_sym == str2sym(consrv_rhs_elim(i));
+   else
+       consrv_rhs_init(i) = curr_sym == sol;
+   end
+end
+
+sol_consrv_elim = struct2cell((solve(consrv_rhs_init,str2sym(consrv_nm))));
+consrv_rhs_elim = string(cell2sym(sol_consrv_elim));
+
+
+
 if N_fast>0
     
-    sol_fast_1 = sym2cell(subs(cell2sym(sol_fast_0), str2sym(elim_con'), cell2sym(sol_consrv)));
-    fast_init_reps = regexprep(cellstr(string([sol_fast_1; sol_consrv(con_fast)])),slow_refs, slow_init_reps);
+    sol_fast_1 = struct2cell(solve(subs(cell2sym(sol_fast_0), str2sym(elim_con'), cell2sym(sol_consrv_elim)) == str2sym(fast_chems), str2sym(fast_chems)));
+    fast_init_reps = regexprep(cellstr(string([sol_fast_1; sol_consrv_elim(con_fast)])),slow_refs, slow_init_reps);
     fast_init_reps = cellstr(string(str2sym(fast_init_reps)));
     fast_init_reps = regexprep(fast_init_reps, par_refs, par_reps);
     init(is_fast) = fast_init_reps;
@@ -499,7 +520,7 @@ else
 end
 
 
-consrv_defs_init = regexprep(consrv_rhs,[slow_refs; fast_refs],[slow_init_reps'; fast_init_reps]');
+consrv_defs_init = regexprep(consrv_rhs_elim,[slow_refs; fast_refs],[slow_init_reps'; fast_init_reps]');
 consrv_defs_init = cellstr(string(str2sym(consrv_defs_init)));
 consrv_def_vals = consrv_defs_init;
 
@@ -1207,8 +1228,10 @@ fid=fopen(strcat(save_dir,filesep,'rhs_fun.m'),'w');
 fwrite(fid,rhs_str,'char');
 fclose(fid);
 
-init_vals = eval(strcat("[",strjoin(regexprep(init(~ismissing(init)),par_refs,par_reps)),"]"));
+init_sym = subs(subs(str2sym(init)), str2sym([chems(~is_fast) chems(is_fast)]), str2sym([slow_init_reps, fast_init_reps']));
 
+init_vals = double(subs(init_sym(~ismissing(init)),str2sym(model_pars_tot),str2sym(par_reps)));
+% init_vals = eval(strcat("[",strjoin(regexprep(string(init_vals),par_refs,par_reps)),"]"));
 
 fid=fopen(strcat(save_dir,filesep,'model_ic.m'),'w');
 fwrite(fid,strcat("ic = [", strjoin(string(init_vals)), "];"),'char');
