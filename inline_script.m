@@ -4,18 +4,23 @@ function [str, deps, init] = inline_script(script, manual_deps, override)
         try
             l1=fgetl(fid);
         catch e
+%             rethrow(e)
             disp(e);
         end
-        while isempty(l1)&&~isnumeric(l1)
-            l1=fgetl(fid);
-        end
-        fclose(fid);
-        if ~isnumeric(l1)
-            
-            m=regexp(l1,"[\s]?(function)[\s]+",'ONCE');
-            bool=isempty(m);
+        if exist('l1','var')
+            while isempty(l1)&&~isnumeric(l1)
+                l1=fgetl(fid);
+            end
+            fclose(fid);
+            if ~isnumeric(l1)
+                
+                m=regexp(l1,"[\s]?(function)[\s]+",'ONCE');
+                bool=isempty(m);
+            else
+                bool=true;
+            end
         else
-            bool=true;
+            bool=false;
         end
     end
 
@@ -77,9 +82,9 @@ if ~isempty(matched_scripts)
         script_reps{end+1}=[rep newline];
         new_deps=setdiff(new_deps,init,'stable');
         init=union(init,new_init);
-%         [script ' : ' script_name ]
+        %         [script ' : ' script_name ]
         deps=union(deps, new_deps);
-
+        
     end
     special = {'\\a','\\b','\\f','\\r','\\t','\\v'}';
     special_rep = cellfun(@(x) ['\\' x],special,'UniformOutput',false);
