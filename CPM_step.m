@@ -1,4 +1,4 @@
-if ~any(isfinite([lam_a,lam_p]))
+if all(isfinite([lam_a,lam_p]))
     
     detect_bndrys
     

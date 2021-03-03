@@ -7,18 +7,10 @@ catch
     deploy_model(model_name,1);
 end
 
-% plotting=false;
-if plotting %do not display pictures when running in parallel...i.e., on the cluster
-    
-%     figure(1);clf();
-%     set(gcf,'defaultaxesfontsize',14);
-%     d=[0.04, 0.04];
-%     panelA=subplot(2,2,1); annotatePlot('A',22,d);
-%     panelB=subplot(2,2,2); annotatePlot('B',22,d);
-%     panelC=subplot(2,2,3); annotatePlot('C',22,d);
-%     panelD=subplot(2,2,4); annotatePlot('D',22,d);
 
-initialize_pic
+if plotting %do not display pictures when running in parallel...i.e., on the cluster
+
+    initialize_pic
     
 end
 
@@ -30,7 +22,7 @@ end
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 noise=0.0005;
-dt=0.1;
+dt=1;
 Ttot=2e5; %Total simulation time
 
 SF=2; % speed factor I divide molecule number by this for speed
@@ -39,7 +31,7 @@ N=150; % number of points used to discretize the grid
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); %length of a latice square
-cpm_wait=5;
+cpm_wait=5; %number of cpm steps to wait before saving
 
 vmax=3/60; %max speed of the cell
 picstep=5;
@@ -152,26 +144,13 @@ d0=sum(x(:));
 
 if isempty(getCurrentTask()); copyNum=[]; end
 
-% eval(['try' newline...
-%     FVM_call newline...
-%     'catch err' newline...
-%     'disp(getReport(err));' newline...
-%     'end']);
 
-% run(scr)
 
 FVM_CPM_loop
 
 toc
-% 
-% if isempty(getCurrentTask())  
-% %     close(vid);
-%     fn=['results/final_B_' num2str(B) '.mat'];
-%     ls results
-%     disp(['saving to: ' fn]);
-%     save(fn, '-v7.3');
-% else
-    fn=strcat('_',model_name,'/results/final_B_', num2str(B), '_copy', int2str(copyNum), '.mat'];
+
+    fn=strcat('_',model_name,'/results/final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
     disp(['saving to: ' fn]);
     ls results
     save(fn);

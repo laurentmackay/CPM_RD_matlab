@@ -1,5 +1,5 @@
-function [B,lam_p_0,dt,copyNum,cpmstep0,model_name] = main_FVM_fun(B,lam_p_0,dt,...
-copyNum,cpmstep0,model_name)
+function [B,lam_p_0,dt,copyNum,model_name] = main_FVM_fun(B,lam_p_0,dt,copyNum,...
+model_name)
 
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
@@ -9,10 +9,10 @@ catch
     deploy_model(model_name,1);
 end
 
-if plotting 
-    
 
-pic_fig=figure(1);clf();
+if plotting 
+
+    pic_fig=figure(1);clf();
 panel1=subplot(2,2,1);
 panel2=subplot(2,2,2);
 panel3=subplot(2,2,3);
@@ -35,13 +35,13 @@ N=150;
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); 
-cpm_wait=5;
+cpm_wait=5; 
 
 vmax=3/60; 
 picstep=5;
 cpmsteps=5;
 
-
+cpmstep0=h/vmax;
 cpmstep=cpmstep0/cpmsteps;
 
 
@@ -304,7 +304,7 @@ if length(D)~=9
     if relax
         disp('Relaxed to a new fixed point:')
         disp(strjoin(strcat(chems,'=',string(fp))),', ')
-        fid=fopen('model_fp.m','w');
+        fid=fopen(which('model_fp'),'w');
         fwrite(fid,['fp = [' num2str(fp,12) '];'],'char');
         fclose(fid);
     end
@@ -714,7 +714,7 @@ if time>=lastcpm+cpmstep
             
             for kk=1:(2*Per)/cpmsteps 
                 try
-                    if ~any(isfinite([lam_a,lam_p]))
+                    if all(isfinite([lam_a,lam_p]))
     
     adj_empty = ~cell_mask(up) | ~cell_mask(down) | ~cell_mask(left) | ~cell_mask(right); 
 adj_full = cell_mask(up) | cell_mask(down) | cell_mask(left) | cell_mask(right); 
@@ -1114,7 +1114,8 @@ end
 end
 
 toc
-    fn=['results/final_B_' num2str(B) '_copy' int2str(copyNum) '.mat'];
+
+    fn=strcat('_',model_name,'/results/final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
     disp(['saving to: ' fn]);
     ls results
     save(fn);

@@ -168,7 +168,7 @@ if length(D)~=9
     if relax
         disp('Relaxed to a new fixed point:')
         disp(strjoin(strcat(chems,'=',string(fp))),', ')
-        fid=fopen('model_fp.m','w');
+        fid=fopen(which('model_fp'),'w');
         fwrite(fid,['fp = [' num2str(fp,12) '];'],'char');
         fclose(fid);
     end
