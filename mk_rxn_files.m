@@ -1219,8 +1219,8 @@ end
 % nms_elim = regexp(string(f_mix_elim(mask_non_elim)),name, 'tokens')';
 % nms_elim=[nms_elim{:}];
 
-params = inline_script('model_params');
-eval_rhs_str = inline_script('eval_Rx_elim');
+params = inline_script(which('model_params'));
+eval_rhs_str = inline_script(which('eval_Rx_elim'));
 
 rhs_str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
 
