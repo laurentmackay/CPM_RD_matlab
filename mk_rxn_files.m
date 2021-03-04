@@ -9,6 +9,13 @@ elementwise_operations = @(str) regexprep(str,'(?<pre>[^\.])(?<op>\/|\*|\^)','$<
 
 [chems,S_,rate_constants,fast_chems,fast_pair,fast_affinity, S_cat, species_fast,stoic_fast, S_fast, S_cat_fast,r,p,r_fast,p_fast] = getChemRxns(f);
 
+S_tot = [S_ S_fast];
+
+lcon = null(S_tot','r');
+lcon=rref(lcon')';
+
+
+
 init=getInitialConditions(f,chems);
 
 
@@ -47,6 +54,67 @@ str = regexprep(str,'(?:\n|^)(?:p|par|param)[ \t\f]([^\n]+)','');
 
 model_defs = regexp(str,ass,'match');
 model_defs = [model_defs{:}];
+
+
+
+whitespace='[ \f\t\v]*';
+
+empty_or_num='[ \f\t\v\.0-9]*';
+
+chem_name=strcat('(?:',strjoin(chems,'|'),')');
+
+chem_set = ['((?:' empty_or_num chem_name  whitespace '[+])*+(?:' empty_or_num chem_name  '))' whitespace ];
+
+possible_consrv = regexp(model_defs,['\=' whitespace chem_set whitespace '$'],'match');
+is_possible_consrv = ~cellfun(@isempty,possible_consrv);
+possible_consrv = [possible_consrv{:}];
+
+cf2=@(f,x)  cellfun( @(y) cellfun(@(z) f(z),y,'UniformOutput',0),x,'UniformOutput',0);
+cf22=@(f,x,xx)  cellfun( @(y,yy) cellfun(@(z,zz) f(z,zz),y,yy,'UniformOutput',0),x,xx,'UniformOutput',0);
+
+user_consrv = regexp(possible_consrv,['(' empty_or_num ')' name ],'tokens');
+stoic_user_consrv =cf2(@(x) empty2one(str2double(x{1})), user_consrv);
+chems_user_consrv =cf2(@(x) x{2}, user_consrv);
+
+lcon_user = cf22(@(c,s) strcmp(c,chems)'*s,chems_user_consrv,stoic_user_consrv);
+lcon_user = cellfun(@(x) sum(cell2mat(x),2),lcon_user,'UniformOutput',false);
+is_valid_consrv = cellfun(@(x) is_in_span(x,lcon), lcon_user);
+
+inds=find(is_possible_consrv);
+user_consrv_defs = model_defs(inds(is_valid_consrv));
+
+
+if ~isempty(user_consrv_defs)
+    consrv_nm = regexp(user_consrv_defs,[name '(?=[ \t\f]*\=)'],'match');
+    consrv_nm = [consrv_nm{:}];
+else
+    consrv_nm={};
+end
+
+
+if any(~is_valid_consrv)
+   disp(newline);
+   disp('The following user-specified conserved quantities are inconsistent with the stoichiometirc matrix')
+   disp('and will be ignored during model reduction:') 
+   disp(" ")
+   
+   cellfun(@(x) disp(x),model_defs(inds(~is_valid_consrv)))
+   disp(" ")
+   disp(['Any specified parmeter values associated with these conserved quantities will not be ignored.']);
+   disp(newline)
+   
+   
+end
+model_defs(inds)=[];
+
+
+
+lcon_user = cell2mat(lcon_user(is_valid_consrv));
+
+[lcon p_lcon]=get_first_li_columns([lcon_user lcon]);
+
+
+
 if ~isempty(model_defs)
     model_split = regexp(model_defs,[name '[ \t\f]*=([^=]+)'],'tokens');
     model_split=[model_split{:}];
@@ -80,7 +148,7 @@ rate_constant_pars= regexp(rate_constants,name,'tokens');
 rate_constant_pars=[rate_constant_pars{:}];
 rate_constant_pars=[rate_constant_pars{:}];
 
-model_pars = unique([model_pars fast_params rate_constant_pars],'stable');
+model_pars = unique([model_pars fast_params rate_constant_pars consrv_nm],'stable');
 model_pars = setdiff(model_pars, [model_vars chems],'stable');
 model_par_vals = cellstr(repmat('0.0',1,length(model_pars)));
 
@@ -156,6 +224,10 @@ rhs=[rhs{:}];
 if ~isempty(rhs)
     rhs=cellfun(@(x) x{1},rhs,'UniformOutput',false);
 end
+
+rhs(inds)=[];
+
+
 spatial_vars=[chems predef_spatial];
 ref=@(x) ['(:?[' code '\n]|^)(?<var>' x ')(:?[' code '\n]|$)'];
 
@@ -288,9 +360,7 @@ for i=1:N_con
     
 end
 
-
-
-consrv_nm = strcat('cnsrv_',string(1:N_con)) ;
+consrv_nm = [consrv_nm strcat('cnsrv_',string(1:N_con-size(lcon_user,2)))] ;
 eval(['syms ' char(strjoin(consrv_nm,' '))])
 
 eval(['assume([ ' char(strjoin(consrv_nm,', ')) ']>0)'])
