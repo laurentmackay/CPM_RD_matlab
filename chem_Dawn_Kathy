@@ -15,6 +15,7 @@ GPP <-> Pax; (k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R))/Pax_Square
 
 
 R = Rac / Rac_Square;
+RacRatio = R;
 RhoRatio = Rho / Rho_Square;
 PaxRatio = Paxs / Pax_Square;
 
@@ -62,4 +63,6 @@ GIT(0)=2
 PaxGIT(0)=PaxsGIT(0)=Paxs(0)=PaxsFAK(0)=PaxFAK(0)=0
 Pax(0)=1
 FAK(0)=50
+
+plot(Pax,FAK,Rac)
 

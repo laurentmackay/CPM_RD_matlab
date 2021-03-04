@@ -230,16 +230,6 @@ if all(isfinite([lam_a,lam_p]))
         cell_inds(1:A)=find(cell_mask);
     else
         eval_model
-        %         grow
-        %         im = reshape(RacRatio0,shape);
-        %         im(im==0) = nan;
-        %         imagesc(im); colorbar();
-        %         title(['time = ' num2str(time)]);
-        %         hold on;
-        %         plot(j0(vox_trial),i0(vox_trial),'rx')
-        %        [grow  x(j0(vox_trial),i0(vox_trial))]
-        %         hold off;
-        %         drawnow;
     end
     
     

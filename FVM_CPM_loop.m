@@ -35,6 +35,7 @@ while time<Ttot
         if time>=lastplot+picstep || time==lastcpm % takes video frames
  
             if cpmcounter==cpmsteps*cpm_wait
+              u = reshape(x,[sz ,size(x,3)]);
               pic
               lastplot=time; 
             

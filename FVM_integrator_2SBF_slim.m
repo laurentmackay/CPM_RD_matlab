@@ -53,7 +53,10 @@ while time-t0<T_integration
     for i = 1:N_species
         u(:,i) = MAT_list{i}\b(:,i);
     end
-  
+    
+    if any(u(:)<0)
+        disp('wild ass over here')
+    end
     time=time+dt;
 
 

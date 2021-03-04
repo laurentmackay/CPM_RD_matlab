@@ -1,10 +1,10 @@
-model_name = 'chem_Rx_Pax_Kathy';
+model_name = 'chem_Dawn_Kathy';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
     inputname(1);
 catch
-    deploy_model(model_name,1);
+    deploy_model(model_name);
 end
 
 
@@ -22,7 +22,7 @@ end
 nrx=3e4; %number of times reactions are carried out in a chem_func loop
 
 noise=0.0005;
-dt=1;
+dt=0.001;
 Ttot=2e5; %Total simulation time
 
 SF=2; % speed factor I divide molecule number by this for speed
@@ -70,6 +70,7 @@ initialize_results
 
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
+u = reshape(x,[sz ,size(x,3)]);
 pic %takes a frame for the video
 if plotting && usejava('desktop') && isempty(getCurrentTask())
     delete test.gif
