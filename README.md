@@ -20,7 +20,21 @@ Reversible pairs of reactions may be specified using two separate declartions as
 ```
 A + B <-> C; k1, k2
 ```
-where k2 is the rate constant for the degradation of `C` into `A` and `B`.
+where `k2` is the rate constant for the degradation of `C` into `A` and `B`.
+
+Most generally, reactions can be specified using the one of the following notations:
+```
+r1*X1 + r2*X2 + ... + rN*XN -> p1*X1 + p2*X2 + ... + pN*XN; forward_rate
+```
+or 
+```
+ p1*X1 + p2*X2 + ... + pN*XN <- r1*X1 + r2*X2 + ... + rN*XN; forward_rate
+```
+or
+```
+r1*X1 + r2*X2 + ... + rN*XN <-> p1*X1 + p2*X2 + ... + pN*XN; forward_rate (?, backward_rate)
+```
+where `rn` is the stoichiometic coefficient of the `n`th chemical species denoted by `Xn` as a reactant in the reaction ()
 
 ToDo: Explicit specification of boundary conditions
 
