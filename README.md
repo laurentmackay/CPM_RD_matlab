@@ -3,7 +3,7 @@ A general puprose tool for modelling reaction-diffusion systems in MATLAB (with 
 
 The aim of this project is to provide a tool that separates model specification from model analysis, simulation building, simulation analysis.
 
-Currently, we have developped a simple text-based [model specification paradigm] (#anchors-model-specification) for reaction-diffusion systems that is flxeible to be extended to consider other types of systems (e.g., reaction-diffusion-convection).  
+Currently, we have developped a simple text-based [model specification paradigm] (#model-specification) for reaction-diffusion systems that is flxeible to be extended to consider other types of systems (e.g., reaction-diffusion-convection).  
 
 
 *N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but you may be able to run it on older versions with some elbow grease.*
