@@ -39,7 +39,7 @@ depending on whether one wishes the reaction to be reversible or not. In the abs
 #### Variable definitions
 While we have used the name of a rate "constant", the value of the rate constants specified above may in fact be functions of the chemical species (e.g., when QSSA has already been applied to the model). In such a case, one may define the rate constants to be variable quantities by using simple algebraic expressions.
 
-For example, we may model mutual inhibition between two molecules (`A` and `B`) that can switch betweem two isomers (e.g., through isomerization reactions `A0<->A1` and `B0<->B1`) using the following model specification:
+For example, we may model mutual inhibition between two molecules (`A` and `B`) that can switch betweem two isoforms (e.g., through reversible isomerization reactions `A0<->A1` and `B0<->B1`) using the following model specification:
 ```
 A0 <-> A1; kA, delta_A
 B0 <-> B1; kB, delta_B
