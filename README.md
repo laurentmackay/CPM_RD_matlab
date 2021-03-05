@@ -20,7 +20,7 @@ Reaction-diffusion systems are specified primarily using a text-based chemical r
 ```
 A + B -> C; k1
 ```
-Reversible pairs of reactions may be specified using two separate declartions as above (with products and reactants swapped), or one may use the shorthand notation,
+Reversible pairs of reactions may be specified using two separate declarations as above (with products and reactants swapped), or one may use the shorthand notation,
 ```
 A + B <-> C; k1, k2
 ```
