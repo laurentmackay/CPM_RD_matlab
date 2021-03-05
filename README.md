@@ -44,7 +44,7 @@ kA = 1/(1+B^2)
 kB = 1/(1+A^2)
 ```
 
-Variable definitions may reference other variable definitions, but note that any variable name reference in a variable definitions must have already been defined in the file That is, we will not sort out the order of variable definitions for you.
+Variable definitions may reference other variable definitions, but note that any variable name referenced in a variable definition must have already been defined in the file That is, we will not sort out the order of variable definitions for you.
 
 # CPM_RD_matlab
 
