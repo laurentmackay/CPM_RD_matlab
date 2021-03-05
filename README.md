@@ -55,7 +55,10 @@ The diffusion coefficient of a chemical species `X` can be specified using
 ```
 D(X)=1
 ```
-where we have specified a diffusion coefficient of 1 (space units^2 / time units, see not on [units](#units)). 
+where we have specified a diffusion coefficient of 1 (space units^2 / time units, see not on [units](#units)). For convenience, when multiple molecules have the same diffusion coefficient, their diffusion coefficients may all be specified using a compound declaration as follows:
+```
+D(X)=D(Y)=D(Z)=1
+```
 
 
 # Units
