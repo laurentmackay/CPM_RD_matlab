@@ -10,12 +10,17 @@ Currently, we have developped a simple text-based [model specification paradigm]
 
 
 ## Model Specification
+### Reaction Notation
 Reaction-Diffusion systems are specified primarily using a text-based chemical reaction notation. For, example a bimolecular complexing reaction between chemical species `A` and `B` producing `C` with rate constant `k1` is written as:
 
 ```
 A + B -> C; k1
 ```
-
+Reversible pairs of reactions may be specified using two separate declartions as above (with products and reactants swapped), or one may use the shorthand notation,
+```
+A + B <-> C; k1, k2
+```
+where k2 is the rate constant for the degradation of `C` into `A` and `B`.
 
 ToDo: Explicit specification of boundary conditions
 
