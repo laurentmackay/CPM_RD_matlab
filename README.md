@@ -65,8 +65,16 @@ A model specified in the file `model_file` can be used in simulations by first c
 Only one model can be deployed at a time, and `deploy_model` will take care of modifying the MATLAB-path when a user switches between models.
 
 Moreover, `deploy_model` will also check if the model specification file has been updated since it was last deployed, and will only run the model through the interpreter when changes have been made. This behaviour can be overridden by passing a second boolean argument `true` or `1` to `deploy_model`.
+
 ## Simulations
-Upon deploying a model, it 
+Upon deploying a model, simulation specific files will be generated. Currently, we produce files that allow the user to simulate the model inside the Cellular Potts Model framework as well as some files for producing bifurcations in AUTO07p.
+
+Moving forward, we will provide a more flexible approach such that arbitrary simulation files can be generated from user-specified model.
+
+## Analysis
+
+I am just starting to think about how to manage this within our system. However, we should probably distingush between model analysis and analaysis of simulation results as they are generally quite different, but often inter-related, beasts.
+
 
 # Units
 Model specification is unit-agnostic and it is up to a specific simulation to interpret the numerical values specified by the user apprpriately.
