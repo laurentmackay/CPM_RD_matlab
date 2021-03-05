@@ -34,7 +34,7 @@ or
 ```
 r1*X1 + r2*X2 + ... + rN*XN <-> p1*X1 + p2*X2 + ... + pN*XN; forward_rate , backward_rate
 ```
-depending on whether one wishes the reaction to be reversible or not.
+depending on whether one wishes the reaction to be reversible or not. In the absence of an explicit stoichiometric coefficient, a value of 1 is assumed.
 
 #### Variable definitions
 While we have used the name of a rate "constant", the value of the rate constants specified above may in fact be functions of the chemical species (e.g., when QSSA has already been applied to the model). In such a case, one may define the rate constants to be variable quantities by using simple algebraic expressions.
@@ -50,7 +50,7 @@ kB = 1/(1+A^2)
 
 Variable definitions may reference other variable definitions, but note that any variable name referenced in a variable definition must have already been defined in the file That is, we will not sort out the order of variable definitions for you.
 
-## Diffusion Notation
+### Diffusion Notation
 The diffusion coefficient of a chemical species `X` can be specified using
 ```
 D(X)=1
@@ -59,7 +59,14 @@ where we have specified a diffusion coefficient of 1 (space units^2 / time units
 ```
 D(X)=D(Y)=D(Z)=1
 ```
+## Deploying Models
+A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will interpret the model specified in `model_file` and pass it along to simulation-dependent functions that will generate appropriate files necessary for running simulations. These files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
 
+Only one model can be deployed at a time, and `deploy_model` will take care of modifying the MATLAB-path when you switch between models.
+
+Moreover, `deploy_model` will also check if the model specification file has been updated since it was last deployed, and will only run the model through the interpreter when changes have been made. This behaviour can be overridden by passing a second boolean argument `true` or `1` to `deploy_model`.
+## Simulations
+Upon deploying a model, it 
 
 # Units
 Model specification is unit-agnostic and it is up to a specific simulation to interpret the numerical values specified by the user apprpriately.
