@@ -22,21 +22,29 @@ A + B <-> C; k1, k2
 ```
 where `k2` is the rate constant for the degradation of `C` into `A` and `B`.
 
-Most generally, reactions can be specified using the one of the following notations:
+Most generally, reactions are described by stoichiometirc coeffient and chemical species. Consider a reaction whose `n`th chemical species is denoted by `Xn` and has a stoichiometric coefficent of `rn` as a reactant and `pn` as a product. Such a reaction can be written as  
 ```
 r1*X1 + r2*X2 + ... + rN*XN -> p1*X1 + p2*X2 + ... + pN*XN; forward_rate
 ```
-or 
-```
- p1*X1 + p2*X2 + ... + pN*XN <- r1*X1 + r2*X2 + ... + rN*XN; forward_rate
-```
 or
 ```
-r1*X1 + r2*X2 + ... + rN*XN <-> p1*X1 + p2*X2 + ... + pN*XN; forward_rate (?, backward_rate)
+r1*X1 + r2*X2 + ... + rN*XN <-> p1*X1 + p2*X2 + ... + pN*XN; forward_rate , backward_rate
 ```
-where `rn` is the stoichiometic coefficient of the `n`th chemical species denoted by `Xn` as a reactant in the reaction ()
+depending on whether one wishes the reaction to be reversible or not.
 
-ToDo: Explicit specification of boundary conditions
+#### Variable definitions
+While we have used the name of a rate "constant", the value of the rate constants specified above may in fact be functions of the checmial species (e.g., when QSSA is used). In such a case, one may define the rate constants to be variable quantities by using simple algebraic expressions.
+
+For example, we may model mutual inhibition between two molecules (`A` and `B`) that can switch betweem two isomers (e.g., through isomerization reactions `A0<->A1` and `B0<->B1`) using the following model specification:
+```
+A0 <-> A1; kA, delta_A
+B0 <-> B1; kB, delta_B
+
+kA = 1/(1+B^2)
+kB = 1/(1+A^2)
+```
+
+Variable definitions may reference other variable definitions, but note that any variable name reference in a variable definitions must have already been defined in the file That is, we will not sort out the order of variable definitions for you.
 
 # CPM_RD_matlab
 
