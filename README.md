@@ -75,7 +75,7 @@ or
 X(0)=X0
 par X0=1
 ```
-For convenience, multiple species can be given the same initial condition using a compound declaration as follows:
+where in both cases we have specified an initial condition of 1 (concentration units, see note on [units](#units)). For convenience, multiple species can be given the same initial condition using a compound declaration as follows:
 ```
 X(0)=Y(0)=Z(0)=1
 ```
@@ -89,7 +89,7 @@ The diffusion coefficient of a chemical species `X` can be specified using
 ```
 D(X)=1
 ```
-where we have specified a diffusion coefficient of 1 (space units^2 / time units, see not on [units](#units)). For convenience, when multiple species have the same diffusion coefficient, their diffusion coefficients may all be specified using a compound declaration as follows:
+where we have specified a diffusion coefficient of 1 (space units^2 / time units, see note on [units](#units)). For convenience, when multiple species have the same diffusion coefficient, their diffusion coefficients may all be specified using a compound declaration as follows:
 ```
 D(X)=D(Y)=D(Z)=1
 ```
