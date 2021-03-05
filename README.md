@@ -1,8 +1,21 @@
 # CPM_RD_matlab
+A general puprose tool for modelling reaction-diffusion systems in MATLAB (with extensible support for other computational environments).
+
+The aim of this project is to provide a tool that separates model specification from model analysis, simulation building, simulation analysis.
+
+Currently, we have developped a simple text-based [model specification paradigm] (#model) for reaction-diffusion systems that is flxeible to be extended to consider other types of systems (e.g., reaction-diffusion-convection).  
+
+
+*N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but you may be able to run it on older versions with some elbow grease.*
+
+
+## <a name='model'></a>Model Specification
+
+# CPM_RD_matlab
 
 A general purpose 2D stochastic implementation of reaction-diffusion systems using the SSSA (SSA0_fun.m), with a Cellular-Potts Model component (CPM_step.m) to provide a dyanmic domain for the chemical reactions and diffusion to occur in. See CPM_ReadMe.pdf for more details on these algorithms.
 
-N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but you may be able to run it on older versions with some elbow grease. 
+
 
 ## Auto-generation of SSA Code (mk_fun)
 Due to the way MATLAB handles functions (pass by value), it is computationally inefficient to compute chemical reaction propensities inside of a function. Instead, we specify the update rules in a script `update_alpha_chem0.m`, and automatically generate a SSSA function with those rules inside of it. 
