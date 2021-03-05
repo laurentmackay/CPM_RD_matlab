@@ -6,7 +6,7 @@ The aim of this project is to provide a tool that separates model specification 
 Currently, we have developped a simple text-based [model specification paradigm](#model-specification) for reaction-diffusion systems that is flxeible to be extended to consider other types of systems (e.g., reaction-diffusion-convection).  
 
 
-*N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but you may be able to run it on older versions with some elbow grease.*
+*N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but one may be able to run it on older versions with some elbow grease.*
 
 
 ## Model Specification
@@ -48,7 +48,7 @@ kA = 1/(1+B^2)
 kB = 1/(1+A^2)
 ```
 
-Variable definitions may reference other variable definitions, but note that any variable name referenced in a variable definition must have already been defined in the file That is, we will not sort out the order of variable definitions for you.
+Variable definitions may reference other variable definitions, but note that any variable name referenced in a variable definition must have already been defined in the file. That is, we will not sort out the order of variable definitions for the user, nor will we notify the user when a model is defined in an inconsistent manner.
 
 ### Diffusion Notation
 The diffusion coefficient of a chemical species `X` can be specified using
@@ -62,7 +62,7 @@ D(X)=D(Y)=D(Z)=1
 ## Deploying Models
 A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will interpret the model specified in `model_file` and pass it along to simulation-dependent functions that will generate appropriate files necessary for running simulations. These files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
 
-Only one model can be deployed at a time, and `deploy_model` will take care of modifying the MATLAB-path when you switch between models.
+Only one model can be deployed at a time, and `deploy_model` will take care of modifying the MATLAB-path when a user switches between models.
 
 Moreover, `deploy_model` will also check if the model specification file has been updated since it was last deployed, and will only run the model through the interpreter when changes have been made. This behaviour can be overridden by passing a second boolean argument `true` or `1` to `deploy_model`.
 ## Simulations
