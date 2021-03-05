@@ -10,6 +10,14 @@ Currently, we have developped a simple text-based [model specification paradigm]
 
 
 ## Model Specification
+Reaction-Diffusion systems are specified primarily using a text-based chemical reaction notation. For, example a bimolecular complexing reaction between chemical species `A` and `B` producing `C` with rate constant `k1` is written as:
+
+```
+A + B -> C; k1
+```
+
+
+ToDo: Explicit specification of boundary conditions
 
 # CPM_RD_matlab
 
