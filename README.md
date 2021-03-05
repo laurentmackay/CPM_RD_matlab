@@ -65,12 +65,23 @@ Unlike in xppaut, we allow parameter values to reference one another. However, s
 par delta_A = 0.1, delta_B = 1 + 10*delta_A 
 ```
 
+#### Initial Conditions
+Initial condtions for the molecule `X` are specified using by placing `(0) = ` after the chemical species name and either specifying a numerical value of paremeter name. For example:
+```
+X(0) = 1
+```
+For convenience, multiple species can be given the same initial condition using a compound declaration as follows:
+```
+X(0)=Y(0)=Z(0)=1
+```
+
+
 ### Diffusion Notation
 The diffusion coefficient of a chemical species `X` can be specified using
 ```
 D(X)=1
 ```
-where we have specified a diffusion coefficient of 1 (space units^2 / time units, see not on [units](#units)). For convenience, when multiple molecules have the same diffusion coefficient, their diffusion coefficients may all be specified using a compound declaration as follows:
+where we have specified a diffusion coefficient of 1 (space units^2 / time units, see not on [units](#units)). For convenience, when multiple species have the same diffusion coefficient, their diffusion coefficients may all be specified using a compound declaration as follows:
 ```
 D(X)=D(Y)=D(Z)=1
 ```
