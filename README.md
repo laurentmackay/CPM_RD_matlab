@@ -70,6 +70,11 @@ Initial condtions for the molecule `X` are specified using by placing `(0) = ` a
 ```
 X(0) = 1
 ```
+or 
+```
+X(0) = X0
+par X0=1
+```
 For convenience, multiple species can be given the same initial condition using a compound declaration as follows:
 ```
 X(0)=Y(0)=Z(0)=1
