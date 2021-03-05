@@ -12,7 +12,7 @@ Currently, we have developped a simple text-based [model specification paradigm]
 ## Model Specification
 We have implemented a basic model specification scheme for reaction-diffusion systems. This model specification scheme serves as a basic template that can be expanded upon to model more complex types of systems.
 
-Model are specified in simple line-oriented text files, where we are agnostic about file extensions (but recommend against their use as they do nothing but cause confusion). By line-oriented, we mean that declarations (e.g., a reaction declaration, variable declaration, or diffusion coefficient declaration) are separated from one another by newline characters.
+Model are specified in simple line-oriented text files, where we are agnostic about file extensions (but recommend against their use as they do nothing but cause confusion). By line-oriented, we mean that declarations (e.g., a reaction declaration, variable declaration, or diffusion coefficient declaration) are separated from one another by newline characters. There is currently no limit on line lengths in the model specification files.
 
 ### Reaction Notation
 Reaction-diffusion systems are specified primarily using a text-based chemical reaction notation. For, example a bimolecular complexing reaction between chemical species `A` and `B` producing `C` with rate constant `k1` is written as:
@@ -49,6 +49,21 @@ kB = 1/(1+A^2)
 ```
 
 Variable definitions may reference other variable definitions, but note that any variable name referenced in a variable definition must have already been defined in the file. That is, we will not sort out the order of variable definitions for the user, nor will we notify the user when a model is defined in an inconsistent manner.
+
+#### Parameter Values
+We have borrowed heavily from xppaut for our parameter specification paradigm. Any line starting with "par" or "param" denotes a line of parameter value declarations. For example, in the isomerization example considered above we could specify parameters values using:
+```
+par delta_A=0.1, delta_B=2
+```
+
+Moreover, we have added in  wildcard approach for specifying a default parameter value that is used for parameters that are unspecified. For axmple, we can specify a default parameter value of 1 using:
+```
+par *=1
+```
+Unlike in xppaut, we allow parameter values to reference one another. However, similarly to variable declarations, they must be specified in appropraiate order. For example:
+```
+par delta_A = 0.1, delta_B = 1 + 10*delta_A 
+```
 
 ### Diffusion Notation
 The diffusion coefficient of a chemical species `X` can be specified using
