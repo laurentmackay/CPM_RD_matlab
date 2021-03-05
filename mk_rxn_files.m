@@ -148,7 +148,7 @@ rate_constant_pars= regexp(rate_constants,name,'tokens');
 rate_constant_pars=[rate_constant_pars{:}];
 rate_constant_pars=[rate_constant_pars{:}];
 
-model_pars = unique([model_pars fast_params rate_constant_pars consrv_nm],'stable');
+model_pars = unique([model_pars fast_params rate_constant_pars],'stable');
 model_pars = setdiff(model_pars, [model_vars chems],'stable');
 model_par_vals = cellstr(repmat('0.0',1,length(model_pars)));
 
@@ -183,7 +183,7 @@ if ~isempty(par_defs)
         matched = cellfun(@(x) ~isempty(x) ,i_par);
         model_par_vals([i_par{:}]) = par_vals(matched);
     end
-    vars=setdiff(vars,pars,'stable');
+    vars=setdiff(vars,[pars consrv_nm],'stable');
     
     
 end
@@ -592,14 +592,19 @@ end
 
 consrv_defs_init = regexprep(consrv_rhs_elim,[slow_refs; fast_refs],[slow_init_reps'; fast_init_reps]');
 consrv_defs_init = cellstr(string(str2sym(consrv_defs_init)));
-consrv_def_vals = consrv_defs_init;
+
 
 consrv_defs = regexprep(string(consrv_eqns),'==','=');
+
+N_con_user = size(lcon_user,2);
+
+model_pars = [model_pars consrv_nm{1:N_con_user}];
+model_par_vals = [model_par_vals consrv_defs_init{1:N_con_user}];
 
 par_eqn = str2sym(model_pars');
 par_val_eqn = str2sym(model_par_vals);
 consrv_nm_eqn = str2sym(consrv_nm');
-consrv_val_eqn = str2sym(consrv_def_vals);
+consrv_val_eqn = str2sym(consrv_defs_init);
 chem_eqn = str2sym(chems(~is_fast));
 init_eqn = str2sym(init(~is_fast));
 
@@ -1104,11 +1109,11 @@ fclose(fid);
 
 
 
-N_con_user = size(lcon_user,2);
+
 
 consrv_assgn = cellfun(@(nm,v) [nm '=' v],cellstr(consrv_nm(N_con_user+1:end)), cellstr(consrv_defs_init(N_con_user+1:end)'),'UniformOutput',false);
 
-consrv_defs_init = strcat("par ",consrv_nm, " = " , consrv_defs_init', string(newline));
+% consrv_defs_init = strcat("par ",consrv_nm, " = " , consrv_defs_init', string(newline));
 
 %  if simp
 % ode_body = [strjoin([model_defs'; rates_slow'; sigma__reps'; predefs'; sigma2__reps';], newline)...
@@ -1158,8 +1163,8 @@ ode_body_elim = char(strjoin(strcat('d',chems(~is_elim_con0 & ~is_fast),'/dt=',s
 ode_body_elim=regexprep(ode_body_elim,'\.\*','\*');
 
 % ode_body_elim = regexprep(ode_body_elim,elim_refs,elim_reps);
-
-consrv_str = strjoin(strcat(strcat('#', consrv_defs), string(newline), consrv_defs_init'), newline);
+consrv_str = strcat("par ",consrv_nm', " = " , consrv_defs_init, string(newline));
+consrv_str = strjoin(strcat(strcat('#', consrv_defs), string(newline), consrv_str), newline);
 consrv_str = char(consrv_str);
 
 
@@ -1181,7 +1186,7 @@ init_str =  breaklines(init_str,255,['\']);
 model_str = strjoin(model_defs,newline);
 
 
-  elim_con_defs = regexprep(string(sol_consrv),nameref(consrv_nm),consrv_def_vals);
+  elim_con_defs = regexprep(string(sol_consrv),nameref(consrv_nm(N_con_user+1:end)),consrv_defs_init(N_con_user+1:end));
 %   elim_con_defs = string(eval(['[' char(strjoin(elim_con_defs)) ']'])');
   
  elim_con_defs = char(strjoin(strcat(elim_con','=',elim_con_defs), newline));
@@ -1281,7 +1286,7 @@ par_vals_tot = tmp2(i);
 pars_tot = pars_tot(i);
 if ~isempty(pars_tot)
     fid=fopen(strcat(save_dir,filesep,'model_params.m'),'w');
-    fwrite(fid, strjoin(strcat([pars_tot cellstr(consrv_nm)],'=',[par_vals_tot consrv_def_vals'],';'),newline),'char');
+    fwrite(fid, strjoin(strcat([pars_tot cellstr(consrv_nm)],'=',[par_vals_tot consrv_defs_init'],';'),newline),'char');
     fclose(fid);
 end
 

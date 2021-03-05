@@ -12,7 +12,7 @@ Paxtot = Pax + Paxs + PaxGIT + PaxsGIT + PaxFAK +PaxsFAK
 serine_kinase = (PAK + PaxsGIT + PaxGIT)
 Q_ps = kons*(serine_kinase^n)/(L^n+serine_kinase^n)
 
-par kon1=1.0, koff1=1.0, kon2=1.0, koff2=1.0, kons=1.0, koffs=0.01, kfs=50, L=0.75, n=4.0, PAK=0, Paxtot=1
+par kon1=1.0, koff1=1.0, kon2=1.0, koff2=1.0, kons=1.0, koffs=0.01, kfs=50, L=0.75, n=4.0, PAK=0, Paxtot=10
 
 GIT(0)=2
 PaxGIT(0)=PaxsGIT(0)=Paxs(0)=PaxsFAK(0)=PaxFAK(0)=0
