@@ -94,7 +94,7 @@ where we have specified a diffusion coefficient of 1 (space units^2 / time units
 D(X)=D(Y)=D(Z)=1
 ```
 ## Deploying Models
-A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will run  the model specified in `model_file` through an interpreter and pass it along to simulation-dependent functions that will generate appropriate files necessary for running simulations. These files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
+A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will run  the model specified in `model_file` through an interpreter (i.e., `mk_rxn_files`) and pass it along to simulation-dependent functions that will generate appropriate files necessary for running simulations. These files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
 
 Only one model can be deployed at a time, and `deploy_model` will take care of modifying the MATLAB-path when a user switches between models.
 
