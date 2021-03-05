@@ -79,7 +79,10 @@ For convenience, multiple species can be given the same initial condition using 
 ```
 X(0)=Y(0)=Z(0)=1
 ```
-
+We also allow for wildcard notation to define a default intial conditions:
+```
+*(0)=1
+```
 
 ### Diffusion Notation
 The diffusion coefficient of a chemical species `X` can be specified using
