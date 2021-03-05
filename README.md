@@ -1,7 +1,7 @@
 # CPM_RD_matlab
-A general puprose tool for modelling reaction-diffusion systems in MATLAB (with extensible support for other computational environments).
+A general puprose tool for modelling reaction-diffusion systems in MATLAB (with extensible support for other computational environments). Inspired by the very fun and useful dynamical systems analysis tool [xppaut](http://www.math.pitt.edu/~bard/xpp/xpp.html), we have aimed to make chemical kinetic systems more approachable by providing a tool that automatically derives sets of equations from reactions schemes and can perform some of the more tedious aspects of model simplification in an reliable and automated manner.
 
-The aim of this project is to provide a tool that separates model specification from model analysis, simulation building, simulation analysis.
+A longer term aim of this project is to provide a tool that separates model specification from model analysis, simulation building, simulation analysis.
 
 Currently, we have developped a simple text-based [model specification paradigm](#model-specification) for reaction-diffusion systems that is flxeible to be extended to consider other types of systems (e.g., reaction-diffusion-convection).  
 
