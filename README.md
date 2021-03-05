@@ -9,7 +9,7 @@ Currently, we have developped a simple text-based [model specification paradigm]
 *N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but you may be able to run it on older versions with some elbow grease.*
 
 
-## <a name='model'></a>Model Specification
+## <a name="model"></a>Model Specification
 
 # CPM_RD_matlab
 
