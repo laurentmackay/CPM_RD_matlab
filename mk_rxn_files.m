@@ -100,7 +100,6 @@ if any(~is_valid_consrv)
    
    cellfun(@(x) disp(x),model_defs(inds(~is_valid_consrv)))
    disp(" ")
-   disp(['Any specified parmeter values associated with these conserved quantities will not be ignored.']);
    disp(newline)
    
    
