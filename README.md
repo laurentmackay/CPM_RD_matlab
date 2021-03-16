@@ -8,17 +8,17 @@ Currently, we have developped a simple text-based [model specification paradigm]
 
 *N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but one may be able to run it on older versions with some elbow grease.*
 
+### GoTo
+- [Model Specification](#model-specification)
+- - [Reaction Notation](#reaction-notation)
+- - [Variable Definitions](#variable-definitions)
+- - [Diffusion Notation](#diffusion-notation)
+
 
 ## Model Specification
 We have implemented a basic model specification scheme for reaction-diffusion systems. This model specification scheme serves as a basic template that can be expanded upon to model more complex types of systems.
 
 Model are specified in simple line-oriented text files, where we are agnostic about file extensions. By line-oriented, we mean that declarations (e.g., a reaction declaration, variable declaration, or diffusion coefficient declaration) are separated from one another by newline characters. There is currently no limit on line lengths in the model specification files.
-
-### GoTo
-
- - [Reaction Notation](#reaction-notation)
- - [Variable Definitions](#variable-definitions)
- - [Diffusion Notation](#diffusion-notation)
 
 
 ### Reaction Notation
