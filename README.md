@@ -19,7 +19,7 @@ Model are specified in simple line-oriented text files, where we are agnostic ab
  [Reaction Notation](#reactionnoation)
  
  [Variable Definitions](#variabledefinitions)
- 
+
  [Diffusion Notation](#diffusionnotation)
 
 
