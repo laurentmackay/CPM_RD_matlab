@@ -16,7 +16,7 @@ Currently, we have developped a simple text-based [model specification paradigm]
   - [Initial Conditions](#initial-conditions)
   - [Diffusion Notation](#diffusion-notation)
 - [Deploying Models](#deploying-models)
-- 
+- [Note on Units](#units)
 
 
 ## Model Specification
