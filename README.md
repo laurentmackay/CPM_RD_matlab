@@ -16,9 +16,9 @@ Model are specified in simple line-oriented text files, where we are agnostic ab
 
 ### GoTo
 
- - [Reaction Notation](#reactionnoation)
- - [Variable Definitions](#variabledefinitions)
- - [Diffusion Notation](#diffusionnotation)
+ - [Reaction Notation](#reaction_notation)
+ - [Variable Definitions](#variable_definitions)
+ - [Diffusion Notation](#diffusion_notation)
 
 
 ### Reaction Notation
