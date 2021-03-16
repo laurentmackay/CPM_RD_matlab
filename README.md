@@ -14,7 +14,6 @@ Currently, we have developped a simple text-based [model specification paradigm]
   - [Variable Definitions](#variable-definitions)
   - [Parameter Values](#parameter-values)
   - [Initial Conditions](#initial-conditions)
-  - 
   - [Diffusion Notation](#diffusion-notation)
 - [Deploying Models](#deploying-models)
 - 
