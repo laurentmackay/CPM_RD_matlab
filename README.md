@@ -8,11 +8,16 @@ Currently, we have developped a simple text-based [model specification paradigm]
 
 *N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but one may be able to run it on older versions with some elbow grease.*
 
-### GoTo
+### Index
 - [Model Specification](#model-specification)
   - [Reaction Notation](#reaction-notation)
   - [Variable Definitions](#variable-definitions)
+  - [Parameter Values](#parameter-values)
+  - [Initial Conditions](#initial-conditions)
+  - 
   - [Diffusion Notation](#diffusion-notation)
+- [Deploying Models](#deploying-models)
+- 
 
 
 ## Model Specification
