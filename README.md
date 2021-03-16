@@ -10,9 +10,9 @@ Currently, we have developped a simple text-based [model specification paradigm]
 
 ### GoTo
 - [Model Specification](#model-specification)
-- - [Reaction Notation](#reaction-notation)
-- - [Variable Definitions](#variable-definitions)
-- - [Diffusion Notation](#diffusion-notation)
+ - [Reaction Notation](#reaction-notation)
+ - [Variable Definitions](#variable-definitions)
+ - [Diffusion Notation](#diffusion-notation)
 
 
 ## Model Specification
