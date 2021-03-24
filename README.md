@@ -8,11 +8,24 @@ Currently, we have developped a simple text-based [model specification paradigm]
 
 *N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but one may be able to run it on older versions with some elbow grease.*
 
+### Index
+- [Model Specification](#model-specification)
+  - [Reaction Notation](#reaction-notation)
+  - [Variable Definitions](#variable-definitions)
+  - [Parameter Values](#parameter-values)
+  - [Initial Conditions](#initial-conditions)
+  - [Diffusion Notation](#diffusion-notation)
+- [Deploying Models](#deploying-models)
+  - [Simulations](#simulations)
+  - [Analysis](#analysis)
+- [Note on Units](#units)
+
 
 ## Model Specification
 We have implemented a basic model specification scheme for reaction-diffusion systems. This model specification scheme serves as a basic template that can be expanded upon to model more complex types of systems.
 
-Model are specified in simple line-oriented text files, where we are agnostic about file extensions (but recommend against their use as they do nothing but cause confusion). By line-oriented, we mean that declarations (e.g., a reaction declaration, variable declaration, or diffusion coefficient declaration) are separated from one another by newline characters. There is currently no limit on line lengths in the model specification files.
+Model are specified in simple line-oriented text files, where we are agnostic about file extensions. By line-oriented, we mean that declarations (e.g., a reaction declaration, variable declaration, or diffusion coefficient declaration) are separated from one another by newline characters. There is currently no limit on line lengths in the model specification files.
+
 
 ### Reaction Notation
 Reaction-diffusion systems are specified primarily using a text-based chemical reaction notation. For, example a bimolecular complexing reaction between chemical species `A` and `B` producing `C` with rate constant `k1` is written as:
@@ -36,7 +49,7 @@ r1*X1 + r2*X2 + ... + rN*XN <-> p1*X1 + p2*X2 + ... + pN*XN; forward_rate , back
 ```
 depending on whether one wishes the reaction to be reversible or not. In the absence of an explicit stoichiometric coefficient, a value of 1 is assumed.
 
-#### Variable definitions
+#### Variable Definitions
 While we have used the name of a rate "constant", the value of the rate constants specified above may in fact be functions of the chemical species (e.g., when QSSA has already been applied to the model). In such a case, one may define the rate constants to be variable quantities by using simple algebraic expressions.
 
 For example, we may model mutual inhibition between two molecules (`A` and `B`) that can switch betweem two isoforms (e.g., through reversible isomerization reactions `A0<->A1` and `B0<->B1`) using the following model specification:
