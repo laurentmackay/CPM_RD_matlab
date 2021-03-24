@@ -30,7 +30,7 @@ for i=1:length(inds)
     else
         time_to_polarize{inds(i)}{end+1}=Inf;
     end
-    disp(['processed: ' int2str(i) '/' int2str(length(inds))])
+    disp(['processed: ' int2str(i) '/' int2str(length(inds)) ', B=' num2str(B_vals(inds(i)))  '->' num2str(delta_max>0.01)])
 end
 disp('done running timecourse')
 
@@ -39,6 +39,13 @@ e2=cellfun(@(x) std([x{:}]),time_to_polarize);
 t2=cellfun(@(x) mean([x{:}]),time_to_polarize);
 figure(1);clf();
 h=errorbar(B_vals,t2,e2);
+
+% hold (gca,'on')
+% figure(1);
+% h=errorbar(B_vals,t2,e2);
+% hold (gca,'off')
+
+
 
 d2=cellfun(@(x) mean([x{:}]),max_diff);
 figure(2);clf();

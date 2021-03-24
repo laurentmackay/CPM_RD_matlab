@@ -1,5 +1,8 @@
 function playback(f,plot_fun)
-addpath(genpath('..'));
+% addpath(genpath('..'));
+
+load(strcat(results_dir(),f));
+
 if nargin<2 || isempty(plot_fun)
 
 
@@ -11,7 +14,7 @@ if nargin<2 || isempty(plot_fun)
 
 end
 
-load(strcat('../results/',f));
+
 
 plotting=true;
 N_steps=size(Results,4);
@@ -24,7 +27,7 @@ for i=1:iter
    drawnow()
 end
 
-rmpath(genpath('..'))
+% rmpath(genpath('..'))
 
 
 end

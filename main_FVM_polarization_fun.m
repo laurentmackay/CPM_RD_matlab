@@ -1,5 +1,5 @@
-function [B,lam_p_0,dt,copyNum,cpmstep0,model_name] = main_FVM_fun(B,lam_p_0,dt,...
-copyNum,cpmstep0,model_name)
+function [B,lam_p_0,save_dir,dt,copyNum,cpmstep0,model_name] = ...
+main_FVM_polarization_fun(B,lam_p_0,save_dir,dt,copyNum,cpmstep0,model_name)
 
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
@@ -27,7 +27,7 @@ nrx=1e5;
 
 noise=0.0005;
 
-Ttot=4e4; 
+Ttot=2e5; 
 
 SF=2; 
 Gsize=80; 
@@ -583,8 +583,9 @@ if isempty(getCurrentTask());  end
 
 
 T_integration = cpmstep;
+keep_running=true;
 
-while time<Ttot
+while time<Ttot && keep_running
     A=nnz(cell_mask); 
     cell_inds(1:A)=find(cell_mask); 
     
@@ -1072,13 +1073,16 @@ sgtitle(pic_fig,['t=' num2str(time) ', t_{plot}=' num2str(double(tic-tp__0)*1e-6
 end
 lastplot=time; 
             
- 
+                i_rac = find(strcmp(chems,'Rac')); 
+                inds=cell_inds(1:A)+sz*(i_rac-1);
+                d_Rac=max(max(x(inds)))-min(min(x(inds)));
                 if plotting
                     gif
                 end
                 if ~isempty(getCurrentTask())
-                    disp([num2str(copyNum) ': B=' num2str(B) ', t=' num2str(time)])
+                    disp([num2str(copyNum) ': B=' num2str(B) ', t=' num2str(time) ', delta_Rac=' num2str(d_Rac)])
                 end
+                
                 iter=iter+1;
 
 center(:,iter)=com(cell_mask);
@@ -1093,6 +1097,14 @@ Ham0(iter)=H0;
 Hchem(iter)=dH_chem;
 
 cpmcounter=0;
+                
+                i_rac = find(strcmp(chems,'Rac')); 
+                inds=cell_inds(1:A)+sz*(i_rac-1);
+                if d_Rac>0.05
+                   keep_running=false;
+                   break;
+                end
+                
             end
             
             
@@ -1125,7 +1137,7 @@ end
 
 toc
 
-    fn=strcat('_',model_name,'/results/final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
+    fn=strcat(save_dir, 'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
     disp(['saving to: ' fn]);
     ls results
     save(fn,'-v7.3');

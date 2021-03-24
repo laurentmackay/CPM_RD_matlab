@@ -27,11 +27,11 @@ plot(RacRatio0,RacRatio,RhoRatio,PaxRatio)
 
 D(Raci)=D(Rhoi)=0.43       %fast diffusion for inactive RhoGTPases
 D(Rac)=D(Rho)=0.02          %slow for active forms
-D(Paxi)=0.1       %fast for paxillin
-D(Pax)=20       %fast for paxillin
+D(Paxi)=0.03      %fast for paxillin
+D(Pax)=0.03       %fast for paxillin
 
 
-param B=3
+param B=3.
 
 param I_rho=0.016, L_rho=0.34, delta_rho=0.016
 param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5

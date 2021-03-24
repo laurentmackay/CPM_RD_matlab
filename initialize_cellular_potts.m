@@ -9,7 +9,7 @@
 %BMC Biophys. 2015;8:8. Published 2015 May 12. doi:10.1186/s13628-015-0022-x
 
 lam_a=1*h^4; %energy cost of area change
-lam_p_0=1;
+lam_p_0=0.1;
 lam_p=lam_p_0*h^2; %energy cost of permiter change
 J=0*h; %energy cost of change in medium contact
 

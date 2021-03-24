@@ -38,7 +38,9 @@ t0=time;
 eye = speye(A);
 MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D,'UniformOutput',0); % 2-SBDF
 % MAT_list = arrayfun(@(Di)( eye/dt-Di*u_xx*9/16),D,'UniformOutput',0); %MCNAB
-
+if any(u(:)<0)
+    disp('negatory pig pen')
+end
 
 while time-t0<T_integration
     
@@ -52,11 +54,14 @@ while time-t0<T_integration
 
     for i = 1:N_species
         u(:,i) = MAT_list{i}\b(:,i);
+        
+        if any(u(:)<0)
+            disp('wild ass over here')
+        end
+    
     end
     
-    if any(u(:)<0)
-        disp('wild ass over here')
-    end
+
     time=time+dt;
 
 

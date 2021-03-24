@@ -9,7 +9,7 @@ else
 end
 
 
-load(strcat(base_dir,'/results/',f));
+load(strcat(results_dir(), f));
 
 plotting=true;
 N_steps=size(Results,4);
@@ -19,6 +19,9 @@ plot_accum={};
 
 for i=1:iter
    x=Results(:,:,2:end,i);
+   cell_mask=Results(:,:,1,i);
+   A=nnz(cell_mask);
+   cell_inds(1:A)=find(cell_mask);
    time=Times(i);
    eval_model;
    if nargin==3

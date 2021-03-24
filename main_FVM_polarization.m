@@ -18,10 +18,11 @@ end
 
 %open(vid);
 
+
 nrx=1e5; %number of times reactions are carried out in a chem_func loop
 
-noise=0.005;
-dt=1;
+noise=0.0005;
+dt=0.1;
 Ttot=2e5; %Total simulation time
 
 SF=2; % speed factor I divide molecule number by this for speed
@@ -70,7 +71,6 @@ initialize_results
 
 % Results=zeros(N,N,N_species+1,floor(Ttot/picstep)+1); %an array where we store results
 u = reshape(x,[sz ,size(x,3)]);
-eval_model
 pic %takes a frame for the video
 if plotting && usejava('desktop') && isempty(getCurrentTask())
     delete test.gif
@@ -147,11 +147,11 @@ if isempty(getCurrentTask()); copyNum=[]; end
 
 
 
-FVM_CPM_loop
+FVM_CPM_loop_polarization
 
 toc
 
-    fn=strcat('_',model_name,'/results/final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
+    fn=strcat(save_dir, 'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
     disp(['saving to: ' fn]);
     ls results
     save(fn,'-v7.3');
