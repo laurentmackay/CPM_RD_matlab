@@ -1410,97 +1410,113 @@ fclose(fid);
 
 % 
 % LPA_locals={'Rac','Rho','Pax'};
+ LPA_locals={'Rac','Rho','Paxs', 'PaxsFAK', 'PaxsGIT'};
+  LPA_locals={'Rac','Rho','Paxs'};
+  
+  LPA_globals =  {'Pax' 'FAK' 'GIT'    'Raci'    'Rhoi'};
+ LPA_locals = setdiff(chems(~is_fast),LPA_globals,'stable');
+ 
+% LPA_locals = intersect(LPA_locals,chems);
+ 
 % 
 % 
-% f_mix_LPA = subs(f_mix_explicit, str2sym(elim_con'), subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_minus'))));
-% is_local = cellfun( @(x) any(strcmp(x,LPA_locals)), chems);
-% 
-% offsets=cumsum(is_local*3)+1;
-% offsets_global = offsets(~is_local);
-% 
-% f_tot_LPA( offsets_global ) = subs(f_mix_LPA(~is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_minus')) );
-% 
-% 
-% 
-% offsets_local=[offsets(is_local)-2; offsets(is_local)-1];
-% % offset=offsets(:);
-% 
-% 
-% model_vars = regexprep(model_defs, [name '[ \t\f]*=.+'], '$1');
-% 
-% f_tot_LPA(offsets_local(1:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_plus')));
-% f_tot_LPA(offsets_local(2:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_minus')));
-% 
-% model_refs=[nameref(model_vars); nameref(LPA_locals)];
-% model_defs_plus = regexprep(model_defs, model_refs, '$1_plus');
-% model_defs_minus = regexprep(model_defs, model_refs, '$1_minus');
-% model_vars_LPA = [strcat(model_vars,'_plus') strcat(model_vars,'_minus')];
-% 
-% F_assgn_LPA = arrayfun(@(f,i)[  'F(' int2str(i) ')=' char(string(f))],f_tot_LPA(offsets_local(:)),(1:nnz(is_local)*2),'UniformOutput',false);
-% 
-% % LPA_locals_tot={strcat(LPA_locals,'_plus'); strcat(LPA_locals,{'_minus'})}
-% u_LPA(offsets_local(1,:))=strcat(LPA_locals,'_plus');
-% u_LPA(offsets_local(2,:))=strcat(LPA_locals,'_minus');
-% u_LPA(offsets_global)=chems(~is_local);
-% 
-% u_read_LPA= cellfun(@(c,i) [c '=U(' int2str(i) ')'],u_LPA(offsets_local(:)),num2cell(1:numel(u_LPA(offsets_local))),'UniformOutput',false);
-% 
-% % u_assgn_LPA(offsets_local(1,:)')=strcat("U(", int2str(offsets_local(1,:)'),')=',num2str(fp(is_local)'));
-% % u_assgn_LPA(offsets_local(2,:))=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
-% % u_assgn_LPA(offsets_global)=strcat("U(",int2str(offsets_global'),')=',num2str(fp(~is_local)'));
-% 
-% % u_assgn_LPA(1:2:end)=strcat("U(", int2str(offsets_local(1,:)'),')=',num2str(fp(is_local)'));
-% % u_assgn_LPA(2:2:end)=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
-% 
-% u_assgn_LPA=strcat("U(", int2str((1:nnz(is_local)*2)'),')=',num2str(repelem(fp(is_local),2)'));
-% % u_assgn_LPA(2:2:end)=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
-% % u_assgn_LPA(offsets_global)=strcat("U(",int2str(offsets_global'),')=',num2str(fp(~is_local)'));
-% 
-% % u_assgn = cellfun(@(v,i) ['U(' int2str(i) ')=' v],cellstr(num2str(init_relaxed',12))',num2cell(1:nnz(~is_elim_con)),'UniformOutput',false);
-% 
-% 
-% func_str_LPA=[strjoin(u_read_LPA,newline) newline newline strjoin(par_read,newline) newline newline...
-%     strjoin(consrv_assgn,newline)  newline newline newline strjoin([model_defs_plus, {newline}, model_defs_minus], newline)... 
-%     newline newline strjoin(predefs, newline) newline newline...
-%     newline newline strjoin(F_assgn_LPA, newline)];
-% 
-% func_str_LPA = fortran_subroutine('FUNC','NDIM,U,ICP,PAR,IJAC,F,DFDU,DFDP',...
-%     ['IMPLICIT NONE' newline 'INTEGER NDIM, IJAC, ICP(*)' newline ...
-%     'DOUBLE PRECISION U(NDIM), PAR(*), F(NDIM), DFDU(*), DFDP(*)'],...
-%     unique([model_pars, u_LPA cellstr(consrv_nm), model_vars_LPA, string(m1_gamma)],'stable'),...
-% func_str_LPA);
-% 
-% 
-% 
-% stpnt_str_LPA = fortran_subroutine('STPNT','NDIM,U,PAR,T',...
-%     ['IMPLICIT NONE' newline 'INTEGER NDIM' newline ...
-%     'DOUBLE PRECISION U(NDIM), PAR(*), T'],{},...
-%     [ strjoin(par_assgn,newline) newline newline char(strjoin(u_assgn_LPA,newline))]);
-% 
-% auto_str_LPA = [ func_str_LPA stpnt_str_LPA fortran_subroutine('BCND') fortran_subroutine('ICND') fortran_subroutine('FOPT') fortran_subroutine('PVLS')  ];
-% auto_str_LPA = breaklines(auto_str_LPA,80,'&');
-% auto_str_LPA = strrep(auto_str_LPA,"^","**");
-% 
-% fid=fopen(strcat(save_dir,filesep,f,'_LPA.f90'),'w');
-% fwrite(fid,auto_str_LPA,'char');
-% fclose(fid);
-% 
-% 
-% fid=fopen(strcat(save_dir,filesep,'c.',f,'_LPA'),'w');
-% fwrite(fid,...
-% ['NDIM=   ' int2str(nnz(is_local)*2) ', NPAR=   ' int2str(length(valid_ind)) ', IPS =   1, IRS =   0, ILP =   1' newline ...
-% 'parnames = {'  char(strjoin(strcat(int2str(find(valid_ind)'),": '",model_pars(1:nnz(valid_ind))',"'"),','))  '}' newline ...
-% 'unames = {' char(strjoin(strcat(int2str((1:length(u_LPA(is_local)))'),": '",u_LPA(is_local)',"'"),','))  '}' newline...
-% 'ICP =  [1]' newline ...
-% 'NTST=  50, NCOL=   4, IAD =   3, ISP =   2, ISW = 1, IPLT= 0, NBC= 0, NINT= 0' newline...
-% 'NMX= 10000000, NPR=  10000, MXBF=  10, IID =   2, ITMX= 8, ITNW= 5, NWTN= 3, JAC= 0' newline...
-% 'EPSL= 1e-7, EPSU = 1e-7, EPSS = 1e-05' newline ...
-% 'DS  =   0.001, DSMIN= 0.0000001, DSMAX=   0.05, IADS=   1' newline ...
-% 'THL =  {11: 0.0}, THU =  {}' newline ...
-% 'UZSTOP={}' newline ...
-% 'UZR={}']...
-% ,'char');
-% fclose(fid);
+f_mix_LPA = subs(f_mix_explicit, str2sym(elim_con'), subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_minus'))));
+is_local = cellfun( @(x) any(strcmp(x,LPA_locals)), chems);
+is_local = is_local(~is_fast);
+
+offsets=cumsum(is_local+1);
+offsets_global = offsets(~is_local);
+
+f_tot_LPA( offsets_global ) = subs(f_mix_LPA(~is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_minus')) );
+
+
+
+offsets_local=[offsets(is_local)-1; offsets(is_local)];
+% offset=offsets(:);
+
+
+model_vars = regexprep(model_defs, [name '[ \t\f]*=.+'], '$1');
+
+f_tot_LPA(offsets_local(1:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_plus')));
+f_tot_LPA(offsets_local(2:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_minus')));
+
+model_refs=[nameref(model_vars); nameref(LPA_locals)];
+model_defs_plus = regexprep(model_defs, model_refs, '$1_plus');
+model_defs_plus = subs(str2sym(model_defs_plus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_minus'))));
+model_defs_plus = regexprep(cellstr(string(model_defs_plus)),'==','=');
+
+model_defs_minus = regexprep(model_defs, model_refs, '$1_minus');
+model_defs_minus = subs(str2sym(model_defs_minus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_minus'))));
+model_defs_minus = regexprep(cellstr(string(model_defs_minus)),'==','=');
+
+
+
+model_vars_LPA = [strcat(model_vars,'_plus') strcat(model_vars,'_minus')];
+
+F_assgn_LPA = arrayfun(@(f,i)[  'F(' int2str(i) ')=' char(string(f))],f_tot_LPA(offsets_local(:)),(1:nnz(is_local)*2),'UniformOutput',false);
+
+% LPA_locals_tot={strcat(LPA_locals,'_plus'); strcat(LPA_locals,{'_minus'})}
+u_LPA(offsets_local(1,:))=strcat(LPA_locals,'_plus');
+u_LPA(offsets_local(2,:))=strcat(LPA_locals,'_minus');
+u_LPA(offsets_global)=chems(~is_local);
+
+u_read_LPA= cellfun(@(c,i) [c '=U(' int2str(i) ')'],u_LPA(offsets_local(:)),num2cell(1:numel(u_LPA(offsets_local))),'UniformOutput',false);
+
+% u_assgn_LPA(offsets_local(1,:)')=strcat("U(", int2str(offsets_local(1,:)'),')=',num2str(fp(is_local)'));
+% u_assgn_LPA(offsets_local(2,:))=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
+% u_assgn_LPA(offsets_global)=strcat("U(",int2str(offsets_global'),')=',num2str(fp(~is_local)'));
+
+% u_assgn_LPA(1:2:end)=strcat("U(", int2str(offsets_local(1,:)'),')=',num2str(fp(is_local)'));
+% u_assgn_LPA(2:2:end)=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
+
+u_assgn_LPA=strcat("U(", int2str((1:nnz(is_local)*2)'),')=',num2str(repelem(fp(is_local),2)'));
+% u_assgn_LPA(2:2:end)=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
+% u_assgn_LPA(offsets_global)=strcat("U(",int2str(offsets_global'),')=',num2str(fp(~is_local)'));
+
+% u_assgn = cellfun(@(v,i) ['U(' int2str(i) ')=' v],cellstr(num2str(init_relaxed',12))',num2cell(1:nnz(~is_elim_con)),'UniformOutput',false);
+
+
+func_str_LPA=[strjoin(u_read_LPA,newline) newline newline strjoin(par_read,newline) newline newline...
+    strjoin(consrv_assgn,newline)  newline newline newline strjoin([model_defs_plus, {newline}, model_defs_minus], newline)... 
+    newline newline strjoin(F_assgn_LPA, newline)];
+
+func_str_LPA = fortran_subroutine('FUNC','NDIM,U,ICP,PAR,IJAC,F,DFDU,DFDP',...
+    ['IMPLICIT NONE' newline 'INTEGER NDIM, IJAC, ICP(*)' newline ...
+    'DOUBLE PRECISION U(NDIM), PAR(*), F(NDIM), DFDU(*), DFDP(*)'],...
+    unique([model_pars, u_LPA(offsets_local(:)) cellstr(consrv_nm), model_vars_LPA, string(m1_gamma)],'stable'),...
+func_str_LPA);
+
+
+
+stpnt_str_LPA = fortran_subroutine('STPNT','NDIM,U,PAR,T',...
+    ['IMPLICIT NONE' newline 'INTEGER NDIM' newline ...
+    'DOUBLE PRECISION U(NDIM), PAR(*), T'],{},...
+    [ strjoin(par_assgn,newline) newline newline char(strjoin(u_assgn_LPA,newline))]);
+
+auto_str_LPA = [ func_str_LPA stpnt_str_LPA fortran_subroutine('BCND') fortran_subroutine('ICND') fortran_subroutine('FOPT') fortran_subroutine('PVLS')  ];
+auto_str_LPA = breaklines(auto_str_LPA,80,'&');
+auto_str_LPA = strrep(auto_str_LPA,"^","**");
+
+fid=fopen(strcat(save_dir,filesep,f,'_LPA.f90'),'w');
+fwrite(fid,auto_str_LPA,'char');
+fclose(fid);
+
+
+fid=fopen(strcat(save_dir,filesep,'c.',f,'_LPA'),'w');
+fwrite(fid,...
+['NDIM=   ' int2str(nnz(is_local)*2) ', NPAR=   ' int2str(length(valid_ind)) ', IPS =   1, IRS =   0, ILP =   1' newline ...
+'parnames = {'  char(strjoin(strcat(int2str(find(valid_ind)'),": '",model_pars(1:nnz(valid_ind))',"'"),','))  '}' newline ...
+'unames = {' char(strjoin(strcat(int2str((1:length(u_LPA(is_local)))'),": '",u_LPA(is_local)',"'"),','))  '}' newline...
+'ICP =  [1]' newline ...
+'NTST=  50, NCOL=   4, IAD =   3, ISP =   2, ISW = 1, IPLT= 0, NBC= 0, NINT= 0' newline...
+'NMX= 10000000, NPR=  10000, MXBF=  10, IID =   2, ITMX= 8, ITNW= 5, NWTN= 3, JAC= 0' newline...
+'EPSL= 1e-7, EPSU = 1e-7, EPSS = 1e-05' newline ...
+'DS  =   0.001, DSMIN= 0.0000001, DSMAX=   0.05, IADS=   1' newline ...
+'THL =  {11: 0.0}, THU =  {}' newline ...
+'UZSTOP={}' newline ...
+'UZR={}']...
+,'char');
+fclose(fid);
 
 preamble={'if length(vox)>1'...
     '[tmp,tmp2]=meshgrid(ir0,vox);'...
