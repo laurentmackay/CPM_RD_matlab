@@ -1420,14 +1420,14 @@ fclose(fid);
  
 % 
 % 
-f_mix_LPA = subs(f_mix_explicit, str2sym(elim_con'), subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_minus'))));
+f_mix_LPA = subs(f_mix_explicit, str2sym(elim_con'), subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
 is_local = cellfun( @(x) any(strcmp(x,LPA_locals)), chems);
 is_local = is_local(~is_fast);
 
 offsets=cumsum(is_local+1);
 offsets_global = offsets(~is_local);
 
-f_tot_LPA( offsets_global ) = subs(f_mix_LPA(~is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_minus')) );
+f_tot_LPA( offsets_global ) = subs(f_mix_LPA(~is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')) );
 
 
 
@@ -1437,27 +1437,27 @@ offsets_local=[offsets(is_local)-1; offsets(is_local)];
 
 model_vars = regexprep(model_defs, [name '[ \t\f]*=.+'], '$1');
 
-f_tot_LPA(offsets_local(1:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_plus')));
-f_tot_LPA(offsets_local(2:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_minus')));
+f_tot_LPA(offsets_local(1:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_local')));
+f_tot_LPA(offsets_local(2:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')));
 
 model_refs=[nameref(model_vars); nameref(LPA_locals)];
-model_defs_plus = regexprep(model_defs, model_refs, '$1_plus');
-model_defs_plus = subs(str2sym(model_defs_plus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_minus'))));
+model_defs_plus = regexprep(model_defs, model_refs, '$1_local');
+model_defs_plus = subs(str2sym(model_defs_plus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
 model_defs_plus = regexprep(cellstr(string(model_defs_plus)),'==','=');
 
-model_defs_minus = regexprep(model_defs, model_refs, '$1_minus');
-model_defs_minus = subs(str2sym(model_defs_minus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_minus'))));
+model_defs_minus = regexprep(model_defs, model_refs, '$1_global');
+model_defs_minus = subs(str2sym(model_defs_minus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
 model_defs_minus = regexprep(cellstr(string(model_defs_minus)),'==','=');
 
 
 
-model_vars_LPA = [strcat(model_vars,'_plus') strcat(model_vars,'_minus')];
+model_vars_LPA = [strcat(model_vars,'_local') strcat(model_vars,'_global')];
 
 F_assgn_LPA = arrayfun(@(f,i)[  'F(' int2str(i) ')=' char(string(f))],f_tot_LPA(offsets_local(:)),(1:nnz(is_local)*2),'UniformOutput',false);
 
 % LPA_locals_tot={strcat(LPA_locals,'_plus'); strcat(LPA_locals,{'_minus'})}
-u_LPA(offsets_local(1,:))=strcat(LPA_locals,'_plus');
-u_LPA(offsets_local(2,:))=strcat(LPA_locals,'_minus');
+u_LPA(offsets_local(1,:))=strcat(LPA_locals,'_local');
+u_LPA(offsets_local(2,:))=strcat(LPA_locals,'_global');
 u_LPA(offsets_global)=chems(~is_local);
 
 u_read_LPA= cellfun(@(c,i) [c '=U(' int2str(i) ')'],u_LPA(offsets_local(:)),num2cell(1:numel(u_LPA(offsets_local))),'UniformOutput',false);
@@ -1506,7 +1506,7 @@ fid=fopen(strcat(save_dir,filesep,'c.',f,'_LPA'),'w');
 fwrite(fid,...
 ['NDIM=   ' int2str(nnz(is_local)*2) ', NPAR=   ' int2str(length(valid_ind)) ', IPS =   1, IRS =   0, ILP =   1' newline ...
 'parnames = {'  char(strjoin(strcat(int2str(find(valid_ind)'),": '",model_pars(1:nnz(valid_ind))',"'"),','))  '}' newline ...
-'unames = {' char(strjoin(strcat(int2str((1:length(u_LPA(is_local)))'),": '",u_LPA(is_local)',"'"),','))  '}' newline...
+'unames = {' char(strjoin(strcat(int2str((1:numel(offsets_local))'),": '",u_LPA(offsets_local(:))',"'"),','))  '}' newline...
 'ICP =  [1]' newline ...
 'NTST=  50, NCOL=   4, IAD =   3, ISP =   2, ISW = 1, IPLT= 0, NBC= 0, NINT= 0' newline...
 'NMX= 10000000, NPR=  10000, MXBF=  10, IID =   2, ITMX= 8, ITNW= 5, NWTN= 3, JAC= 0' newline...
