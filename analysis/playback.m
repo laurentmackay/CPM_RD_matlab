@@ -21,6 +21,8 @@ N_steps=size(Results,4);
 
 for i=1:iter
    x=Results(:,:,2:end,i);
+   cell_mask = Results(:,:,1,i);
+   
    time=Times(i);
    eval_model
    plot_fun()
