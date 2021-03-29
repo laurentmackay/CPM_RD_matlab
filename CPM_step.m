@@ -124,23 +124,27 @@ if all(isfinite([lam_a,lam_p]))
             inds2=inds+i_chem_0;
             i_trial=vox_trial+i_chem_0;
             
-            
+            Ts=sum(x(inds2));
             if grow
                 us=x(vox_ref+i_chem_0);
-                Ts=sum(x(inds2));
+%                 Ts=sum(x(inds2));
                 f=Ts./(Ts+us);
                 x(i_trial)=us;
                 inds2=[inds2; i_trial];
             else
                 ut=x(i_trial);
-                f=1+(ut./sum(x(inds2)));
+                f=1+(ut./Ts);
                 x(i_trial)=0;
             end
             
             if is_discrete
                 x(inds2)=floor(x(inds2).*f)+[zeros(1,N_species); diff(floor(cumsum(rem(x(inds2).*f,1.0))+1e-5))]; %the 1e-5 is a fudge-factor to prevent underflow erros, they are typically of the order 1e-10 so the 1e-5 dominates
             else
-                x(inds2)=x(inds2).*f;
+                i3=Ts>0;
+                x(inds2(:,i3))=x(inds2(:,i3)).*f(i3);
+                if ~grow && any(i3)
+                    x(inds2(:,~i3))=repmat(ut(~i3),size(inds2,1),1)/size(inds2,1);
+                end
             end
             
             %             for i=1:length(D)

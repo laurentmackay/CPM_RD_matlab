@@ -30,9 +30,9 @@ for i=steps
             %         ep=min(sp,M-l);
             inds=sp:sp+max_lag;
             
-            if i>M-max_lag
-                l
-            end
+%             if i>M-max_lag
+%                 l
+%             end
             
             %             if l==0;
             try
@@ -42,7 +42,7 @@ for i=steps
                 %                end
                 acf(l+1,j)=sum(sum(v(:,inds).*v(:,inds+l),1))/norm_factor;
             catch err
-                err
+                rethrow(err)
             end
         end
         

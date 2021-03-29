@@ -1,3 +1,6 @@
+Raci <->  Rac; Q_R, delta_R;
+Rhoi <-> Rho; Q_rho, delta_rho;
+
 Pax + FAK <-> PaxFAK; kon1, koff1
 Paxs + FAK <-> PaxsFAK; kon1, kfs*koff1
 
@@ -6,8 +9,7 @@ Paxs + GIT <-> PaxsGIT; kon2, koff2
 
 Pax <-> Paxs; Q_ps, delta_P
 
-Raci <->  Rac; Q_R, delta_R;
-Rhoi <-> Rho; Q_rho, delta_rho;
+
 
 
 RacPAK <-> Rac; alpha_PAK*K0/Rac_Square
@@ -40,7 +42,7 @@ Q_ps = B*(serine_kinase^n)/(L^n+serine_kinase^n)
 
 par kon1=1.0, koff1=1.0, kon2=1.0, koff2=1.0, kons=1.0, koffs=0.01, kfs=50, L=0.75, n=4.0, PAK=0
 
-param B=2
+param B=5
 
 param I_rho=0.016, L_rho=0.34, delta_rho=0.016
 param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5

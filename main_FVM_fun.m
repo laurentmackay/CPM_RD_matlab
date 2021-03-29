@@ -1,12 +1,12 @@
-function [B,lam_p_0,dt,copyNum,cpmstep0,model_name] = main_FVM_fun(B,lam_p_0,dt,...
-copyNum,cpmstep0,model_name)
+function [B,lam_p_0,save_dir,dt,copyNum,cpmstep0,model_name] = main_FVM_fun(B,...
+lam_p_0,save_dir,dt,copyNum,cpmstep0,model_name)
 
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
     inputname(1);
 catch
-    deploy_model(model_name);
+    deploy_model(model_name,1);
 end
 
 
@@ -22,12 +22,11 @@ end
 
 
 
-
 nrx=1e5; 
 
-noise=0.0005;
+noise=0.005;
 
-Ttot=4e4; 
+Ttot=2e5; 
 
 SF=2; 
 Gsize=80; 
@@ -109,21 +108,21 @@ bndry_lr= bndry_l | bndry_r;
 
 bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
 
-N_species = 6;
+N_species = 8;
 N_rx = 6;
-D = [0.43         0.02         0.43         0.02          0.1           20];
+D = [0.43        0.02        0.43        0.02        0.02        0.02        0.02           0];
 N_slow = 6;
-chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax'};
+chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
 
 
 
 
 
-N_species = 6;
+N_species = 8;
 N_rx = 6;
-D = [0.43         0.02         0.43         0.02          0.1           20];
+D = [0.43        0.02        0.43        0.02        0.02        0.02        0.02           0];
 N_slow = 6;
-chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax'};
+chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
 
 
 
@@ -402,17 +401,18 @@ ir0=((1:N_rx)-1)*sz;
 
 vox=cell_inds(1:A);
 
-RacRatio0 = x(:,:,2) ./ Rac_Square;
+R = x(:,:,2) ./ Rac_Square;
 RhoRatio = x(:,:,4) ./ Rho_Square;
 PaxRatio = x(:,:,6) ./ Pax_Square;
-K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*RacRatio0)+k_G.*k_X.*GIT.*PIX);
-K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
-I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*RacRatio0));
-P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*RacRatio0));
-RacRatio = (x(:,:,2) + alpha_PAK.*K) ./ Rac_Square;
-Q_R = ((1-RacRatio)./(1-RacRatio0)).*(I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
+K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*R)+k_G.*k_X.*GIT.*PIX);
+K0=alpha_R.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
+K=R.*K0;
+I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*R));
+P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*R));
+RacRatio = (x(:,:,2) + ((K0.*x(:,:,2).*alpha_PAK)./Rac_Square)) ./ Rac_Square;
+Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
-Q_P = (P_i./(1-PaxRatio)).*B.*(K.^n./(L_K.^n+K.^n));
+Q_P = B.*(K.^n./(L_K.^n+K.^n));
 
 
 
@@ -484,14 +484,26 @@ Hchem(iter)=dH_chem;
 
 
 u = reshape(x,[sz ,size(x,3)]);
+R = x(:,:,2) ./ Rac_Square;
+RhoRatio = x(:,:,4) ./ Rho_Square;
+PaxRatio = x(:,:,6) ./ Pax_Square;
+K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*R)+k_G.*k_X.*GIT.*PIX);
+K0=alpha_R.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
+K=R.*K0;
+I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*R));
+P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*R));
+RacRatio = (x(:,:,2) + ((K0.*x(:,:,2).*alpha_PAK)./Rac_Square)) ./ Rac_Square;
+Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
+Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
+Q_P = B.*(K.^n./(L_K.^n+K.^n));
 if plotting
 
 tp__0=tic;
 
-plotCellIm(panel1,reshape(RacRatio0,shape),cell_mask,i0,j0);
+plotCellIm(panel1,reshape(R,shape),cell_mask,i0,j0);
 caxis(panel1,'auto');
 colorbar(panel1);
-title(panel1,'RacRatio0', 'Fontsize', 24);
+title(panel1,'R', 'Fontsize', 24);
 
 plotCellIm(panel2,reshape(RacRatio,shape),cell_mask,i0,j0);
 caxis(panel2,'auto');
@@ -621,27 +633,54 @@ u_xx=u_xx(cell_inds(1:A),cell_inds(1:A));
 
 
 
-RacRatio0 = u(:,2) ./ Rac_Square;
+R = u(:,2) ./ Rac_Square;
 RhoRatio = u(:,4) ./ Rho_Square;
 PaxRatio = u(:,6) ./ Pax_Square;
-K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*RacRatio0)+k_G.*k_X.*GIT.*PIX);
-K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
-I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*RacRatio0));
-P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*RacRatio0));
-RacRatio = (u(:,2) + alpha_PAK.*K) ./ Rac_Square;
-Q_R = ((1-RacRatio)./(1-RacRatio0)).*(I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
+K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*R)+k_G.*k_X.*GIT.*PIX);
+K0=alpha_R.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
+K=R.*K0;
+I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*R));
+P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*R));
+RacRatio = (u(:,2) + ((K0.*u(:,2).*alpha_PAK)./Rac_Square)) ./ Rac_Square;
+Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
-Q_P = (P_i./(1-PaxRatio)).*B.*(K.^n./(L_K.^n+K.^n));
+Q_P = B.*(K.^n./(L_K.^n+K.^n));
 f_Raci = -(Q_R.*u(:,1))+ (delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+ (delta_rho.*u(:,4));
 f_Paxi = -(Q_P.*u(:,5))+ (delta_P.*u(:,6));
+subs__0 = 1./(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X);
+subs__1 = 1./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+subs__2 = PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1;
+subs__3 = (u(:,2).*alpha_R)./Rac_Square;
+subs__4 = 1./Pax_Square;
+subs__5 = subs__3 + 1;
+subs__6 = k_X.^2;
+subs__7 = k_G.^2;
+subs__8 = PIX.^2;
+subs__9 = GIT.^2;
+subs__10 = 1./Rac_Square;
+subs__11 = subs__0.^2;
+subs__12 = GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*subs__0.*subs__4.*subs__5;
+J_gamma_1_2=(alpha_R.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1))./(Rac_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (u(:,2).*alpha_R.^2.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1).^2)./(Rac_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
+J_gamma_2_2=(GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Pax_Square.*Rac_Square.*alpha_R.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+J_gamma_1_6=(GIT.^2.*PIX.^2.*Paxtot.*Pax_Square.*u(:,2).*Rac_Square.*alpha_R.*alpha_PAK.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+J_gamma_2_6=(GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*((u(:,2).*alpha_R)./Rac_Square + 1))./(Pax_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Paxtot.*k_C.^2.*k_G.^2.*k_X.^2.*((u(:,2).*alpha_R)./Rac_Square + 1).^2)./(Pax_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
+subs2__0 = 1./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1);
+subs2__1 = J_gamma_2_2.*f_Raci;
+subs2__2 = J_gamma_1_6.*f_Paxi;
+subs2__3 = -subs2__2;
+subs2__4 = -subs2__1;
+subs2__5 = J_gamma_1_2.*f_Raci;
+subs2__6 = J_gamma_1_2.*f_Paxi;
 
 Rx = [f_Raci,...
--f_Raci,...
+-subs2__0.*(f_Raci + subs2__3 + J_gamma_2_6.*f_Raci),...
 f_Rhoi,...
 -f_Rhoi,...
 f_Paxi,...
--f_Paxi];
+-subs2__0.*(f_Paxi + subs2__4 + subs2__6),...
+-subs2__0.*(subs2__2 + subs2__5 + J_gamma_1_6.*subs2__4 + J_gamma_2_6.*subs2__5),...
+-subs2__0.*(subs2__1 + J_gamma_2_6.*f_Paxi + J_gamma_2_2.*subs2__3 + J_gamma_2_6.*subs2__6)];
 u_prev = u;
 
 t0=time;
@@ -657,32 +696,59 @@ while time-t0<T_integration
 
     
     Rx_prev=Rx;
-    RacRatio0 = u(:,2) ./ Rac_Square;
+    R = u(:,2) ./ Rac_Square;
 RhoRatio = u(:,4) ./ Rho_Square;
 PaxRatio = u(:,6) ./ Pax_Square;
-K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*RacRatio0)+k_G.*k_X.*GIT.*PIX);
-K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
-I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*RacRatio0));
-P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*RacRatio0));
-RacRatio = (u(:,2) + alpha_PAK.*K) ./ Rac_Square;
-Q_R = ((1-RacRatio)./(1-RacRatio0)).*(I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
+K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*R)+k_G.*k_X.*GIT.*PIX);
+K0=alpha_R.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
+K=R.*K0;
+I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*R));
+P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*R));
+RacRatio = (u(:,2) + ((K0.*u(:,2).*alpha_PAK)./Rac_Square)) ./ Rac_Square;
+Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
-Q_P = (P_i./(1-PaxRatio)).*B.*(K.^n./(L_K.^n+K.^n));
+Q_P = B.*(K.^n./(L_K.^n+K.^n));
 f_Raci = -(Q_R.*u(:,1))+ (delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+ (delta_rho.*u(:,4));
 f_Paxi = -(Q_P.*u(:,5))+ (delta_P.*u(:,6));
+subs__0 = 1./(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X);
+subs__1 = 1./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+subs__2 = PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1;
+subs__3 = (u(:,2).*alpha_R)./Rac_Square;
+subs__4 = 1./Pax_Square;
+subs__5 = subs__3 + 1;
+subs__6 = k_X.^2;
+subs__7 = k_G.^2;
+subs__8 = PIX.^2;
+subs__9 = GIT.^2;
+subs__10 = 1./Rac_Square;
+subs__11 = subs__0.^2;
+subs__12 = GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*subs__0.*subs__4.*subs__5;
+J_gamma_1_2=(alpha_R.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1))./(Rac_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (u(:,2).*alpha_R.^2.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1).^2)./(Rac_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
+J_gamma_2_2=(GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Pax_Square.*Rac_Square.*alpha_R.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+J_gamma_1_6=(GIT.^2.*PIX.^2.*Paxtot.*Pax_Square.*u(:,2).*Rac_Square.*alpha_R.*alpha_PAK.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+J_gamma_2_6=(GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*((u(:,2).*alpha_R)./Rac_Square + 1))./(Pax_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Paxtot.*k_C.^2.*k_G.^2.*k_X.^2.*((u(:,2).*alpha_R)./Rac_Square + 1).^2)./(Pax_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
+subs2__0 = 1./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1);
+subs2__1 = J_gamma_2_2.*f_Raci;
+subs2__2 = J_gamma_1_6.*f_Paxi;
+subs2__3 = -subs2__2;
+subs2__4 = -subs2__1;
+subs2__5 = J_gamma_1_2.*f_Raci;
+subs2__6 = J_gamma_1_2.*f_Paxi;
 
 Rx = [f_Raci,...
--f_Raci,...
+-subs2__0.*(f_Raci + subs2__3 + J_gamma_2_6.*f_Raci),...
 f_Rhoi,...
 -f_Rhoi,...
 f_Paxi,...
--f_Paxi];
-b=(2*u-u_prev/2)/dt + (2*Rx-Rx_prev); 
+-subs2__0.*(f_Paxi + subs2__4 + subs2__6),...
+-subs2__0.*(subs2__2 + subs2__5 + J_gamma_1_6.*subs2__4 + J_gamma_2_6.*subs2__5),...
+-subs2__0.*(subs2__1 + J_gamma_2_6.*f_Paxi + J_gamma_2_2.*subs2__3 + J_gamma_2_6.*subs2__6)];
+b_=(2*u-u_prev/2)/dt + (2*Rx-Rx_prev); 
     u_prev=u;
 
     for i = 1:N_species
-        u(:,i) = MAT_list{i}\b(:,i);
+        u(:,i) = MAT_list{i}\b_(:,i);
         
         if any(u(:)<0)
             disp('wild ass over here')
@@ -697,27 +763,54 @@ b=(2*u-u_prev/2)/dt + (2*Rx-Rx_prev);
 end
 x(cell_inds(1:A) + i_chem_0) = u(:);
 u = reshape(x,[sz ,size(x,3)]);
-RacRatio0 = u(:,2) ./ Rac_Square;
+R = u(:,2) ./ Rac_Square;
 RhoRatio = u(:,4) ./ Rho_Square;
 PaxRatio = u(:,6) ./ Pax_Square;
-K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*RacRatio0)+k_G.*k_X.*GIT.*PIX);
-K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
-I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*RacRatio0));
-P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*RacRatio0));
-RacRatio = (u(:,2) + alpha_PAK.*K) ./ Rac_Square;
-Q_R = ((1-RacRatio)./(1-RacRatio0)).*(I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
+K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*R)+k_G.*k_X.*GIT.*PIX);
+K0=alpha_R.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
+K=R.*K0;
+I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*R));
+P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*R));
+RacRatio = (u(:,2) + ((K0.*u(:,2).*alpha_PAK)./Rac_Square)) ./ Rac_Square;
+Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
-Q_P = (P_i./(1-PaxRatio)).*B.*(K.^n./(L_K.^n+K.^n));
+Q_P = B.*(K.^n./(L_K.^n+K.^n));
 f_Raci = -(Q_R.*u(:,1))+ (delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+ (delta_rho.*u(:,4));
 f_Paxi = -(Q_P.*u(:,5))+ (delta_P.*u(:,6));
+subs__0 = 1./(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X);
+subs__1 = 1./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+subs__2 = PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1;
+subs__3 = (u(:,2).*alpha_R)./Rac_Square;
+subs__4 = 1./Pax_Square;
+subs__5 = subs__3 + 1;
+subs__6 = k_X.^2;
+subs__7 = k_G.^2;
+subs__8 = PIX.^2;
+subs__9 = GIT.^2;
+subs__10 = 1./Rac_Square;
+subs__11 = subs__0.^2;
+subs__12 = GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*subs__0.*subs__4.*subs__5;
+J_gamma_1_2=(alpha_R.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1))./(Rac_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (u(:,2).*alpha_R.^2.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1).^2)./(Rac_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
+J_gamma_2_2=(GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Pax_Square.*Rac_Square.*alpha_R.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+J_gamma_1_6=(GIT.^2.*PIX.^2.*Paxtot.*Pax_Square.*u(:,2).*Rac_Square.*alpha_R.*alpha_PAK.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
+J_gamma_2_6=(GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*((u(:,2).*alpha_R)./Rac_Square + 1))./(Pax_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Paxtot.*k_C.^2.*k_G.^2.*k_X.^2.*((u(:,2).*alpha_R)./Rac_Square + 1).^2)./(Pax_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
+subs2__0 = 1./(J_gamma_1_2 + J_gamma_2_6 + J_gamma_1_2.*J_gamma_2_6 - J_gamma_1_6.*J_gamma_2_2 + 1);
+subs2__1 = J_gamma_2_2.*f_Raci;
+subs2__2 = J_gamma_1_6.*f_Paxi;
+subs2__3 = -subs2__2;
+subs2__4 = -subs2__1;
+subs2__5 = J_gamma_1_2.*f_Raci;
+subs2__6 = J_gamma_1_2.*f_Paxi;
 
 Rx = [f_Raci,...
--f_Raci,...
+-subs2__0.*(f_Raci + subs2__3 + J_gamma_2_6.*f_Raci),...
 f_Rhoi,...
 -f_Rhoi,...
 f_Paxi,...
--f_Paxi];
+-subs2__0.*(f_Paxi + subs2__4 + subs2__6),...
+-subs2__0.*(subs2__2 + subs2__5 + J_gamma_1_6.*subs2__4 + J_gamma_2_6.*subs2__5),...
+-subs2__0.*(subs2__1 + J_gamma_2_6.*f_Paxi + J_gamma_2_2.*subs2__3 + J_gamma_2_6.*subs2__6)];
 
 if time>=lastcpm+cpmstep
             
@@ -864,23 +957,26 @@ is_discrete = all(mod(x(cell_inds(1:A)),1)==0);
             inds2=inds+i_chem_0;
             i_trial=vox_trial+i_chem_0;
             
-            
+            Ts=sum(x(inds2));
             if grow
                 us=x(vox_ref+i_chem_0);
-                Ts=sum(x(inds2));
                 f=Ts./(Ts+us);
                 x(i_trial)=us;
                 inds2=[inds2; i_trial];
             else
                 ut=x(i_trial);
-                f=1+(ut./sum(x(inds2)));
+                f=1+(ut./Ts);
                 x(i_trial)=0;
             end
             
             if is_discrete
                 x(inds2)=floor(x(inds2).*f)+[zeros(1,N_species); diff(floor(cumsum(rem(x(inds2).*f,1.0))+1e-5))]; 
             else
-                x(inds2)=x(inds2).*f;
+                i3=Ts>0;
+                x(inds2(:,i3))=x(inds2(:,i3)).*f(i3);
+                if ~grow && any(i3)
+                    x(inds2(:,~i3))=repmat(ut(~i3),size(inds2,1),1)/size(inds2,1);
+                end
             end
             
             
@@ -969,17 +1065,18 @@ is_discrete = all(mod(x(cell_inds(1:A)),1)==0);
         A=nnz(cell_mask); 
         cell_inds(1:A)=find(cell_mask);
     else
-        RacRatio0 = x(:,:,2) ./ Rac_Square;
+        R = x(:,:,2) ./ Rac_Square;
 RhoRatio = x(:,:,4) ./ Rho_Square;
 PaxRatio = x(:,:,6) ./ Pax_Square;
-K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*RacRatio0)+k_G.*k_X.*GIT.*PIX);
-K=alpha_R.*RacRatio0.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
-I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*RacRatio0));
-P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*RacRatio0));
-RacRatio = (x(:,:,2) + alpha_PAK.*K) ./ Rac_Square;
-Q_R = ((1-RacRatio)./(1-RacRatio0)).*(I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
+K_is=1.0./((1.0+k_X.*PIX+k_G.*k_X.*k_C.*GIT.*PIX.*Paxtot.*PaxRatio).*(1+alpha_R.*R)+k_G.*k_X.*GIT.*PIX);
+K0=alpha_R.*K_is.*(1+k_X.*PIX+k_G.*k_X.*k_C.*Paxtot.*GIT.*PIX.*PaxRatio);
+K=R.*K0;
+I_Ks=I_K.*(1.0-K_is.*(1+alpha_R.*R));
+P_i=1.0-PaxRatio.*(1+k_G.*k_X.*k_C.*GIT.*PIX.*PAKtot.*K_is.*(1+alpha_R.*R));
+RacRatio = (x(:,:,2) + ((K0.*x(:,:,2).*alpha_PAK)./Rac_Square)) ./ Rac_Square;
+Q_R = (I_R+I_Ks).*(L_rho.^m./(L_rho.^m+RhoRatio.^m));
 Q_rho = I_rho.*(L_R.^m./(L_R.^m +(RacRatio).^m));
-Q_P = (P_i./(1-PaxRatio)).*B.*(K.^n./(L_K.^n+K.^n));
+Q_P = B.*(K.^n./(L_K.^n+K.^n));
 end
     
     
@@ -1047,10 +1144,10 @@ lastcpm=time;
 
 tp__0=tic;
 
-plotCellIm(panel1,reshape(RacRatio0,shape),cell_mask,i0,j0);
+plotCellIm(panel1,reshape(R,shape),cell_mask,i0,j0);
 caxis(panel1,'auto');
 colorbar(panel1);
-title(panel1,'RacRatio0', 'Fontsize', 24);
+title(panel1,'R', 'Fontsize', 24);
 
 plotCellIm(panel2,reshape(RacRatio,shape),cell_mask,i0,j0);
 caxis(panel2,'auto');
@@ -1125,7 +1222,7 @@ end
 
 toc
 
-    fn=strcat('_',model_name,'/results/final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
+    fn=strcat(save_dir,'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
     disp(['saving to: ' fn]);
     ls results
     save(fn,'-v7.3');
