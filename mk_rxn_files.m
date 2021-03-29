@@ -751,8 +751,11 @@ lslow_0 = lcon(~is_fast,~i_con_fast)';
 % end
 
 l_sf=sym(lmix(1:N_con_fast,:));
-for i=1:N_con_fast
-    l_sf(i,:)=l_sf(i,:)+sum((lcon_fast(:,i)'.*j_gam')',1);
+scQSSA=true;
+if scQSSA
+    for i=1:N_con_fast
+        l_sf(i,:)=l_sf(i,:)+sum((lcon_fast(:,i)'.*j_gam')',1);
+    end
 end
 % l_sf=(lcon_fast'.*j_gam)+lmix(1:N_con_fast,:);
 % b__0 = eval(['[' strjoin( f_slow,'; ') ']'] );
@@ -1414,13 +1417,33 @@ fclose(fid);
   LPA_locals={'Rac','Rho','Paxs'};
   
   LPA_globals =  {'Pax' 'FAK' 'GIT'    'Raci'    'Rhoi'};
+%     LPA_globals =  { 'Paxi'  'Raci'    'Rhoi'};
+  
+  
+  LPA_globals = intersect(LPA_globals,chems,'stable')
  LPA_locals = setdiff(chems(~is_fast),LPA_globals,'stable');
+ 
+ if length(LPA_globals)>length(consrv_eqns)
+    error('More global LPA variables than can be solved for using the conservation of matter')
+ end
  
 % LPA_locals = intersect(LPA_locals,chems);
  
 % 
 % 
-f_mix_LPA = subs(f_mix_explicit, str2sym(elim_con'), subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
+
+model_vars = regexprep(model_defs, [name '[ \t\f]*=.+'], '$1');
+
+
+ic0=any(~cell2mat(cellfun(@(c) isAlways(diff(ec0,str2sym(c))), LPA_globals, 'UniformOutput', false)'));
+
+warning ('off','symbolic:solve:SolutionsDependOnConditions');
+sol_LPA_globals = struct2array(solve(ec0(ic0), str2sym(LPA_globals)));
+warning ('on','symbolic:solve:SolutionsDependOnConditions');
+
+sol_LPA_globals = subs(sol_LPA_globals, str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')));
+f_mix_LPA = subs(f_mix_explicit, str2sym(LPA_globals), sol_LPA_globals);
+% f_mix_LPA = subs(f_mix_explicit, str2sym(elim_con'), subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
 is_local = cellfun( @(x) any(strcmp(x,LPA_locals)), chems);
 is_local = is_local(~is_fast);
 
@@ -1433,19 +1456,20 @@ f_tot_LPA( offsets_global ) = subs(f_mix_LPA(~is_local), str2sym([model_vars LPA
 
 offsets_local=[offsets(is_local)-1; offsets(is_local)];
 % offset=offsets(:);
+model_defs_LPA = subs(str2sym(model_defs), str2sym(LPA_globals), sol_LPA_globals);
+model_defs_LPA  = regexprep(cellstr(string(model_defs_LPA)),'==','=');
 
 
-model_vars = regexprep(model_defs, [name '[ \t\f]*=.+'], '$1');
 
 f_tot_LPA(offsets_local(1:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_local')));
 f_tot_LPA(offsets_local(2:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')));
 
 model_refs=[nameref(model_vars); nameref(LPA_locals)];
-model_defs_plus = regexprep(model_defs, model_refs, '$1_local');
+model_defs_plus = regexprep(model_defs_LPA, model_refs, '$1_local');
 model_defs_plus = subs(str2sym(model_defs_plus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
 model_defs_plus = regexprep(cellstr(string(model_defs_plus)),'==','=');
 
-model_defs_minus = regexprep(model_defs, model_refs, '$1_global');
+model_defs_minus = regexprep(model_defs_LPA, model_refs, '$1_global');
 model_defs_minus = subs(str2sym(model_defs_minus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
 model_defs_minus = regexprep(cellstr(string(model_defs_minus)),'==','=');
 

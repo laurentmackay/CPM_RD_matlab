@@ -31,7 +31,7 @@ D(Paxi)=0.03      %fast for paxillin
 D(Pax)=0.03       %fast for paxillin
 
 
-param B=3.
+param B=28
 
 param I_rho=0.016, L_rho=0.34, delta_rho=0.016
 param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5

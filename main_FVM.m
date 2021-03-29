@@ -1,4 +1,4 @@
-model_name = 'chem_Rx_Pax_Kathy';
+model_name = 'chem_Rx_Pax_Asheesh';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
@@ -151,7 +151,7 @@ FVM_CPM_loop
 
 toc
 
-    fn=strcat('_',model_name,'/results/final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
+    fn=strcat(save_dir,'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
     disp(['saving to: ' fn]);
     ls results
     save(fn,'-v7.3');

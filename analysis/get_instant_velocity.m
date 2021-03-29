@@ -1,7 +1,7 @@
-function v = get_instant_velocity(f,iters,n0)
+function varargout = get_instant_velocity(f,iters,n0)
 
 %%load in the results
-load([ f]);
+load(strcat(results_dir(),f));
 iter=min(iter,length(Times));
 
 if nargin==1 || isempty(iters)
@@ -20,9 +20,11 @@ M=size(center,2);
 
 dr=center(:,1:n0:M-n0)-center(:,1+n0:n0:M);
 
-v= dr./(Times(1+n0:n0:end)-Times(1:n0:M-n0));
-
-net_vel=sqrt(sum((center(:,1)-center(:,end)).^2,1))/(Times(end)-Times(1))
+varargout{1} = dr./(Times(1+n0:n0:end)-Times(1:n0:M-n0));
+if nargout==2
+    varargout{2} = Times(1:n0:M-n0);
+end
+% net_vel=sqrt(sum((center(:,1)-center(:,end)).^2,1))/(Times(end)-Times(1))
 
 end
 
