@@ -1305,6 +1305,7 @@ fid=fopen(strcat(save_dir,filesep,'rhs_fun.m'),'w');
 fwrite(fid,rhs_str,'char');
 fclose(fid);
 
+
 init_sym = subs(subs(str2sym(init)), str2sym([chems(~is_fast) chems(is_fast)]), str2sym([slow_init_reps, fast_init_reps']));
 
 init_vals = double(subs(init_sym(~ismissing(init)),str2sym(model_pars_tot),str2sym(par_reps)));
@@ -1313,6 +1314,8 @@ init_vals = double(subs(init_sym(~ismissing(init)),str2sym(model_pars_tot),str2s
 fid=fopen(strcat(save_dir,filesep,'model_ic.m'),'w');
 fwrite(fid,strcat("ic = [", strjoin(string(init_vals)), "];"),'char');
 fclose(fid);
+
+clear rhs_fun model_ic model_params
 
 is_ode = ~is_elim_con0 & ~is_fast;
 
@@ -1417,7 +1420,7 @@ fclose(fid);
   LPA_locals={'Rac','Rho','Paxs'};
   
   LPA_globals =  {'Pax' 'FAK' 'GIT'    'Raci'    'Rhoi'};
-%     LPA_globals =  {'Paxi' 'Raci'    'Rhoi'};
+    LPA_globals =  { 'Raci'    'Rhoi'};
   
   
   LPA_globals = intersect(LPA_globals,chems,'stable')
