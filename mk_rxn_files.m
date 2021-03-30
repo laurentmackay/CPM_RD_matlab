@@ -1427,6 +1427,10 @@ fclose(fid);
     error('More global LPA variables than can be solved for using the conservation of matter')
  end
  
+ if length(LPA_globals)>length(consrv_eqns)
+    error('More global LPA variables than can be solved for using the conservation of matter')
+ end
+ 
 % LPA_locals = intersect(LPA_locals,chems);
  
 % 
