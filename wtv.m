@@ -6,7 +6,8 @@ set_experiment('random_walk_B_sweep');
 
 save_dir=results_dir();
 
-B_vals=linspace(0,1,10);
+B_vals=linspace(1,2,10);
+B_vals=B_vals(2:end);
 
 N_reps=3;
 

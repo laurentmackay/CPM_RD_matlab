@@ -1,5 +1,6 @@
 % file='../_chem_Rx_Pax_Kathy/results/random_walk_B_sweep/final_B_2.25_copy1.mat';
 % file='final_B_6.2586_copy2.mat';
+deploy_model('chem_Rx_Pax_Asheesh')
 
 set_experiment('random_walk_B_sweep')
 

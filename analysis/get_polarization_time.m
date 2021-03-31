@@ -7,8 +7,8 @@ end
         "i_rac = find(strcmp(chems,'Rac')); inds=cell_inds(1:A)+sz*(i_rac-1); ");
 delta=abs( y(:,1)-y(:,2));
 
-% figure(3);
-% plot(t,y(:,1),t,y(:,2))
+figure(3);
+semilogy(t,delta)
 
 i_polarize=find(delta>thresh,1);
 

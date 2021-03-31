@@ -1309,6 +1309,19 @@ fwrite(fid,rhs_str,'char');
 fclose(fid);
 
 
+
+eval_rhs_str = inline_script(which('eval_Rx'));
+
+rhs_str =['function Rx = rhs_fun_tot(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
+
+fid=fopen(strcat(save_dir,filesep,'rhs_fun_tot.m'),'w');
+fwrite(fid,rhs_str,'char');
+fclose(fid);
+
+
+
+
+
 init_sym = subs(subs(str2sym(init)), str2sym([chems(~is_fast) chems(is_fast)]), str2sym([slow_init_reps, fast_init_reps']));
 
 init_vals = double(subs(init_sym(~ismissing(init)),str2sym(model_pars_tot),str2sym(par_reps)));
