@@ -30,13 +30,13 @@ u_xx=u_xx(cell_inds(1:A),cell_inds(1:A));
 
 
 
-eval_Rx
-u_prev = u;
+eval_Rx_slow
+u_prev = u(:,1:N_slow);
 
 t0=time;
 
 eye = speye(A);
-MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D,'UniformOutput',0); % 2-SBDF
+MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D(1:N_slow),'UniformOutput',0); % 2-SBDF
 % MAT_list = arrayfun(@(Di)( eye/dt-Di*u_xx*9/16),D,'UniformOutput',0); %MCNAB
 if any(u(:)<0)
     disp('negatory pig pen')
@@ -47,25 +47,30 @@ while time-t0<T_integration
 
     
     Rx_prev=Rx;
-    eval_Rx
-    b_=(2*u-u_prev/2)/dt + (2*Rx-Rx_prev); % 2-SBDF
+    eval_Rx_slow
+    u_curr = u(:,1:N_slow);
+    b_=(2*u_curr-u_prev/2)/dt + (2*Rx-Rx_prev); % 2-SBDF
 %     b=u/dt + 3/2*Rx-Rx_prev/2 + (D'.*(u_xx*(3*u/8 + u_prev/16))')'; %MCNAB
-    u_prev=u;
+    u_prev=u_curr;
 
-    for i = 1:N_species
+    for i = 1:N_slow
         u(:,i) = MAT_list{i}\b_(:,i);
-        
-        if any(u(:)<0)
-            disp('wild ass over here')
+        if any(u(:,i)<0)
+            disp(['wild ass over here -> ' int2str(i)])
         end
-    
     end
+    
+    project_fast
     
 
     time=time+dt;
 
 
 end
+
+    if any(u(:)<0)
+        disp('wild ass over here')
+    end
 %expanding back in to the full system
 x(cell_inds(1:A) + i_chem_0) = u(:);
 u = reshape(x,[sz ,size(x,3)]);

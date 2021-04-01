@@ -595,8 +595,9 @@ if isempty(getCurrentTask());  end
 
 
 T_integration = cpmstep;
+keep_running=true;
 
-while time<Ttot
+while time<Ttot && keep_running
     A=nnz(cell_mask); 
     cell_inds(1:A)=find(cell_mask); 
     
@@ -648,23 +649,6 @@ Q_P = B.*(K.^n./(L_K.^n+K.^n));
 f_Raci = -(Q_R.*u(:,1))+ (delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+ (delta_rho.*u(:,4));
 f_Paxi = -(Q_P.*u(:,5))+ (delta_P.*u(:,6));
-subs__0 = 1./(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X);
-subs__1 = 1./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
-subs__2 = PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1;
-subs__3 = (u(:,2).*alpha_R)./Rac_Square;
-subs__4 = 1./Pax_Square;
-subs__5 = subs__3 + 1;
-subs__6 = k_X.^2;
-subs__7 = k_G.^2;
-subs__8 = PIX.^2;
-subs__9 = GIT.^2;
-subs__10 = 1./Rac_Square;
-subs__11 = subs__0.^2;
-subs__12 = GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*subs__0.*subs__4.*subs__5;
-J_gamma_1_2=(alpha_R.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1))./(Rac_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (u(:,2).*alpha_R.^2.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1).^2)./(Rac_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
-J_gamma_2_2=(GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Pax_Square.*Rac_Square.*alpha_R.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
-J_gamma_1_6=(GIT.^2.*PIX.^2.*Paxtot.*Pax_Square.*u(:,2).*Rac_Square.*alpha_R.*alpha_PAK.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
-J_gamma_2_6=(GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*((u(:,2).*alpha_R)./Rac_Square + 1))./(Pax_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Paxtot.*k_C.^2.*k_G.^2.*k_X.^2.*((u(:,2).*alpha_R)./Rac_Square + 1).^2)./(Pax_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
 subs2__0 = -f_Raci;
 subs2__1 = -f_Paxi;
 
@@ -673,15 +657,13 @@ subs2__0,...
 f_Rhoi,...
 -f_Rhoi,...
 f_Paxi,...
-subs2__1,...
-J_gamma_1_2.*subs2__0 + J_gamma_1_6.*subs2__1,...
-J_gamma_2_2.*subs2__0 + J_gamma_2_6.*subs2__1];
-u_prev = u;
+subs2__1];
+u_prev = u(:,1:N_slow);
 
 t0=time;
 
 eye = speye(A);
-MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D,'UniformOutput',0); 
+MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D(1:N_slow),'UniformOutput',0); 
 if any(u(:)<0)
     disp('negatory pig pen')
 end
@@ -706,23 +688,6 @@ Q_P = B.*(K.^n./(L_K.^n+K.^n));
 f_Raci = -(Q_R.*u(:,1))+ (delta_R.*u(:,2));
 f_Rhoi = -(Q_rho.*u(:,3))+ (delta_rho.*u(:,4));
 f_Paxi = -(Q_P.*u(:,5))+ (delta_P.*u(:,6));
-subs__0 = 1./(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X);
-subs__1 = 1./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
-subs__2 = PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1;
-subs__3 = (u(:,2).*alpha_R)./Rac_Square;
-subs__4 = 1./Pax_Square;
-subs__5 = subs__3 + 1;
-subs__6 = k_X.^2;
-subs__7 = k_G.^2;
-subs__8 = PIX.^2;
-subs__9 = GIT.^2;
-subs__10 = 1./Rac_Square;
-subs__11 = subs__0.^2;
-subs__12 = GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*subs__0.*subs__4.*subs__5;
-J_gamma_1_2=(alpha_R.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1))./(Rac_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (u(:,2).*alpha_R.^2.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1).^2)./(Rac_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
-J_gamma_2_2=(GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Pax_Square.*Rac_Square.*alpha_R.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
-J_gamma_1_6=(GIT.^2.*PIX.^2.*Paxtot.*Pax_Square.*u(:,2).*Rac_Square.*alpha_R.*alpha_PAK.*k_C.*k_G.^2.*k_X.^2)./(Pax_Square.*Rac_Square + Pax_Square.*u(:,2).*alpha_R + PIX.*Pax_Square.*Rac_Square.*k_X + PIX.*Pax_Square.*u(:,2).*alpha_R.*k_X + GIT.*PIX.*Pax_Square.*Rac_Square.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*Rac_Square.*k_C.*k_G.*k_X + GIT.*PIX.*u(:,6).*Paxtot.*u(:,2).*alpha_R.*k_C.*k_G.*k_X).^2;
-J_gamma_2_6=(GIT.*PAKtot.*PIX.*k_C.*k_G.*k_X.*((u(:,2).*alpha_R)./Rac_Square + 1))./(Pax_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X)) - (GIT.^2.*PAKtot.*PIX.^2.*u(:,6).*Paxtot.*k_C.^2.*k_G.^2.*k_X.^2.*((u(:,2).*alpha_R)./Rac_Square + 1).^2)./(Pax_Square.^2.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X).^2);
 subs2__0 = -f_Raci;
 subs2__1 = -f_Paxi;
 
@@ -731,26 +696,28 @@ subs2__0,...
 f_Rhoi,...
 -f_Rhoi,...
 f_Paxi,...
-subs2__1,...
-J_gamma_1_2.*subs2__0 + J_gamma_1_6.*subs2__1,...
-J_gamma_2_2.*subs2__0 + J_gamma_2_6.*subs2__1];
-b_=(2*u-u_prev/2)/dt + (2*Rx-Rx_prev); 
-    u_prev=u;
+subs2__1];
+u_curr = u(:,1:N_slow);
+    b_=(2*u_curr-u_prev/2)/dt + (2*Rx-Rx_prev); 
+    u_prev=u_curr;
 
-    for i = 1:N_species
+    for i = 1:N_slow
         u(:,i) = MAT_list{i}\b_(:,i);
-        
-        if any(u(:)<0)
-            disp('wild ass over here')
+        if any(u(:,i)<0)
+            disp(['wild ass over here -> ' int2str(i)])
         end
-    
     end
     
-
-    time=time+dt;
+    u(:,7)=(u(:,2).*alpha_R.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1))./(Rac_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X));
+u(:,8)=(GIT.*PAKtot.*PIX.*u(:,6).*k_C.*k_G.*k_X.*((u(:,2).*alpha_R)./Rac_Square + 1))./(Pax_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X));
+time=time+dt;
 
 
 end
+
+    if any(u(:)<0)
+        disp('wild ass over here')
+    end
 x(cell_inds(1:A) + i_chem_0) = u(:);
 u = reshape(x,[sz ,size(x,3)]);
 R = u(:,2) ./ Rac_Square;
@@ -1154,13 +1121,14 @@ sgtitle(pic_fig,['t=' num2str(time) ', t_{plot}=' num2str(double(tic-tp__0)*1e-6
 end
 lastplot=time; 
             
- 
+                i_rac = find(strcmp(chems,'Rac')); 
+                inds=cell_inds(1:A)+sz*(i_rac-1);
+                d_Rac=max(max(x(inds)))-min(min(x(inds)));
                 if plotting
                     gif
                 end
-                if ~isempty(getCurrentTask())
-                    disp([num2str(copyNum) ': B=' num2str(B) ', t=' num2str(time)])
-                end
+                    disp([num2str(copyNum) ': B=' num2str(B) ', t=' num2str(time) ', delta_Rac=' num2str(d_Rac)])
+                
                 iter=iter+1;
 
 center(:,iter)=com(cell_mask);
@@ -1175,6 +1143,14 @@ Ham0(iter)=H0;
 Hchem(iter)=dH_chem;
 
 cpmcounter=0;
+                
+                i_rac = find(strcmp(chems,'Rac')); 
+                inds=cell_inds(1:A)+sz*(i_rac-1);
+                if d_Rac>0.05
+                   keep_running=false;
+                   break;
+                end
+                
             end
             
             

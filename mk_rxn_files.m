@@ -1090,6 +1090,36 @@ fclose(fid);
 
 clear eval_Rx
 
+if simp
+    rxn_body_slow = [strjoin([model_defs'; rates_slow'; sigma__reps'; sigma2__reps';],[';' newline])...
+    ';' newline newline ['Rx = [' char(strjoin(string(f_tot(~is_fast)),[',...' newline])) '];']];
+else
+    rxn_body_slow = [strjoin([model_defs'; rates_slow'; sigma2__reps';],[';' newline])...
+    ';' newline newline ['Rx = [' char(strjoin(string(f_tot(~is_fast)),[',...' newline])) '];']];
+end
+
+rxn_body_slow = regexprep(rxn_body_slow,chem_ref ,chem_rep_FVM);% reshape the chemical names
+
+rxn_body_slow = elementwise_operations(rxn_body_slow); %make multiplication, division, and exponentiation element-wise operations
+
+
+% fast_affinity_FVM = regexprep(fast_affinity_0,chem_ref ,chem_rep_FVM);
+% fast_affinity_FVM=regexprep(fast_affinity_FVM,spatial_ref,'$<pre>$<var>\(:\)$<post>')
+fid=fopen(strcat(save_dir,filesep,'eval_Rx_slow.m'),'w');
+fwrite(fid,rxn_body_slow,'char');
+fclose(fid);
+
+clear eval_Rx_slow
+
+project_body = strcat(chems(is_fast),'=',cellstr(string(Gamma')));
+project_body = regexprep(project_body,chem_ref ,chem_rep_FVM);
+project_body =  elementwise_operations([strjoin(project_body,[';' newline]) ';']);
+
+fid=fopen(strcat(save_dir,filesep,'project_fast.m'),'w');
+fwrite(fid,project_body,'char');
+fclose(fid);
+
+clear project_fast
 
 
 

@@ -21,7 +21,7 @@ end
 nrx=1e5; %number of times reactions are carried out in a chem_func loop
 
 noise=0.005;
-dt=1;
+dt=0.1;
 Ttot=2e5; %Total simulation time
 
 SF=2; % speed factor I divide molecule number by this for speed
@@ -147,7 +147,7 @@ if isempty(getCurrentTask()); copyNum=[]; end
 
 
 
-FVM_CPM_loop
+FVM_CPM_loop_polarization
 
 toc
 

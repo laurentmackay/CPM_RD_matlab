@@ -46,9 +46,9 @@ while time<Ttot && keep_running
                 if plotting
                     gif
                 end
-                if ~isempty(getCurrentTask())
+%                 if ~isempty(getCurrentTask())
                     disp([num2str(copyNum) ': B=' num2str(B) ', t=' num2str(time) ', delta_Rac=' num2str(d_Rac)])
-                end
+%                 end
                 
                 save_results
                 cpmcounter=0;

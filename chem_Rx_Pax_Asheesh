@@ -33,7 +33,7 @@ D(Raci)=D(Rhoi)=0.43       %fast diffusion for inactive RhoGTPases
 D(Rac)=D(Rho)=D(RacPAK)=D(Pax)=0.02          %slow for active forms
 D(Paxi)=0.02        %fast for paxillin
 
-param B=1
+param B=1.7
 
 param I_rho=0.016, L_rho=0.34, delta_rho=0.016
 param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5

@@ -7,14 +7,14 @@ set_experiment('random_walk_B_sweep');
 save_dir=results_dir();
 
 B_vals=linspace(1,2,10);
-B_vals=B_vals(2:end);
+B_vals=B_vals(8:end);
 
 N_reps=3;
 
 % p=parpool(3);
 
 cpmstep0=2e1;
-dt=cpmstep0/5;
+dt=cpmstep0/50;
 
 parfor i0=1:length(B_vals)*N_reps
     i=ceil(i0/N_reps);
