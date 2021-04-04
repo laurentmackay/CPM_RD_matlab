@@ -2,12 +2,12 @@ model_name='chem_Rx_Pax_Asheesh';
 deploy_model(model_name,1);
 mk_fun2('main_FVM',{},{'B','lam_p_0','dt','copyNum','cpmstep0','model_name'});
 
-set_experiment('random_walk_B_sweep');
+set_experiment('random_walk_B_sweep_200k');
 
 save_dir=results_dir();
 
-B_vals=linspace(1,2,10);
-B_vals=B_vals(8:end);
+B_vals=linspace(1.4,2.4,11);
+% B_vals=B_vals(3:end);
 
 N_reps=3;
 

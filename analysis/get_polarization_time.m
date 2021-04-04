@@ -10,6 +10,9 @@ delta=abs( y(:,1)-y(:,2));
 figure(3);
 semilogy(t,delta)
 
+figure(4);
+plot(t,y(:,1),t, y(:,2))
+
 i_polarize=find(delta>thresh,1);
 
 if isempty(i_polarize)

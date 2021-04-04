@@ -13,7 +13,7 @@ Pax <-> Paxs; Q_ps, delta_P
 
 
 RacPAK <-> Rac; alpha_PAK*K0/Rac_Square
-GPP <-> Pax; (k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R))/Pax_Square
+GPP <-> Pax; (k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R))/(Pax_Square)
 
 
 R = Rac / Rac_Square;
@@ -63,12 +63,27 @@ param PAKtot=Rtot*alpha_PAK
 % uninduced steady state
 Raci(0) = Rho(0) = Rac_Square 
 Rac(0) = Rhoi(0) = 0
-Pax(0) = Paxtot
+Pax(0) = Ptot
 
 GIT(0)=2
 PaxGIT(0)=PaxsGIT(0)=Paxs(0)=PaxsFAK(0)=PaxFAK(0)=0
-Pax(0)=1
 FAK(0)=50
 
-plot(Pax,FAK,Rac)
+Raci(0,induced)=0.543096
+Rac(0,induced)=0.234484
+Rhoi(0,induced)=0.800984
+Rho(0,induced)=0.199016
+Pax(0,induced)=0.000694767
+FAK(0,induced)=49.5588
+PaxFAK(0,induced)=0.246086
+Paxs(0,induced)=0.19681
+PaxsFAK(0,induced)=0.195074
+GIT(0,induced)=1.6642
+PaxGIT(0,induced)=0.00826367
+PaxsGIT(0,induced)=0.327532
+
+
+
+
+plot(Paxs,Rho,Rac)
 

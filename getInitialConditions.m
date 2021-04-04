@@ -1,5 +1,10 @@
-function init = getInitialConditions(f,chems)
+function init = getInitialConditions(f,chems, region)
 
+if nargin<3
+    extra='';
+else
+    extra=strcat(',[ \t\f]*', region, '[ \t\f]*');
+end
 
 str=fileread(f);
 
@@ -21,7 +26,9 @@ dbl='[0-9]+(?:(?:[edf\.][\+\-]?)?[0-9])?';
 name='[a-zA-Z_$][a-zA-Z_$0-9\-]*';
 
 
-str=strjoin(regexp(str,['[^\n]*' name '\(0\)[^\n\;]*(\n|\;|$)'],"match"),newline);
+
+
+str=strjoin(regexp(str,['[^\n]*' name '\(0' extra '\)[^\n\;]*(\n|\;|$)'],"match"),newline);
 
 
 N=length(chems);
@@ -39,7 +46,7 @@ end
 
 for i=1:N
     chem=chems{i};
-    [init_str, start]=regexp(str,['(?<![A-Za-z0-9])' chem '\(0\)[ \t\f]*=?[^\r\n\;]*=[ \t\f]*([' code ']+)'],'tokens','start');
+    [init_str, start]=regexp(str,['(?<![A-Za-z0-9])' chem '\(0' extra '\)[ \t\f]*=?[^\r\n\;]*=[ \t\f]*([' code ']+)'],'tokens','start');
     if ~isempty(init_str)
         init(i)=init_str{1}{1};
     end

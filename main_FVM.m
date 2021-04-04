@@ -1,4 +1,5 @@
 model_name = 'chem_Rx_Pax_Asheesh';
+model_name = 'chem_Dawn_Kathy';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
@@ -21,7 +22,7 @@ end
 nrx=1e5; %number of times reactions are carried out in a chem_func loop
 
 noise=0.005;
-dt=0.1;
+dt=0.01;
 Ttot=2e5; %Total simulation time
 
 SF=2; % speed factor I divide molecule number by this for speed

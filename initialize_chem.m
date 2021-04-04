@@ -109,45 +109,6 @@ Rhoi0 = Rho_Square - Rho0;
 Rac0 = Rac_Square*RacRatio;           %active Rac
 
 
-if length(D)~=9
-    
-    %inactive Rho that's ready to convert to active Rho
-    
-    
-    
-    Pax0 = Pax_Square*PaxRatio;           %active Rac
-    if length(D)==6
-        Paxi0=Pax_Square-Pax0;
-    else
-        Paxi0 = Pax_Square*P_i;        %inactive Rac that's ready to convert to active Rac
-    end
-    
-    K_PAK = (1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*Pax0/Pax_Square).*alpha_PAK*PAKtot.*K_is;
-    
-    if length(D)==8
-        Raci0 = Rac_Square*(1-(1+K_PAK).*RacRatio);        %inactive Rac that's ready to convert to active Rac
-    else
-        Raci0 = Rac_Square*(1-RacRatio);
-    end
-    
-    RacPak0 = K_PAK .* Rac0;
-    GPP0 = (k_G*k_X*k_C*GIT*PIX*K_is*PAKtot.*(1+alpha_R*Rac0/Rac_Square)) .*Pax0;
-    
-    RacPak0 =  Rac_Square - Rac0 - Raci0;
-    GPP0 = Pax_Square - Pax0 - Paxi0;
-    
-    %Setting up initial state of the cell
-    N0=[Raci0 Rac0 Rhoi0 Rho0 Paxi0 Pax0];
-    
-    N0=[Raci0 Rac0 Rhoi0 Rho0 Paxi0 Pax0 RacPak0 GPP0];
-    
-    
-    % params = inline_script('model_params');
-    % eval_rhs_str = inline_script('eval_Rx');
-    %
-    % str =['function Rx = rhs_fun(t,u)' newline 'u=transpose(u);' newline params newline eval_rhs_str newline 'Rx=transpose(Rx);' newline 'end'];
-    
-    
     fp=0; %trick for inlining
     eval('model_fp');
     rhs_anon=0; %trick for inlining
@@ -172,13 +133,7 @@ if length(D)~=9
         fwrite(fid,['fp = [' num2str(fp,12) '];'],'char');
         fclose(fid);
     end
-    if  nnz(induced_mask)==0
-        N0(1,1:N_species)=fp;
-        
-        %             N0(1,2)/Rac_Square
-        %     N0(1,4)/Rho_Square
-        %     N0(1,6)/Pax_Square
-    end
+
     
     %     N0(1,2)/Rac_Square
     %     N0(1,4)/Rho_Square
@@ -192,53 +147,7 @@ if length(D)~=9
         yl=ylim();
         ylim([0 yl(end)]);
     end
-else
-    
-    
-    unscale=5e0;
-    
-    I_C=2.95*muM/unscale;
-    I_R=0.5*muM/unscale;
-    I_rho=3.3*muM/unscale;
-    
-    a1=1.15*muM;
-    a2=1*muM;
-    n=3;
-    alpha=4.5/unscale;
-    beta=0.3/unscale;
-    d_C=1/unscale;
-    d_R=1/unscale;
-    d_rho=1/unscale;
-    
-    ff=0.4;
-    
-    R_b=3*muM;
-    rho_b=1.25*muM;
-    
-    rescale=35;
-    
-    I_P1=10.5*muM/rescale;
-    delta_P1=0.21;
-    kPI5K=0.084;
-    k21=0.021;
-    
-    kPI3K=0.00072*5;%speed these up
-    kPTEN=0.432/5;
-    
-    P3b=.2*muM;
-    
-    C0=CRatio*C_Square;
-    Ci0=C_Square-C0;
-    
-    Raci0 = Rac_Square*(1-RacRatio);
-    
-    P10=[1; 1]*I_P1/delta_P1;
-    
-    P20=P10.*(kPI5K*(1+Rac0/R_b)/2)/k21;
-    P30=P20.*(kPI3K*(1+Rac0/R_b)/2)./( kPTEN*(1+Rho0/rho_b)/2);
-    
-    N0=[Raci0 Rac0 Ci0 C0 Rhoi0 Rho0 P10 P20 P30];
-end
+
 
 
 % N0=[Raci0 Rac0 Rhoi0 Rho0];
@@ -246,17 +155,24 @@ end
 
 %setting up intial chemcial states
 % x=reshape(round(N0.*cell_mask(:)),[N,N,N_species]);  %puts molecules in their places
+
+induced_ic
+
 mask=induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
 i_induced=tmp+tmp2;
 
 x=zeros([shape ,N_species]); % where the chemical information is stored
 
-x(i_induced)=repmat(N0(2,1:N_species),nnz(mask),1);
+if ~isempty(ic)
+    x(i_induced)=repmat(ic,nnz(mask),1);
+    mask=~induced_mask&cell_mask;
+else
+    mask=cell_mask;
+end
 
-mask=~induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
-x(tmp+tmp2)=repmat(N0(1,1:N_species),nnz(mask),1);
+x(tmp+tmp2)=repmat(fp,nnz(mask),1);
 
 % x=round(x);
 x=(1+noise*rand(size(x))).*x;

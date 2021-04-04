@@ -1,6 +1,10 @@
 T_integration = cpmstep;
 keep_running=true;
 
+i_rac = find(strcmp(chems,'Rac')); 
+inds=cell_inds(1:A)+sz*(i_rac-1);
+d_Rac_0=max(max(x(inds)))-min(min(x(inds)));
+
 while time<Ttot && keep_running
     A=nnz(cell_mask); %current area
     cell_inds(1:A)=find(cell_mask); %all cell sites padded with 0s (initially)
@@ -55,10 +59,10 @@ while time<Ttot && keep_running
                 
                 i_rac = find(strcmp(chems,'Rac')); 
                 inds=cell_inds(1:A)+sz*(i_rac-1);
-                if d_Rac>0.05
-                   keep_running=false;
-                   break;
-                end
+%                 if d_Rac/d_Rac_0<1e-4
+%                    keep_running=false;
+%                    break;
+%                 end
                 
             end
             
