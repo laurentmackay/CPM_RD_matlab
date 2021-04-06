@@ -60,6 +60,19 @@ param Paxtot = 2.3
 param Ptot = 1.0
 param PAKtot=Rtot*alpha_PAK
 
+D(FAK) = D(GIT) = 30
+D(PaxsFAK) = 0.09
+D(PaxsGIT) = 0.08
+D(Paxs) = 0.1
+D(PaxFAK) = 19
+D(PaxGIT) = 17
+D(Pax) = D(GPP) = 20
+D(Rac) = D(Rho) = D(RacPAK) = 0.02
+D(Raci) = D(Rhoi) = 0.43
+
+plot(Rac, Pax, FAK, GIT,PaxFAK,PaxsGIT)
+
+
 % uninduced steady state
 Raci(0) = Rho(0) = Rac_Square 
 Rac(0) = Rhoi(0) = 0
