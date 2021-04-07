@@ -4,7 +4,7 @@ global active_model RD_base protocol
 
 if isempty(RD_base)
     p=mfilename('fullpath');
-    RD_base = regexprep(p,[ filesep '[^\' filesep ']+$'],filesep);
+    RD_base = regexprep(p,[ '[^\' filesep ']+$'],'');
 end
 
 
