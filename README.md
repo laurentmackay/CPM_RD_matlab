@@ -19,27 +19,41 @@ This library provides three main components that are useful for CPM simulations:
 - [Deploying Models](#deploying-models)
   - [Simulations](#simulations)
   - [Analysis](#analysis)
-- [Note on Units](#units)
 
 
-## Deploying Models
-A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will run  the model specified in `model_file` through an interpreter (i.e., `mk_rxn_files`) and pass it along to simulation-dependent functions that will generate appropriate files necessary for running simulations. These output files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
+## Installation
+The repository should be downloaded:
+```
+git clone https://github.com/laurentmackay/CPM_RD_matlab.git
+cd CPM_RD_matlab
+```
 
-Only one model can be deployed at a time, and `deploy_model` will take care of modifying the MATLAB-path when a user switches between models.
+Furthermore, its base directory should be added to the MATLAB path (all subsequent modifications to the path are handled algorithmically).
+
+## Usage
+
+After creating a model specification file (e.g., in the file `model_file`) for your model, one should:
+
+1. Deploy the model
+2. Create a "virtual experiment" to help organize results on the file system
+3. Run a CPM simulation using `main_FVM.m`
+4. Analyze the results using tools in [/analysis/](analysis/)
+
+### Deploying Models
+A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will parse the model specified in `model_file` and generate model-dependent functions necessary for running simulations. These generated files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
+
+Only one model can be deployed at a time, and `deploy_model` will take care of modifying the MATLAB-path when a user switches between models. One may check the currently active model using the `active_model` global variable.
 
 Moreover, `deploy_model` will also check if the model specification file has been updated since it was last deployed, and will only run the model through the interpreter when changes have been made. This behaviour can be overridden by passing a second boolean argument `true` or `1` to `deploy_model`.
 
-## Simulations
-Upon deploying a model, simulation specific files will be generated. Currently, we produce files that allow the user to simulate the model inside the Cellular Potts Model framework as well as some files for producing bifurcations in AUTO07p.
-
-Moving forward, we will provide a more flexible approach such that arbitrary simulation files can be generated from user-specified model.
-
-## Analysis
-
-I am just starting to think about how to manage this within our system. However, we should probably distingush between model analysis and analaysis of simulation results as they are generally quite different, but often inter-related, beasts.
 
 
-# Units
-Model specification is unit-agnostic and it is up to a specific simulation to interpret the numerical values specified by the user apprpriately.
+### Experiments
+
+In order to prevent overwriting of files and disroganized data, we use "experiments" to define where results should be saved. In order to set the name of your current experiment, use the command `set_experiment('experiment_name')`.
+
+The current results directory can be obtained using `results_dir()`, and, in general, is given by `<CPM_RD_matlab>/_model_name/results/experiment_name` where `<CPM_RD_matlab>` is the path to the base directory of this library.
+
+The function `ls_results()` can be used to check the results directory for `.mat` files, or one may also use `ls_results(ext)` to find all files that end in `.ext`.
 
 

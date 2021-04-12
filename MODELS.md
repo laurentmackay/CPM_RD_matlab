@@ -12,6 +12,7 @@ Model are specified in simple line-oriented text files, where we are agnostic ab
 - [Parameter Values](#parameter-values)
 - [Initial Conditions](#initial-conditions)
 - [Diffusion Notation](#diffusion-notation)
+- [Note on Units](#units)
 
 ### Reaction Notation
 Reaction-diffusion systems are specified primarily using a text-based chemical reaction notation. For, example a bimolecular complexing reaction between chemical species `A` and `B` producing `C` with rate constant `k1` is written as:
@@ -92,3 +93,6 @@ where we have specified a diffusion coefficient of 1 (space units^2 / time units
 ```
 D(X)=D(Y)=D(Z)=1
 ```
+
+# Units
+Model specification is unit-agnostic and it is up to a specific simulation to interpret the numerical values specified by the user apprpriately.
