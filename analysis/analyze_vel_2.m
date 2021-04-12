@@ -2,7 +2,7 @@
 % file='final_B_6.2586_copy2.mat';
 deploy_model('chem_Rx_Pax_Asheesh')
 
-set_experiment('random_walk_B_sweep')
+set_experiment('random_walk_B_sweep_200k2')
 
 
 
@@ -23,8 +23,8 @@ disp([ int2str(length(inds)) ' results total, ' int2str(length(B_vals)) ' unique
 
 %
 thresh=1.5;
-percent_moving=cell(length(B_vals),1);
-lambda=cell(length(B_vals),1);
+% percent_moving=cell(length(B_vals),1);
+% lambda=cell(length(B_vals),1);
 % persistence_time=cell(length(B_vals),1);
 figure(1);
 
@@ -42,8 +42,8 @@ ylabel(['\lambda (B=' num2str(B_vals(inds(i))) ')'])
 drawnow
     if ~isempty(i_polarize)
         N_up=nnz(acf_halflife(i_polarize:end)>thresh);
-        percent_moving{inds(i)}{end+1}=N_up/(length(acf_halflife)-i_polarize);
-        lambda{inds(i)}{end+1}=acf_halflife(i_polarize:end);
+%         percent_moving{inds(i)}{end+1}=N_up/(length(acf_halflife)-i_polarize);
+%         lambda{inds(i)}{end+1}=acf_halflife(i_polarize:end);
     end
 end
 
@@ -52,6 +52,8 @@ end
 % 
 % block_length(b) 
 % 
+
+lambda{cellfun(@isempty, lambda)}={};
 figure(2);clf();
     hold on
     N_bin=100;
@@ -89,7 +91,7 @@ hold off
 [x,y]=meshgrid(B_vals,(edges_0(1:end-1)+edges_0(1:end-1))/2);
 pcolor(x,y,counts)
 %%
-
+percent_moving{cellfun(@isempty, percent_moving)}={};
 p_move = cellfun(@(x) mean([x{:}]), percent_moving)
 figure(1);clf();
 plot(p_move);

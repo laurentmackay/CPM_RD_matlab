@@ -572,17 +572,21 @@ for i=1:length(consrv_eqns)
     end
 end
 
-sol_consrv_elim = struct2cell((solve(consrv_rhs_init,str2sym(consrv_nm))));
-consrv_rhs_elim = string(cell2sym(sol_consrv_elim));
+sol_consrv_elim = cell2sym(struct2cell((solve(consrv_rhs_init,str2sym(consrv_nm)))));
+consrv_rhs_elim = string(sol_consrv_elim);
 
 
 
 if N_fast>0
-    
-    sol_fast_1 = struct2cell(solve(subs(cell2sym(sol_fast_0), str2sym(elim_con'), cell2sym(sol_consrv_elim)) == str2sym(fast_chems), str2sym(fast_chems)));
+    sol_fast_1 = subs(subs(cell2sym(sol_fast_0)), str2sym(chems(~is_fast)), str2sym(slow_init_reps));
+%     sol_fast_1 = subs(subs(sol_fast_1), str2sym(elim_con'), subs(cell2sym(sol_consrv)));
+%     subs(subs(sol_fast_1), str2sym(consrv_nm'), subs(sol_consrv_elim))
+
+
     fast_init_reps = regexprep(cellstr(string([sol_fast_1; sol_consrv_elim(con_fast)])),slow_refs, slow_init_reps);
-    fast_init_reps = cellstr(string(str2sym(fast_init_reps)));
+    fast_init_reps = cellstr(string(subs(str2sym(fast_init_reps))));
     fast_init_reps = regexprep(fast_init_reps, par_refs, par_reps);
+    fast_init_reps = cellstr(string(str2sym(fast_init_reps)));
     init(is_fast) = fast_init_reps;
 else
     
@@ -591,7 +595,7 @@ end
 
 
 
-consrv_defs_init = regexprep(consrv_rhs_elim,[slow_refs; fast_refs],[slow_init_reps'; fast_init_reps]');
+consrv_defs_init = regexprep(consrv_rhs,[slow_refs; fast_refs],[slow_init_reps'; fast_init_reps]');
 consrv_defs_init = cellstr(string(str2sym(consrv_defs_init)));
 
 

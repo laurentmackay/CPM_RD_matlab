@@ -36,7 +36,7 @@ D(Paxi)=0.02        %fast for paxillin
 param B=1.5
 
 param I_rho=0.016, L_rho=0.34, delta_rho=0.016
-param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5
+param L_R=0.37, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5
 param delta_P=0.0004, I_K=0.009
 param L_K=5.77
 
@@ -55,8 +55,8 @@ Rac(0) = Rhoi(0) = Pax(0) = 0
 Paxi(0) = Pax_Square
 
 
-%Rac(0,induced)=0.3
-%Rho(0,induced)=0.2
-%Pax(0,induced)=0.33
+Rac(0,induced)=0.3
+Rho(0,induced)=0.2
+Pax(0,induced)=0.33
 
 

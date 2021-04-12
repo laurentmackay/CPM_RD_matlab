@@ -1,0 +1,163 @@
+Raci <->  Rac; Q_R, delta_R;
+Rhoi <-> Rho; Q_rho, delta_rho;
+
+Pax + FAK <-> PaxFAK; kon1, koff1
+Paxs + FAK <-> PaxsFAK; kon1, kfs*koff1
+
+Pax + GIT <-> PaxGIT; kon2, koff2
+Paxs + GIT <-> PaxsGIT; kon2, koff2
+
+Pax <-> Paxs; Q_ps, delta_P
+
+
+
+
+RacPAK <-> Rac; alpha_PAK*K0/Rac_Square
+GPP <-> Pax; (k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R))/(Pax_Square)
+
+
+R = Rac / Rac_Square;
+RacRatio = R;
+RhoRatio = Rho / Rho_Square;
+PaxRatio = Paxs / Pax_Square;
+
+K_is=1.0/((1.0+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio)*(1+alpha_R*R)+k_G*k_X*GIT*PIX)
+K0=alpha_R*K_is*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);
+K=R*K0
+I_Ks=I_K*(1.0-K_is*(1+alpha_R*R))
+P_i=1.0-PaxRatio*(1+k_G*k_X*k_C*GIT*PIX*PAKtot*K_is*(1+alpha_R*R))
+
+Rbar = (Rac + RacPAK) / Rac_Square;
+
+Ptot = Pax + Paxs
+
+
+Q_R = (I_R+I_Ks)*(L_rho^m/(L_rho^m+RhoRatio^m));
+Q_rho = I_rho*(L_R^m/(L_R^m +(Rbar)^m));
+
+
+serine_kinase = (K + PaxsGIT + PaxGIT)
+Q_ps = B*(serine_kinase^n)/(L^n+serine_kinase^n)
+
+
+par kon1=1.0, koff1=1.0, kon2=1.0, koff2=1.0, kons=1.0, koffs=0.01, kfs=50, L=0.75, n=4.0, PAK=0
+
+param B=5
+
+param I_rho=0.016, L_rho=0.34, delta_rho=0.016
+param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5
+param delta_P=0.1, I_K=0.009
+param L_K=5.77
+
+
+param k_X=41.7, k_G=5.71, k_C=5.0
+param GIT=0.11, PIX=0.069, Paxtot=2.3
+param n=4.0, m=4.0, alpha_PAK=0.3
+param Rho_Square = 1.0
+param Rac_Square = 1.0
+param Pax_Square = 1.0
+param Paxtot = 2.3
+param Ptot = 1.0
+param PAKtot=Rtot*alpha_PAK
+
+D(FAK) = D(GIT) = 30
+D(PaxsFAK) = 0.09
+D(PaxsGIT) = 0.08
+D(Paxs) = 0.1
+D(PaxFAK) = 19
+D(PaxGIT) = 17
+D(Pax) = D(GPP) = 20
+D(Rac) = D(Rho) = D(RacPAK) = 0.02
+D(Raci) = D(Rhoi) = 0.43
+
+plot(Rac, Pax, FAK, GIT,PaxFAK,PaxsGIT)
+
+
+%Raci(0) = Rho(0) = Rac_Square 
+%Rac(0) = Rhoi(0) = 0
+%Pax(0) = Paxtot
+
+%GIT(0)=2
+%PaxGIT(0)=PaxsGIT(0)=Paxs(0)=PaxsFAK(0)=PaxFAK(0)=0
+%Pax(0)=1
+%FAK(0)=50
+
+%inducible steady state B=5 dp=0.1
+%Raci(0)=0.7560455423803025
+%Rac(0)=0.088753696457
+%Rhoi(0)=0.5483601983799999
+%Rho(0)=0.45163980162
+%Pax(0)=0.0008890604561588389
+%FAK(0)=49.511099080360005
+%PaxFAK(0)=0.31794534652
+%Paxs(0)=0.17264368626
+%PaxsFAK(0)=0.17095557312
+%GIT(0)=1.69625877072
+%PaxGIT(0)=0.01089286226
+%PaxsGIT(0)=0.29284836702
+%RacPAK(0)=0.1552007611626974
+%GPP(0)=0.03382510436384116
+
+%induced steady state B=5 dp=0.1
+Raci(0,induced)=0.7970887574009898
+Rac(0,induced)=0.073765299894
+Rhoi(0,induced)=0.5025053444400001
+Rho(0,induced)=0.49749465556
+Pax(0,induced)=0.0035495482361662545
+FAK(0,induced)=49.305895910348006
+PaxFAK(0,induced)=0.69319773923
+Paxs(0,induced)=0.00091910957631
+PaxsFAK(0,induced)=0.00090635042199
+GIT(0,induced)=1.9704856049635
+PaxGIT(0,induced)=0.027703302847
+PaxsGIT(0,induced)=0.0018110921895
+RacPAK(0,induced)=0.1291459427050101
+GPP(0,induced)=0.27191285749903366
+
+%uninduced stable state B=5 dp=0.1
+Raci(0)=0.7970887574009898
+Rac(0)=0.073765299894
+Rhoi(0)=0.5025053444400001
+Rho(0)=0.49749465556
+Pax(0)=0.0035495482361662545
+FAK(0)=49.305895910348006
+PaxFAK(0)=0.69319773923
+Paxs(0)=0.00091910957631
+PaxsFAK(0)=0.00090635042199
+GIT(0)=1.9704856049635
+PaxGIT(0)=0.027703302847
+PaxsGIT(0)=0.0018110921895
+RacPAK(0)=0.1291459427050101
+GPP(0)=0.27191285749903366
+
+%pureturing instability for b=5 dp=0.1 kon2=3
+%Raci(0)=0.7682201871024622
+%Rac(0)=0.083385480181
+%Rhoi(0)=0.5364911032399999
+%Rho(0)=0.46350889676
+%Pax(0)=0.0005763253373056309
+%FAK(0)=49.70831670037
+%PaxFAK(0)=0.16601798346
+%Paxs(0)=0.12640270734
+%PaxsFAK(0)=0.12566531617
+%GIT(0)=1.439648933056
+%PaxGIT(0)=0.014424602354
+%PaxsGIT(0)=0.54592646459
+%RacPAK(0)=0.14839433271653776
+%GPP(0)=0.020986600748694344
+
+% induced in bistability right region b=5 dp=0.3 kon2=1 kfs=50
+%Raci(0)=0.5529864004668004
+%Rac(0)=0.22911075836
+%Rhoi(0)=0.77929022436
+%Rho(0)=0.22070977564
+%Pax(0)=0.0015505717930024596
+%FAK(0)=49.40006321981
+%PaxFAK(0)=0.49282719872
+%Paxs(0)=0.10841036882
+%PaxsFAK(0)=0.10710958147
+%GIT(0)=1.788290357667
+%PaxGIT(0)=0.017840425093
+%PaxsGIT(0)=0.19386921724
+%RacPAK(0)=0.21790284117319958
+%GPP(0)=0.07839263686399754

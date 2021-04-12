@@ -1,6 +1,5 @@
-function [B,lam_p_0,save_dir,dt,copyNum,cpmstep0,model_name] = main_FVM_fun(B,...
-lam_p_0,save_dir,dt,copyNum,cpmstep0,model_name)
-
+function [save_dir] = main_FVM_fun(save_dir)
+model_name = 'chem_Rx_Pax_Asheesh';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
@@ -40,7 +39,7 @@ vmax=3/60;
 picstep=5;
 cpmsteps=5;
 
-
+cpmstep0=h/vmax;
 cpmstep=cpmstep0/cpmsteps;
 
 
@@ -147,11 +146,11 @@ Pax_Square = 1;
 
 N_instantaneous=50;
 
-
+B=1.500000000;
 I_rho=0.016000000;
 L_rho=0.340000000;
 delta_rho=0.016000000;
-L_R=0.340000000;
+L_R=0.370000000;
 I_R=0.003000000;
 delta_R=0.025000000;
 alpha_R=15.000000000;
@@ -287,7 +286,7 @@ Rac0 = Rac_Square*RacRatio;
 
 
 
-ic = [];
+ic = [0.46183494324776083050212067121224 0.3 0.8 0.2 0.063605658576895912604836663531382 0.33 0.23816505675223916949787932878776 0.60639434142310408739516333646862];
 mask=induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
 i_induced=tmp+tmp2;
@@ -332,19 +331,19 @@ Q_P = B.*(K.^n./(L_K.^n+K.^n));
 
 
 lam_a=1*h^4; 
-
+lam_p_0=0.1;
 lam_p=lam_p_0*h^2; 
 J=0*h; 
 
-B_0=1.5;
+B_0=0.5;
 B_rho=(B_0/0.3)*h^2;
 B_R=(B_0/0.3)*(.18/.13)*h^2; 
 
 
 a=A; 
-per=Per; 
+per=Per*(1 + (sqrt(2)-1)/2); 
 Hb=0; 
-T=0.3; 
+T=0.5; 
 
 
 
@@ -358,6 +357,9 @@ grow_count=0;
 shrink_count=0;
 end
 
+r_frac= sqrt(2)/2
+
+dt=h^2*r_frac/(2*max(D));
 
 
 lastplot=0;
@@ -504,7 +506,7 @@ d0=sum(x(:));
 
 
 
-if isempty(getCurrentTask());  end
+if isempty(getCurrentTask()); copyNum=[]; end
 
 
 
