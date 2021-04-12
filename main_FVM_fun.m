@@ -1,5 +1,6 @@
-function [save_dir] = main_FVM_fun(save_dir)
-model_name = 'chem_Rx_Pax_Asheesh';
+function [B,save_dir,copyNum,model_name] = main_FVM_fun(B,save_dir,copyNum,...
+model_name)
+
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
@@ -25,7 +26,7 @@ nrx=1e5;
 
 noise=0.005;
 
-Ttot=2e5; 
+Ttot=5e4; 
 
 SF=2; 
 Gsize=80; 
@@ -146,7 +147,7 @@ Pax_Square = 1;
 
 N_instantaneous=50;
 
-B=1.500000000;
+
 I_rho=0.016000000;
 L_rho=0.340000000;
 delta_rho=0.016000000;
@@ -357,7 +358,7 @@ grow_count=0;
 shrink_count=0;
 end
 
-r_frac= sqrt(2)/2
+r_frac= sqrt(2)/2;
 
 dt=h^2*r_frac/(2*max(D));
 
@@ -506,7 +507,7 @@ d0=sum(x(:));
 
 
 
-if isempty(getCurrentTask()); copyNum=[]; end
+if isempty(getCurrentTask());  end
 
 
 

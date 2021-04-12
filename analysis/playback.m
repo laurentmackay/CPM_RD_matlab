@@ -32,9 +32,9 @@ if nargin>3
         eval(code);
     end
     
-    i0=1+frame_skip;
+    iplot_0=1+frame_skip;
 else
-    i0=1;
+    iplot_0=1;
     
 end
 
@@ -42,7 +42,7 @@ end
 
 
 
-for i=i0:frame_skip:iter
+for i=iplot_0:frame_skip:iter
    x=Results(:,:,2:end,i);
    cell_mask = Results(:,:,1,i);
    

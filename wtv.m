@@ -1,8 +1,8 @@
 model_name='chem_Rx_Pax_Asheesh';
 deploy_model(model_name,1);
-mk_fun2('main_FVM',{},{'B','lam_p_0','dt','copyNum','cpmstep0','model_name'});
+mk_fun2('main_FVM',{},{'B','copyNum','model_name'});
 
-set_experiment('random_walk_B_sweep_200k2');
+set_experiment('random_walk_B_sweep_50k');
 
 save_dir=results_dir();
 
@@ -19,5 +19,5 @@ dt=cpmstep0/500;
 parfor i0=1:length(B_vals)*N_reps
     i=ceil(i0/N_reps);
     j=mod(i0-1,N_reps)+1;
-    main_FVM_fun(B_vals(i), 0.1, save_dir, dt,j, cpmstep0,model_name);
+    main_FVM_fun(B_vals(i), save_dir, j, model_name);
 end

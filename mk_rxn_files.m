@@ -534,7 +534,7 @@ eval(strcat(' assume([', strjoin(chems), "]>0)"));
 
 
 ec0=subs(consrv_eqns_elim,str2sym(elim_fast),cell2sym(sol_fast));
-sol_consrv=eval(['solve( ec0,[' strjoin(elim_con,' ')  '])']);
+sol_consrv=eval(['solve( subs(ec0),[' strjoin(elim_con,' ')  '])']);
 if length(elim_con)==1
     %     elim_defs =  strcat(elim_con{1},'=',string(sol_consrv));
     sol_rhs(N_fast_eqn+1:end) =  {sol_consrv'};
@@ -1386,7 +1386,8 @@ end
 
 fp=init;
 fp(~is_elim_con0 & ~is_fast)=num2str(ic_ode',12);
-fp(is_elim_con0) = subs(str2sym(elim_con)',str2sym(elim_con)' ,subs(subs(sol_consrv),consrv_nm_eqn,consrv_val_eqn));
+sol_consrv_ic = subs(sol_consrv, str2sym(chems(is_ode)), ic_ode);
+fp(is_elim_con0) = subs(str2sym(elim_con)',str2sym(elim_con)' ,subs(subs(sol_consrv_ic),consrv_nm_eqn,consrv_val_eqn));
 fp(is_elim_con0) = regexprep(fp(is_elim_con0), par_refs, par_reps);
 fp(is_elim_con0) = regexprep(fp(is_elim_con0),  nameref(chems(is_ode)), string(ic_ode));
 fp(is_fast) = regexprep(string(subs(cell2sym(sol_fast))),nameref(chems(~is_fast)),fp(~is_fast));

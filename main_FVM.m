@@ -1,5 +1,5 @@
 model_name = 'chem_Rx_Pax_Asheesh';
-% model_name = 'chem_Dawn_Kathy';
+model_name = 'chem_DAKA';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
@@ -23,7 +23,7 @@ nrx=1e5; %number of times reactions are carried out in a chem_func loop
 
 noise=0.005;
 
-Ttot=2e5; %Total simulation time
+Ttot=5e4; %Total simulation time
 
 SF=2; % speed factor I divide molecule number by this for speed
 Gsize=80; %length of the grid in um
@@ -61,7 +61,7 @@ end
 
 r_frac= sqrt(2)/2;
 
-dt=h^2*r_frac/(2*max(D));
+dt=max(h^2*r_frac/(2*max(D)),0.01);
 
 
 lastplot=0;
