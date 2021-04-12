@@ -1,6 +1,5 @@
-function [B,save_dir,copyNum,model_name] = main_FVM_fun(B,save_dir,copyNum,...
-model_name)
-
+function [save_dir] = main_FVM_fun(save_dir)
+model_name = 'chem_Rx_Pax_Asheesh';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
@@ -147,7 +146,7 @@ Pax_Square = 1;
 
 N_instantaneous=50;
 
-
+B=2.500000000;
 I_rho=0.016000000;
 L_rho=0.340000000;
 delta_rho=0.016000000;
@@ -233,14 +232,6 @@ RacRatio=[RacRatio_u; RacRatio_i];
 PaxRatio=[PaxRatio_u; PaxRatio_i];
 
 
-K_is=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio).*(1+alpha_R*RacRatio)+k_G*k_X*GIT*PIX); 
-K=alpha_R*RacRatio.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);
-P_i=1-PaxRatio.*(1+k_G*k_X*k_C*GIT*PIX*PAKtot*K_is.*(1+alpha_R*RacRatio));
-
-Rho0 = Rho_Square*RhoRatio;           
-Rhoi0 = Rho_Square - Rho0;
-
-Rac0 = Rac_Square*RacRatio;           
 
 
     fp=0; 
@@ -360,7 +351,7 @@ end
 
 r_frac= sqrt(2)/2;
 
-dt=h^2*r_frac/(2*max(D));
+dt=max(h^2*r_frac/(2*max(D)),0.01);
 
 
 lastplot=0;
@@ -507,7 +498,7 @@ d0=sum(x(:));
 
 
 
-if isempty(getCurrentTask());  end
+if isempty(getCurrentTask()); copyNum=[]; end
 
 
 
@@ -624,9 +615,6 @@ u_curr = u(:,1:N_slow);
 
     for i = 1:N_slow
         u(:,i) = MAT_list{i}\b_(:,i);
-        if any(u(:,i)<0)
-            disp(['wild ass over here -> ' int2str(i)])
-        end
     end
     
     u(:,7)=(u(:,2).*alpha_R.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1))./(Rac_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X));
@@ -637,7 +625,7 @@ time=time+dt;
 end
 
     if any(u(:)<0)
-        disp('wild ass over here')
+        error('Negative solutions detected, please use a smaller timestep dt')
     end
 x(cell_inds(1:A) + i_chem_0) = u(:);
 u = reshape(x,[sz ,size(x,3)]);

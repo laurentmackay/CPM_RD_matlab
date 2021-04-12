@@ -41,8 +41,15 @@ u_prev = u(:,1:N_slow);
 t0=time;
 
 eye = speye(A);
-MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D(1:N_slow),'UniformOutput',0); % 2-SBDF
-MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D(1:N_slow),'UniformOutput',0); % 2-SBDF
+
+is_1BDF = (max(D)*dt/(h^2))>1/2;
+
+if is_1BDF
+    MAT_list = arrayfun(@(Di)( eye/dt-Di*u_xx),D(1:N_slow),'UniformOutput',0); % 1-SBDF
+else
+    MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D(1:N_slow),'UniformOutput',0); % 2-SBDF
+end
+
 % MAT_list = arrayfun(@(Di)( eye/dt-Di*u_xx*9/16),D,'UniformOutput',0); %MCNAB
 if any(u(:)<0)
     disp('negatory pig pen')
@@ -51,13 +58,20 @@ end
 while time-t0<T_integration
     
 
-    
-    Rx_prev=Rx;
+    if ~is_1BDF
+        Rx_prev=Rx;
+    end
     eval_Rx_slow
     u_curr = u(:,1:N_slow);
-    b_=(2*u_curr-u_prev/2)/dt + (2*Rx-Rx_prev); % 2-SBDF
+    if is_1BDF
+        b_=u_curr/dt + Rx; % 1-SBDF   
+    else
+        b_=(2*u_curr-u_prev/2)/dt + (2*Rx-Rx_prev); % 2-SBDF  
+    end
 %     b=u/dt + 3/2*Rx-Rx_prev/2 + (D'.*(u_xx*(3*u/8 + u_prev/16))')'; %MCNAB
-    u_prev=u_curr;
+    if ~is_1BDF
+        u_prev=u_curr;
+    end
 
     for i = 1:N_slow
         u(:,i) = MAT_list{i}\b_(:,i);

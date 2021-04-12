@@ -128,7 +128,6 @@ if ~isempty(matched_scripts)
         script_reps{end+1}=[rep newline];
         new_deps=setdiff(new_deps,init,'stable');
         init=union(init,new_init);
-        %         [script ' : ' script_name ]
         deps=union(deps, new_deps);
         
     end

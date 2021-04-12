@@ -44,7 +44,6 @@ t0=time;
 
 eye = speye(A);
 MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D(1:N_slow),'UniformOutput',0); % 2-SBDF
-MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D(1:N_slow),'UniformOutput',0); % 2-SBDF
 % MAT_list = arrayfun(@(Di)( eye/dt-Di*u_xx*9/16),D,'UniformOutput',0); %MCNAB
 if any(u(:)<0)
     disp('negatory pig pen')
@@ -63,9 +62,9 @@ while time-t0<T_integration
 
     for i = 1:N_slow
         u(:,i) = MAT_list{i}\b_(:,i);
-        if any(u(:,i)<0)
-            disp(['wild ass over here -> ' int2str(i)])
-        end
+%         if any(u(:,i)<0)
+%             disp(['wild ass over here -> ' int2str(i)])
+%         end
     end
     
     project_fast
@@ -77,7 +76,7 @@ while time-t0<T_integration
 end
 
     if any(u(:)<0)
-        disp('wild ass over here')
+        error('Negative solutions detected, please use a smaller timestep dt')
     end
 %expanding back in to the full system
 x(cell_inds(1:A) + i_chem_0) = u(:);
