@@ -99,14 +99,14 @@ RacRatio=[RacRatio_u; RacRatio_i];
 PaxRatio=[PaxRatio_u; PaxRatio_i];
 
 
-K_is=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio).*(1+alpha_R*RacRatio)+k_G*k_X*GIT*PIX); %intial value of some ratios
-K=alpha_R*RacRatio.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);
-P_i=1-PaxRatio.*(1+k_G*k_X*k_C*GIT*PIX*PAKtot*K_is.*(1+alpha_R*RacRatio));
-
-Rho0 = Rho_Square*RhoRatio;           %active Rho
-Rhoi0 = Rho_Square - Rho0;
-
-Rac0 = Rac_Square*RacRatio;           %active Rac
+% K_is=1./((1+k_X*PIX+k_G*k_X*k_C*GIT*PIX*Paxtot*PaxRatio).*(1+alpha_R*RacRatio)+k_G*k_X*GIT*PIX); %intial value of some ratios
+% K=alpha_R*RacRatio.*K_is.*(1+k_X*PIX+k_G*k_X*k_C*Paxtot*GIT*PIX*PaxRatio);
+% P_i=1-PaxRatio.*(1+k_G*k_X*k_C*GIT*PIX*PAKtot*K_is.*(1+alpha_R*RacRatio));
+% 
+% Rho0 = Rho_Square*RhoRatio;           %active Rho
+% Rhoi0 = Rho_Square - Rho0;
+% 
+% Rac0 = Rac_Square*RacRatio;           %active Rac
 
 
     fp=0; %trick for inlining

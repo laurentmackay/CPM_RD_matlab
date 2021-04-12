@@ -1332,6 +1332,7 @@ if ~isempty(pars_tot)
     fclose(fid);
 end
 
+clear model_params
 
 % nms_elim = regexp(string(f_mix_elim(mask_non_elim)),name, 'tokens')';
 % nms_elim=[nms_elim{:}];

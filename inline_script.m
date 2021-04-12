@@ -1,4 +1,9 @@
 function [str, deps, init] = inline_script(script, manual_deps, override, supp_path)
+
+if isempty(script)
+    return
+end
+
     function bool = isScript(f)
         fid = fopen(f);
         try

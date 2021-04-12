@@ -1,8 +1,6 @@
 %NUMERICS TAKEN FROM:
-%J. Math. Biol. (1995) 34:148-176 Journel of
-%Mathematical
-%Mology
-%© Springer-Verlag 1995
+%J. Math. Biol. (1995) 34:148-176
+
 %Implicit-explicit methods for reaction-diffusion
 %problems in pattern formation 
 %%

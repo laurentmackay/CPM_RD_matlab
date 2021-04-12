@@ -28,9 +28,7 @@ end
 
 
 
-if isempty(dir(work_dir))
-    mkdir(work_dir)
-end
+
 
 hash_file = strcat(work_dir,filesep,'model.hash');
 hash = string2hash(fileread(f));

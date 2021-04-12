@@ -1,4 +1,4 @@
-function dir = work_dir()
+function name = work_dir()
 global active_model RD_base
 
 if isempty(RD_base)
@@ -11,7 +11,11 @@ if isempty(active_model)
 end
 
 
-dir =  strcat(RD_base, '_', active_model, filesep);
+name =  strcat(RD_base, '_', active_model, filesep);
+
+if isempty(dir(name))
+    mkdir(name)
+end
 
 end
 
