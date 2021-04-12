@@ -1,10 +1,4 @@
-### Index
-- [Model Specification](#model-specification)
-  - [Reaction Notation](#reaction-notation)
-  - [Variable Definitions](#variable-definitions)
-  - [Parameter Values](#parameter-values)
-  - [Initial Conditions](#initial-conditions)
-  - [Diffusion Notation](#diffusion-notation)
+
 
 
 ## Model Specification
@@ -12,6 +6,12 @@ We have implemented a basic model specification scheme for reaction-diffusion sy
 
 Model are specified in simple line-oriented text files, where we are agnostic about file extensions. By line-oriented, we mean that declarations (e.g., a reaction declaration, variable declaration, or diffusion coefficient declaration) are separated from one another by newline characters. There is currently no limit on line lengths in the model specification files.
 
+### Index
+- [Reaction Notation](#reaction-notation)
+- [Variable Definitions](#variable-definitions)
+- [Parameter Values](#parameter-values)
+- [Initial Conditions](#initial-conditions)
+- [Diffusion Notation](#diffusion-notation)
 
 ### Reaction Notation
 Reaction-diffusion systems are specified primarily using a text-based chemical reaction notation. For, example a bimolecular complexing reaction between chemical species `A` and `B` producing `C` with rate constant `k1` is written as:

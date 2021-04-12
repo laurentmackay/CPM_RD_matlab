@@ -9,7 +9,11 @@ Currently, we have developped a simple text-based [model specification paradigm]
 *N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but one may be able to run it on older versions with some elbow grease.*
 
 ## Overview
-[Model Specification Format](MODELS.md)
+
+This library provides three main components that are useful for CPM simulations:
+1. An extensible [model specification format](MODELS.md) and a parser that will generate model-specific files for running CPM simulations.
+2. A core set of functions/scripts for running CPM simulations.
+3. A basic system for switching between models, running simulations, and storing results in a systematic manner.
 
 ### Index
 - [Deploying Models](#deploying-models)
