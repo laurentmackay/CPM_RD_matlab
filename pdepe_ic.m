@@ -11,6 +11,7 @@ function h=pdepe_ic()
 
     fp=0;
     model_fp
+%     fp=fp';
     fp=fp(1:N_slow)';
     
     
