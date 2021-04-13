@@ -30,7 +30,7 @@ Q_P = B*(K^n/(L_K^n+K^n));
 plot(R,RacRatio,RhoRatio,PaxRatio)
 
 D(Raci)=D(Rhoi)=0.43       %fast diffusion for inactive RhoGTPases
-D(Rac)=D(Rho)=D(RacPAK)=D(Pax)=0.02          %slow for active forms
+D(Rac)=D(Rho)=D(RacPAK)=D(Pax)=D(GPP)=0.02          %slow for active forms
 D(Paxi)=0.02        %fast for paxillin
 
 param B=2.5
