@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = mk_gif(f,frame_skip,plot_fun, frame )
+function [outputArg1,outputArg2] = mk_gif(f,frame_skip,plot_fun,frame)
 if nargin<2
     frame_skip=1;
 end

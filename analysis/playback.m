@@ -22,7 +22,7 @@ if nargin>3
     if iscell(code) && length(code)>1
         x=Results(:,:,2:end,1);
         cell_mask = Results(:,:,1,1);
-
+        eval(code{1})
         time=Times(1);
         eval_model
         plot_fun()

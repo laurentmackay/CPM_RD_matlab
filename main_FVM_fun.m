@@ -1,5 +1,6 @@
-function [save_dir] = main_FVM_fun(save_dir)
-model_name = 'chem_Rx_Pax_Asheesh';
+function [B,save_dir,copyNum,model_name,Ttot] = main_FVM_fun(B,save_dir,copyNum,...
+model_name,Ttot)
+
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
@@ -25,7 +26,7 @@ nrx=1e5;
 
 noise=0.005;
 
-Ttot=5e4; 
+ 
 
 SF=2; 
 Gsize=80; 
@@ -108,7 +109,7 @@ bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
 
 N_species = 8;
 N_rx = 6;
-D = [0.43        0.02        0.43        0.02        0.02        0.02        0.02           0];
+D = [0.43        0.02        0.43        0.02        0.02        0.02        0.02        0.02];
 N_slow = 6;
 chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
 
@@ -118,7 +119,7 @@ chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
 
 N_species = 8;
 N_rx = 6;
-D = [0.43        0.02        0.43        0.02        0.02        0.02        0.02           0];
+D = [0.43        0.02        0.43        0.02        0.02        0.02        0.02        0.02];
 N_slow = 6;
 chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
 
@@ -146,11 +147,11 @@ Pax_Square = 1;
 
 N_instantaneous=50;
 
-B=2.500000000;
+
 I_rho=0.016000000;
 L_rho=0.340000000;
 delta_rho=0.016000000;
-L_R=0.370000000;
+L_R=0.340000000;
 I_R=0.003000000;
 delta_R=0.025000000;
 alpha_R=15.000000000;
@@ -278,7 +279,7 @@ PaxRatio=[PaxRatio_u; PaxRatio_i];
 
 
 
-ic = [0.46183494324776083050212067121224 0.3 0.8 0.2 0.063605658576895912604836663531382 0.33 0.23816505675223916949787932878776 0.60639434142310408739516333646862];
+ic = [];
 mask=induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
 i_induced=tmp+tmp2;
@@ -498,7 +499,7 @@ d0=sum(x(:));
 
 
 
-if isempty(getCurrentTask()); copyNum=[]; end
+if isempty(getCurrentTask());  end
 
 
 

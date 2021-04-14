@@ -18,7 +18,7 @@ function h=pdepe_ic()
     function u0=ic(x)
         
 
-        u0=fp*(1+0.05*randn());
+        u0=fp*(1+0.005*randn());
         
         
     end
