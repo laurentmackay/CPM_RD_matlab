@@ -1,9 +1,11 @@
 # CPM_RD_matlab
-A general puprose tool for modelling reaction-diffusion systems in MATLAB (with extensible support for other computational environments). Inspired by the very fun and useful dynamical systems analysis tool [xppaut](http://www.math.pitt.edu/~bard/xpp/xpp.html), we have aimed to make chemical kinetic systems more approachable by providing a tool that automatically derives sets of equations from reactions schemes and can perform some of the more tedious aspects of model simplification in an reliable and automated manner.
+A general puprose tool for modelling reaction-diffusion systems in MATLAB (with extensible support for other computational environments). Inspired by the very fun and useful dynamical systems analysis tool [xppaut](http://www.math.pitt.edu/~bard/xpp/xpp.html), we have aimed to make chemical kinetic systems more approachable by providing a tool that automatically derives sets of equations from reactions schemes and can perform some of the more tedious aspects of model simplification in an reliable and automated manner. 
 
-A longer term aim of this project is to provide a tool that separates model specification from model analysis, simulation building, simulation analysis. Moreover, due to our reaction-based model specification format, combining models can be made as simple as copy-pasting the contents of two files.
+Moreover, due to our reaction-based model specification format, combining models is often as simple as copy-pasting the contents of two files.
 
-Currently, we have developped a simple text-based [model specification paradigm](#model-specification) for reaction-diffusion systems that is flxeible to be extended to consider other types of systems (e.g., reaction-diffusion-convection).  
+A longer term aim of this project is to provide a tool that separates model specification from model analysis, simulation building, and simulation analysis. 
+
+Currently, we have developped a simple text-based [model specification paradigm](MODELS.md) for reaction-diffusion systems that is flxeible to be extended to consider other types of systems (e.g., reaction-diffusion-convection).  
 
 
 *N.B. All code is written from MATLAB 2018+ (i.e., array braodcasting is used), but one may be able to run it on older versions with some elbow grease.*
