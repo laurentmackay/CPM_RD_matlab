@@ -43,6 +43,8 @@ main_FVM
 
 Eventually, a window should pop up with CPM cell that moves around. Check the `_chem_Rx_Pax_Asheesh` folder for .ode and .f90 files that can be used with xppaut and AUTO, respectively.
 
+You may also have a look at the script [main_FVM.m](/protocols/CPM/main_FVM.m), to see if there are any simulation parameters you wish to change.
+
 
 ## General Usage
 
