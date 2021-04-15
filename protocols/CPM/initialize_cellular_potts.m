@@ -14,7 +14,7 @@ lam_p=lam_p_0*h^2; %energy cost of permiter change
 J=0*h; %energy cost of change in medium contact
 
 B_0=0.5;
-B_rho=(B_0/0.3)*h^2;%chemical potential rho
+B_rho=(B_0/0.2)*h^2;%chemical potential rho
 B_R=(B_0/0.3)*(.18/.13)*h^2; %chemical potential rac
 %(defined such that they have no net effect at the saddle)
 

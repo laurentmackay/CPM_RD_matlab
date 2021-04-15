@@ -19,12 +19,7 @@ i_chem_0 = ((1:N_species)-1)*sz;
 
 %to find total number of molecules took concentrations from paper and
 % assumed sperical cell r=5um gives N=3e5*[X]
-totalRho = 2250000/SF;
-totalRac = 2250000/SF;
-totalPax = 690000/SF;
-Rho_Square = totalRho/(A);    %Average number of Rho per square
-Rac_Square = totalRac/(A);    %Average number of Rac per square
-Pax_Square = totalPax/(A);    %Average number of Pax per square
+
 
 Rho_Square = 1;    %Average number of Rho per square
 Rac_Square = 1;    %Average number of Rac per square

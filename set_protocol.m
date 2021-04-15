@@ -1,10 +1,6 @@
 function set_protocol(nm)
 global RD_base protocol
 
-if strcmp(nm,protocol)
-    return
-end
-
 if isempty(RD_base)
     get_RD_base();
 end
