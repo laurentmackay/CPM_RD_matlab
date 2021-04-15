@@ -83,7 +83,8 @@ figure(33);
 subplot(1,2,1)
 p=cellfun(@(x) mean([x{:}]), polarized)
 e=cellfun(@(x) std([x{:}]), polarized)/sqrt(Nrep);
-h=errorbar(B_vals,p,e );
+% h=errorbar(B_vals,p,e );
+h=plot(B_vals,p);
 set(h,'linewidth',2)
 xlabel('B (s^{-1})');
 ylabel('Prob. Self-Polarization')

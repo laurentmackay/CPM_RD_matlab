@@ -3,8 +3,11 @@ global active_model RD_base protocol
 
 
 if isempty(RD_base)
-    p=mfilename('fullpath');
-    RD_base = regexprep(p,[ '[^\' filesep ']+$'],'');
+    get_RD_base();
+end
+
+if isempty(protocol) && length(dir(strcat(RD_base,'protocols')))==3 %if there is only one protocol, automatically use that one
+    set_protocol(last(dir(strcat(RD_base,'protocols'))).name)
 end
 
 
@@ -12,9 +15,9 @@ if nargin<2
     force=false;
 end
 
-% mk_work_dir = @(f) strcat('./_',f);
+
 [~,fn,~] = fileparts(f);
-% work_dir = mk_work_dir(fn);
+
 
 if isempty(active_model)
     active_model=fn;
@@ -31,7 +34,7 @@ end
 
 
 hash_file = strcat(work_dir,filesep,'model.hash');
-hash = string2hash(fileread(f));
+hash = string2hash(fileread(strcat(RD_base,'models',filesep,f)));
 %check the model-description hash to see if it has changed
 if force || isempty(dir(hash_file)) || strcmp(fileread(hash_file), hash)
     
