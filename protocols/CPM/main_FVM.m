@@ -15,19 +15,14 @@ if plotting %do not display pictures when running in parallel...i.e., on the clu
     
 end
 
-
-
-%open(vid);
-
-nrx=1e5; %number of times reactions are carried out in a chem_func loop
-
-noise=0.005;
-
 Ttot=5e4; %Total simulation time
-
-SF=2; % speed factor I divide molecule number by this for speed
+noise=0.005; %relative amount of noise to add to the initial conditions
 Gsize=80; %length of the grid in um
 N=150; % number of points used to discretize the grid
+
+
+
+
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); %length of a latice square
