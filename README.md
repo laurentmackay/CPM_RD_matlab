@@ -51,7 +51,7 @@ You may also have a look at the script [main_FVM.m](/protocols/CPM/main_FVM.m), 
 
 ## General Usage
 
-After creating a model specification file (e.g., in the file `model_file`) for your model, one should:
+After creating a model specification file (e.g., in the file `models/model_file`) for your model, one should:
 
 1. Deploy the model
 2. Create a "virtual experiment" to help organize results on the file system using `set_experiment()`. [Optional]
@@ -59,7 +59,7 @@ After creating a model specification file (e.g., in the file `model_file`) for y
 4. Analyze the results using tools in [/protocols/CPM/analysis/](/protocols/CPM/analysis/)
 
 ### Deploying Models
-A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will parse the model specified in `model_file` and generate model-dependent functions necessary for running simulations. These generated files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
+A model specified in the file `models/model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will parse the model specified in `models/model_file` and generate model-dependent functions necessary for running simulations. These generated files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
 
 Only one model can be deployed at a time, and `deploy_model` will take care of modifying the MATLAB-path when a user switches between models. One may check the currently active model using the `active_model` global variable.
 
