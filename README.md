@@ -49,9 +49,9 @@ Eventually, a window should pop up with CPM cell that moves around. Check the `_
 After creating a model specification file (e.g., in the file `model_file`) for your model, one should:
 
 1. Deploy the model
-2. Create a "virtual experiment" to help organize results on the file system
+2. Create a "virtual experiment" to help organize results on the file system using set_experiment(). [Optional]
 3. Run a CPM simulation using `main_FVM.m`
-4. Analyze the results using tools in [/analysis/](analysis/)
+4. Analyze the results using tools in [/protocols/CPM/analysis/](/protocols/CPM/analysis/)
 
 ### Deploying Models
 A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will parse the model specified in `model_file` and generate model-dependent functions necessary for running simulations. These generated files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
