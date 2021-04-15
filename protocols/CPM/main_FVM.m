@@ -5,7 +5,7 @@ plotting=usejava('desktop') && isempty(getCurrentTask());
 try
     inputname(1);
 catch
-    deploy_model(model_name,1);
+    deploy_model(model_name);
 end
 
 
