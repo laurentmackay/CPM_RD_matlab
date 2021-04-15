@@ -19,13 +19,16 @@ This library provides three main components that are useful for CPM simulations:
 
 
 ## Installation
-The repository should be downloaded:
+The repository should be downloaded and placed somewhere that MATLAB can access. Furthermore, its base directory should be added to the MATLAB path (all subsequent modifications to the path are handled algorithmically).
+
+One may use the following commands in the command line to download and open the library:
+
 ```
 git clone https://github.com/laurentmackay/CPM_RD_matlab.git
 cd CPM_RD_matlab
+matlab
 ```
 
-Furthermore, its base directory should be added to the MATLAB path (all subsequent modifications to the path are handled algorithmically).
 
 
 ## Testing
