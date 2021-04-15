@@ -40,7 +40,7 @@ depending on whether one wishes the reaction to be reversible or not. In the abs
 
 #### Fast Reactions
 
-Reactions set to quasi-steady state can be specified using a reversible reaction with a single rate constant. This rate constant corresponds to the the association constant of the reaction (i.e., the reciprocal of the dissocation constant).
+Reactions set to quasi-steady state can be specified using a reversible reaction with a single rate constant. This rate constant corresponds to the the association constant of the reaction (i.e., `forward_rate/backward_rate`).
 
 ### Diffusion Notation
 The diffusion coefficient of a chemical species `X` can be specified using
