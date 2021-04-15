@@ -30,9 +30,6 @@ elseif force || ~strcmp(active_model,fn)
 end
 
 
-
-
-
 hash_file = strcat(work_dir,filesep,'model.hash');
 hash = string2hash(fileread(strcat(RD_base,'models',filesep,f)));
 %check the model-description hash to see if it has changed
@@ -48,7 +45,7 @@ if force || isempty(dir(hash_file)) || strcmp(fileread(hash_file), hash)
     dlmwrite( hash_file, hash, '');
 end
 
-
+end
 
 
 

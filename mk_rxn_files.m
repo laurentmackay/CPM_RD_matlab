@@ -1459,7 +1459,7 @@ fwrite(fid,strcat('ic = [', strjoin(init_induced), '];'),'char');
 fclose(fid);
 
 
-
+clear induced_ic
 
 u_read = cellfun(@(c,i) [c '=U(' int2str(i) ')'],chems(is_ode),num2cell(1:nnz(is_ode)),'UniformOutput',false);
 
