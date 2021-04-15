@@ -17,20 +17,18 @@ This library provides three main components that are useful for CPM simulations:
 2. A core set of functions/scripts for running CPM simulations.
 3. A basic system for switching between models, running simulations, and storing results in a systematic manner.
 
-### Index
-- [Deploying Models](#deploying-models)
-  - [Simulations](#simulations)
-  - [Analysis](#analysis)
-
 
 ## Installation
-The repository should be downloaded:
+The repository should be downloaded and placed somewhere that MATLAB can access. Furthermore, its base directory should be added to the MATLAB path (all subsequent modifications to the path are handled algorithmically).
+
+One may use the following commands in the command line to download and open the library:
+
 ```
 git clone https://github.com/laurentmackay/CPM_RD_matlab.git
 cd CPM_RD_matlab
+matlab
 ```
 
-Furthermore, its base directory should be added to the MATLAB path (all subsequent modifications to the path are handled algorithmically).
 
 
 ## Testing
@@ -44,6 +42,11 @@ main_FVM
 Eventually, a window should pop up with CPM cell that moves around. Check the `_chem_Rx_Pax_Asheesh` folder for .ode and .f90 files that can be used with xppaut and AUTO, respectively.
 
 You may also have a look at the script [main_FVM.m](/protocols/CPM/main_FVM.m), to see if there are any simulation parameters you wish to change.
+
+
+
+
+
 
 
 ## General Usage
