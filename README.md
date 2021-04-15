@@ -44,12 +44,12 @@ main_FVM
 Eventually, a window should pop up with CPM cell that moves around. Check the `_chem_Rx_Pax_Asheesh` folder for .ode and .f90 files that can be used with xppaut and AUTO, respectively.
 
 
-## Usage
+## General Usage
 
 After creating a model specification file (e.g., in the file `model_file`) for your model, one should:
 
 1. Deploy the model
-2. Create a "virtual experiment" to help organize results on the file system using set_experiment(). [Optional]
+2. Create a "virtual experiment" to help organize results on the file system using `set_experiment()`. [Optional]
 3. Run a CPM simulation using `main_FVM.m`
 4. Analyze the results using tools in [/protocols/CPM/analysis/](/protocols/CPM/analysis/)
 
