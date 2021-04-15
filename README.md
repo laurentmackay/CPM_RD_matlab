@@ -32,6 +32,18 @@ cd CPM_RD_matlab
 
 Furthermore, its base directory should be added to the MATLAB path (all subsequent modifications to the path are handled algorithmically).
 
+
+## Testing
+As a basic example, try the entering the following commands into the MATLAB command line:
+
+```
+deploy_model('chem_Rx_Pax_Asheesh')
+main_FVM
+```
+
+Eventually, a window should pop up with CPM cell that moves around. Check the `_chem_Rx_Pax_Asheesh` folder for .ode and .f90 files that can be used with xppaut and AUTO, respectively.
+
+
 ## Usage
 
 After creating a model specification file (e.g., in the file `model_file`) for your model, one should:
