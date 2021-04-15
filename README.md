@@ -32,14 +32,28 @@ cd CPM_RD_matlab
 
 Furthermore, its base directory should be added to the MATLAB path (all subsequent modifications to the path are handled algorithmically).
 
-## Usage
+
+## Testing
+As a basic example, try the entering the following commands into the MATLAB command line:
+
+```
+deploy_model('chem_Rx_Pax_Asheesh')
+main_FVM
+```
+
+Eventually, a window should pop up with CPM cell that moves around. Check the `_chem_Rx_Pax_Asheesh` folder for .ode and .f90 files that can be used with xppaut and AUTO, respectively.
+
+You may also have a look at the script [main_FVM.m](/protocols/CPM/main_FVM.m), to see if there are any simulation parameters you wish to change.
+
+
+## General Usage
 
 After creating a model specification file (e.g., in the file `model_file`) for your model, one should:
 
 1. Deploy the model
-2. Create a "virtual experiment" to help organize results on the file system
+2. Create a "virtual experiment" to help organize results on the file system using `set_experiment()`. [Optional]
 3. Run a CPM simulation using `main_FVM.m`
-4. Analyze the results using tools in [/analysis/](analysis/)
+4. Analyze the results using tools in [/protocols/CPM/analysis/](/protocols/CPM/analysis/)
 
 ### Deploying Models
 A model specified in the file `model_file` can be used in simulations by first calling `deploy_model('model_file')`. This will parse the model specified in `model_file` and generate model-dependent functions necessary for running simulations. These generated files are stored in a directory called `_model_file` and that directory is temporarily added to the MATLAB-path. 
