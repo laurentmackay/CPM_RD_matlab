@@ -10,7 +10,7 @@ end
 
 
 if plotting %do not display pictures when running in parallel...i.e., on the cluster
-
+    
     initialize_pic
     
 end
@@ -111,7 +111,7 @@ alpha_rx=sum(alpha_chem(ir0 + cell_inds(1:A)));
 alpha_rx2=alpha_rx;
 a_total=sum(alpha_diff)+sum(alpha_rx(:));
 
-% 
+%
 % if (1/a_total)*nrx>h/(4*vmax) %makes sure that you don't stay in the CPM__chem func loop for to long
 %     error('cell moving to fast consider lowering nrx')
 % end
@@ -150,9 +150,18 @@ FVM_CPM_loop_polarization
 
 toc
 
-    fn=strcat(save_dir,'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
-    disp(['saving to: ' fn]);
-    ls results
-    save(fn,'-v7.3');
+
+try
+    inputname(1);
+catch
+    save_dir=results_dir();
+end
+
+fn=strcat(save_dir,'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
+disp(['saving to: ' fn]);
+close all
+
+
+save(fn,'-v7.3');
 
 % end
