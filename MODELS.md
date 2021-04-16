@@ -8,6 +8,7 @@ Model are specified in simple line-oriented text files, where we are agnostic ab
 
 ### Index
 - [Reaction Notation](#reaction-notation)
+  - [Sources and Sinks](#sources-and-sinks)
   - [Fast Reactions](#fast-reactions)
 - [Variable Definitions](#variable-definitions)
 - [Parameter Values](#parameter-values)
