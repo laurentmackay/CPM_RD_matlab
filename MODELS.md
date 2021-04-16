@@ -8,6 +8,7 @@ Model are specified in simple line-oriented text files, where we are agnostic ab
 
 ### Index
 - [Reaction Notation](#reaction-notation)
+  - [Sources and Sinks](#sources-and-sinks)
   - [Fast Reactions](#fast-reactions)
 - [Variable Definitions](#variable-definitions)
 - [Parameter Values](#parameter-values)
@@ -37,6 +38,16 @@ r1*X1 + r2*X2 + ... + rN*XN <-> p1*X1 + p2*X2 + ... + pN*XN; forward_rate , back
 ```
 depending on whether one wishes the reaction to be reversible or not. In the absence of an explicit stoichiometric coefficient, a value of 1 is assumed.
 
+#### Sources and Sinks
+Production and destruction of matter can be specified using the empty set or zero (i.e., `{}` or `0`) as the sole reactant or product of a reaction, respectively. For example, the production of `A` with a constant rate `v` can be written as
+```
+{} -> A; v
+```
+or 
+```
+0 -> A; v
+```
+where destruction can also be specified by simply reversing the direction of the arrow or swapping the reactant with the product.
 
 #### Fast Reactions
 
