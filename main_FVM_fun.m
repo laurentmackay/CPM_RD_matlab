@@ -269,7 +269,7 @@ PaxRatio=[PaxRatio_u; PaxRatio_i];
 
 
 
-ic = [];
+ic = [0.46183494324776083050212067121224 0.3 0.8 0.2 0.063605658576895912604836663531382 0.33 0.23816505675223916949787932878776 0.60639434142310408739516333646862];
 mask=induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
 i_induced=tmp+tmp2;
@@ -313,10 +313,10 @@ Q_P = B.*(K.^n./(L_K.^n+K.^n));
 
 
 
-lam_a=1*h^4; 
+lam_a=0.1*h^4; 
 lam_p_0=0.1;
 lam_p=lam_p_0*h^2; 
-J=0*h; 
+J=1*h; 
 
 B_0=0.7;
 B_rho=(B_0/0.3)*h^2;

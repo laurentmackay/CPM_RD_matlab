@@ -1,17 +1,16 @@
-function [B,save_dir,copyNum,model_name,Ttot] = main_FVM_fun(B,save_dir,copyNum,...
-model_name,Ttot)
-
+function main_FVM_fun()
+model_name = 'chem_Rx_Pax_Asheesh';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
     inputname(1);
 catch
-    deploy_model(model_name,1);
+    deploy_model(model_name);
 end
 
 
 if plotting 
-
+    
     pic_fig=figure(1);clf();
 panel1=subplot(2,2,1);
 panel2=subplot(2,2,2);
@@ -19,18 +18,14 @@ panel3=subplot(2,2,3);
 panel4=subplot(2,2,4);
 end
 
-
-
-
-nrx=1e5; 
-
-noise=0.005;
-
- 
-
-SF=2; 
+Ttot=5e4; 
+noise=0.005; 
 Gsize=80; 
 N=150; 
+
+
+
+
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); 
@@ -134,12 +129,7 @@ i_chem_0 = ((1:N_species)-1)*sz;
 
 
 
-totalRho = 2250000/SF;
-totalRac = 2250000/SF;
-totalPax = 690000/SF;
-Rho_Square = totalRho/(A);    
-Rac_Square = totalRac/(A);    
-Pax_Square = totalPax/(A);    
+
 
 Rho_Square = 1;    
 Rac_Square = 1;    
@@ -147,7 +137,7 @@ Pax_Square = 1;
 
 N_instantaneous=50;
 
-
+B=5.000000000;
 I_rho=0.016000000;
 L_rho=0.340000000;
 delta_rho=0.016000000;
@@ -279,7 +269,7 @@ PaxRatio=[PaxRatio_u; PaxRatio_i];
 
 
 
-ic = [];
+ic = [0.46183494324776083050212067121224 0.3 0.8 0.2 0.063605658576895912604836663531382 0.33 0.23816505675223916949787932878776 0.60639434142310408739516333646862];
 mask=induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
 i_induced=tmp+tmp2;
@@ -328,7 +318,7 @@ lam_p_0=0.1;
 lam_p=lam_p_0*h^2; 
 J=0*h; 
 
-B_0=0.5;
+B_0=0.7;
 B_rho=(B_0/0.3)*h^2;
 B_R=(B_0/0.3)*(.18/.13)*h^2; 
 
@@ -499,7 +489,7 @@ d0=sum(x(:));
 
 
 
-if isempty(getCurrentTask());  end
+if isempty(getCurrentTask()); copyNum=[]; end
 
 
 
@@ -1089,10 +1079,19 @@ end
 
 toc
 
-    fn=strcat(save_dir,'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
-    disp(['saving to: ' fn]);
-    ls results
-    save(fn,'-v7.3');
+
+try
+    inputname(1);
+catch
+    save_dir=results_dir();
+end
+
+fn=strcat(save_dir,'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
+disp(['saving to: ' fn]);
+close all
+
+
+save(fn,'-v7.3');
 
 
 end

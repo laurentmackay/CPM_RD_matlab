@@ -56,9 +56,9 @@ Paxi(0) = Pax_Square
 
 
 % initial conditions for the "induced" region
-%Rac(0,induced)=0.3
-%Rho(0,induced)=0.2
-%Pax(0,induced)=0.33
+Rac(0,induced)=0.3
+Rho(0,induced)=0.2
+Pax(0,induced)=0.33
 
 LPA_global(Raci,Rhoi)
 
