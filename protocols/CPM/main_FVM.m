@@ -30,7 +30,7 @@ cpm_wait=5; %number of cpm steps to wait before saving
 
 vmax=3/60; %max speed of the cell
 picstep=5;
-cpmsteps=5;
+cpmsteps=15;
 
 cpmstep0=h/vmax;
 cpmstep=cpmstep0/cpmsteps;
@@ -57,7 +57,7 @@ end
 r_frac= sqrt(2)/2;
 
 dt=max(h^2*r_frac/(2*max(D)),0.01);
-
+dt=0.1;
 
 lastplot=0;
 lastcpm=0;
@@ -128,7 +128,7 @@ TPax=[];
 
 last_time=time; %used to time the CMP_step
 % tic
-rx_speedup=2;
+
 rx_count=zeros(shape);
 dt_diff=zeros(size(D));
 P_diff=0.5;

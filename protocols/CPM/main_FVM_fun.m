@@ -1,17 +1,16 @@
-function [B,save_dir,copyNum,model_name,Ttot] = main_FVM_fun(B,save_dir,copyNum,...
-model_name,Ttot)
-
+function main_FVM_fun()
+model_name = 'chem_Rx_Pax_Asheesh';
 
 plotting=usejava('desktop') && isempty(getCurrentTask());
 try
     inputname(1);
 catch
-    deploy_model(model_name,1);
+    deploy_model(model_name);
 end
 
 
 if plotting 
-
+    
     pic_fig=figure(1);clf();
 panel1=subplot(2,2,1);
 panel2=subplot(2,2,2);
@@ -19,18 +18,14 @@ panel3=subplot(2,2,3);
 panel4=subplot(2,2,4);
 end
 
-
-
-
-nrx=1e5; 
-
-noise=0.005;
-
- 
-
-SF=2; 
+Ttot=5e4; 
+noise=0.005; 
 Gsize=80; 
 N=150; 
+
+
+
+
 shape=[N,N];
 sz=prod(shape);
 h=Gsize/(N-1); 
@@ -38,7 +33,7 @@ cpm_wait=5;
 
 vmax=3/60; 
 picstep=5;
-cpmsteps=5;
+cpmsteps=15;
 
 cpmstep0=h/vmax;
 cpmstep=cpmstep0/cpmsteps;
@@ -134,12 +129,7 @@ i_chem_0 = ((1:N_species)-1)*sz;
 
 
 
-totalRho = 2250000/SF;
-totalRac = 2250000/SF;
-totalPax = 690000/SF;
-Rho_Square = totalRho/(A);    
-Rac_Square = totalRac/(A);    
-Pax_Square = totalPax/(A);    
+
 
 Rho_Square = 1;    
 Rac_Square = 1;    
@@ -147,7 +137,7 @@ Pax_Square = 1;
 
 N_instantaneous=50;
 
-
+B=2.000000000;
 I_rho=0.016000000;
 L_rho=0.340000000;
 delta_rho=0.016000000;
@@ -279,7 +269,7 @@ PaxRatio=[PaxRatio_u; PaxRatio_i];
 
 
 
-ic = [];
+ic = [0.49716723973560105702773507696153 0.27 0.8 0.2 0.065206154186437354070013388242775 0.33 0.23283276026439894297226492303847 0.60479384581356264592998661175723];
 mask=induced_mask&cell_mask;
 [tmp,tmp2]=meshgrid((0:N_species-1)*sz,find(mask));
 i_induced=tmp+tmp2;
@@ -328,7 +318,7 @@ lam_p_0=0.1;
 lam_p=lam_p_0*h^2; 
 J=0*h; 
 
-B_0=0.5;
+B_0=0.7;
 B_rho=(B_0/0.3)*h^2;
 B_R=(B_0/0.3)*(.18/.13)*h^2; 
 
@@ -353,7 +343,7 @@ end
 r_frac= sqrt(2)/2;
 
 dt=max(h^2*r_frac/(2*max(D)),0.01);
-
+dt=0.1;
 
 lastplot=0;
 lastcpm=0;
@@ -419,10 +409,10 @@ caxis(panel2,'auto');
 colorbar(panel2);
 title(panel2,'RacRatio', 'Fontsize', 24);
 
-plotCellIm(panel3,reshape(RhoRatio,shape),cell_mask,i0,j0);
+plotCellIm(panel3,reshape(u(:,1),shape),cell_mask,i0,j0);
 caxis(panel3,'auto');
 colorbar(panel3);
-title(panel3,'RhoRatio', 'Fontsize', 24);
+title(panel3,'Raci', 'Fontsize', 24);
 
 plotCellIm(panel4,reshape(PaxRatio,shape),cell_mask,i0,j0);
 caxis(panel4,'auto');
@@ -489,7 +479,7 @@ TRho=[];
 TPax=[];
 
 last_time=time; 
-rx_speedup=2;
+
 rx_count=zeros(shape);
 dt_diff=zeros(size(D));
 P_diff=0.5;
@@ -499,24 +489,26 @@ d0=sum(x(:));
 
 
 
-if isempty(getCurrentTask());  end
+if isempty(getCurrentTask()); copyNum=[]; end
 
 
 
 T_integration = cpmstep;
 keep_running=true;
 
-i_rac = find(strcmp(chems,'Rac')); 
+i_rac = find(strcmp(chems,'Rac'));
 inds=cell_inds(1:A)+sz*(i_rac-1);
 d_Rac_0=max(max(x(inds)))-min(min(x(inds)));
+
+vcpm=zeros([shape 2]);
 
 while time<Ttot && keep_running
     A=nnz(cell_mask); 
     cell_inds(1:A)=find(cell_mask); 
     
     while (time-last_time)<Ttot
-
-       
+        
+        
         
 
 
@@ -524,8 +516,8 @@ u = x(cell_inds(1:A) + i_chem_0);
 
 interior=~bndrys&cell_mask(:);
 
-vox=repmat((1:sz)',1,N_dim);
-vox=vox(interior)';
+vox0=repmat((1:sz)',1,N_dim);
+vox=vox0(interior);
 
 
 
@@ -533,18 +525,48 @@ vox=vox(interior)';
 row = find(interior);
 N_ind = length(row);
 i = [row'; row'];
-j=[ vox(:)';  jump(row)';];
+j=[ vox';  jump(row)';];
 
 Delta=repmat([-1/h; +1/h],N_ind,1);
-u_x = sparse(i,j,Delta,numel(interior),sz);
+J_diff_0 = sparse(i,j,Delta,numel(interior),sz); 
+    
+        vel2=repelem(vcpm,1,1,2);
 
-[i2,j2,v ] = find(u_x);
+        opp_dir=reshape(flipud(reshape(1:4,[2,N_dim/2])),[1,N_dim]);
+        dim=repelem(1:N_dim/2,2);
+        jump_opp=jump(:,opp_dir);
+        
+        mask_upw = -(1-mod(1:N_dim,2)*2).*vel2(jump+((0:N_dim-1))*sz)<0 & interior;
+        row_upw = find(mask_upw);
+        i_upw = mod(row_upw-1,sz)+1;
+
+        
+        j_upw=jump(mask_upw);
+        v_upw = vel2(mask_upw);
+    J_adv = sparse([row_upw; row_upw],[i_upw; j_upw],[-v_upw; v_upw]*h,numel(interior),sz); 
+
+    
+    
+    
+
+    
+    
+
+
+
+[i2,j2,J_vals ] = find(J_diff_0);
 i2=mod(i2-1,sz)+1;
-u_xx = sparse(i2,j2,v/h,sz,sz);
-
+u_xx = sparse(i2,j2,J_vals/h,sz,sz);
 u_xx=u_xx(cell_inds(1:A),cell_inds(1:A));
+eye = speye(A);
 
+    [i20,j2,J_vals ] = find(J_adv);
+    i2=mod(i20-1,sz)+1;
+    vu_x = sparse(i2,j2,J_vals/h,sz,sz);
+    vu_x(jump(unique(i20)),:)=vu_x(jump(unique(i20)),:)-vu_x(jump_opp(unique(i20)),:);
+    vu_x=vu_x(cell_inds(1:A),cell_inds(1:A));
 
+    MAT_list = arrayfun(@(Di)eye+(vu_x+Di*u_xx)*dt,D(1:N_slow),'UniformOutput',0); 
 
 
 R = u(:,2) ./ Rac_Square;
@@ -575,8 +597,7 @@ u_prev = u(:,1:N_slow);
 
 t0=time;
 
-eye = speye(A);
-MAT_list = arrayfun(@(Di)( eye*3/(2*dt)-Di*u_xx),D(1:N_slow),'UniformOutput',0); 
+
 if any(u(:)<0)
     disp('negatory pig pen')
 end
@@ -585,7 +606,6 @@ while time-t0<T_integration
     
 
     
-    Rx_prev=Rx;
     R = u(:,2) ./ Rac_Square;
 RhoRatio = u(:,4) ./ Rho_Square;
 PaxRatio = u(:,6) ./ Pax_Square;
@@ -610,13 +630,14 @@ f_Rhoi,...
 -f_Rhoi,...
 f_Paxi,...
 subs2__1];
-u_curr = u(:,1:N_slow);
-    b_=(2*u_curr-u_prev/2)/dt + (2*Rx-Rx_prev); 
-    u_prev=u_curr;
-
+sumo=sum(u,1);
+    sum(vu_x*u)
     for i = 1:N_slow
-        u(:,i) = MAT_list{i}\b_(:,i);
+        u(:,i) = MAT_list{i}*u(:,i)+Rx(:,i)*dt;
+        
     end
+
+    
     
     u(:,7)=(u(:,2).*alpha_R.*alpha_PAK.*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1))./(Rac_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X));
 u(:,8)=(GIT.*PAKtot.*PIX.*u(:,6).*k_C.*k_G.*k_X.*((u(:,2).*alpha_R)./Rac_Square + 1))./(Pax_Square.*(((u(:,2).*alpha_R)./Rac_Square + 1).*(PIX.*k_X + (GIT.*PIX.*u(:,6).*Paxtot.*k_C.*k_G.*k_X)./Pax_Square + 1) + GIT.*PIX.*k_G.*k_X));
@@ -628,6 +649,7 @@ end
     if any(u(:)<0)
         error('Negative solutions detected, please use a smaller timestep dt')
     end
+
 x(cell_inds(1:A) + i_chem_0) = u(:);
 u = reshape(x,[sz ,size(x,3)]);
 R = u(:,2) ./ Rac_Square;
@@ -675,8 +697,10 @@ J_gamma_1_2.*subs2__0 + J_gamma_1_6.*subs2__1,...
 J_gamma_2_2.*subs2__0 + J_gamma_2_6.*subs2__1];
 
 if time>=lastcpm+cpmstep
-            
+            vcpm(:)=0;
+            counter=0;
             for kk=1:(2*Per)/cpmsteps 
+                
                 try
                     if all(isfinite([lam_a,lam_p]))
     
@@ -731,8 +755,8 @@ is_discrete = all(mod(x(cell_inds(1:A)),1)==0);
     while ~no_holes
         vox_trial = bndry(randi(length(bndry)));
         
-        r=randi(size(jump,2));
-        vox_ref=jump(sub2ind([sz,4],vox_trial,r));
+        drx=randi(size(jump,2));
+        vox_ref=jump(sub2ind([sz,4],vox_trial,drx));
         cell_maskp(vox_trial) = cell_mask(vox_ref);
         
         Per=perim(cell_maskp); 
@@ -802,11 +826,14 @@ is_discrete = all(mod(x(cell_inds(1:A)),1)==0);
             
             if grow
                 dist=max(abs(i0(vox_ref)-i0(inds)),abs(j0(vox_ref)-j0(inds)));
-                
+                di=(i0(vox_ref)-i0)*h;
+                dj=(j0(vox_ref)-j0)*h;
             else
                 dist=max(abs(i0(vox_trial)-i0(inds)),abs(j0(vox_trial)-j0(inds)));
-                
+                di=(i0(vox_trial)-i0)*h;
+                dj=(j0(vox_trial)-j0)*h;
             end
+            
             
             min_dist=5600;
             
@@ -957,8 +984,9 @@ catch err
                     rethrow(err)
                     break;
                 end
-                
-                adj_empty = ~cell_mask(up) | ~cell_mask(down) | ~cell_mask(left) | ~cell_mask(right); 
+                if reacted
+                    counter=counter+1;
+                    adj_empty = ~cell_mask(up) | ~cell_mask(down) | ~cell_mask(left) | ~cell_mask(right); 
 adj_full = cell_mask(up) | cell_mask(down) | cell_mask(left) | cell_mask(right); 
 
 bndry_cell = cell_mask & adj_empty;
@@ -975,8 +1003,27 @@ bndry_ud= bndry_up | bndry_down;
 bndry_lr= bndry_l | bndry_r;
 
 bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
-end
-            
+ecl_dist=sqrt(di.^2+dj.^2);
+                    
+                    if grow
+                        
+                        
+                        
+                        vcpm(:,:,dim(drx))=vcpm(:,:,dim(drx))+(1-~mod(drx,2)*2)*vmax;
+                        
+                    else
+                        vcpm(:,:,dim(drx))=vcpm(:,:,dim(drx))+(1-~mod(drx,2)*2)*vmax;
+                        
+                        
+                        
+                    end
+                end
+
+            end
+            if counter>0
+                vcpm=vcpm/((counter^2));
+            end
+
             diffusing_species=1:N_species; 
 
 
@@ -997,12 +1044,14 @@ end
 lastcpm=time;
             cpmcounter=cpmcounter+1;
         end
-                
+
         if time>=lastplot+picstep || time==lastcpm 
- 
+            
+            
             if cpmcounter==cpmsteps*cpm_wait
-              u = reshape(x,[sz ,size(x,3)]);
-              if plotting
+                
+                u = reshape(x,[sz ,size(x,3)]);
+                if plotting
 
 tp__0=tic;
 
@@ -1016,10 +1065,10 @@ caxis(panel2,'auto');
 colorbar(panel2);
 title(panel2,'RacRatio', 'Fontsize', 24);
 
-plotCellIm(panel3,reshape(RhoRatio,shape),cell_mask,i0,j0);
+plotCellIm(panel3,reshape(u(:,1),shape),cell_mask,i0,j0);
 caxis(panel3,'auto');
 colorbar(panel3);
-title(panel3,'RhoRatio', 'Fontsize', 24);
+title(panel3,'Raci', 'Fontsize', 24);
 
 plotCellIm(panel4,reshape(PaxRatio,shape),cell_mask,i0,j0);
 caxis(panel4,'auto');
@@ -1029,15 +1078,19 @@ title(panel4,'PaxRatio', 'Fontsize', 24);
 sgtitle(pic_fig,['t=' num2str(time) ', t_{plot}=' num2str(double(tic-tp__0)*1e-6), ', t_{sim}=' num2str(toc)], 'Fontsize', 10,'FontWeight','bold')
 
 end
-lastplot=time; 
-            
-                i_rac = find(strcmp(chems,'Rac')); 
+lastplot=time;
+                drawnow
+                
+                
+                i_rac = find(strcmp(chems,'Rac'));
                 inds=cell_inds(1:A)+sz*(i_rac-1);
                 d_Rac=max(max(x(inds)))-min(min(x(inds)));
                 if plotting
                     gif
                 end
-                    disp([num2str(copyNum) ': B=' num2str(B) ', t=' num2str(time) ', delta_Rac=' num2str(d_Rac)])
+                
+                disp([num2str(copyNum) ': B=' num2str(B) ', t=' num2str(time) ', delta_Rac=' num2str(d_Rac)])
+                
                 
                 iter=iter+1;
 
@@ -1054,8 +1107,12 @@ Hchem(iter)=dH_chem;
 
 cpmcounter=0;
                 
-                i_rac = find(strcmp(chems,'Rac')); 
+                i_rac = find(strcmp(chems,'Rac'));
                 inds=cell_inds(1:A)+sz*(i_rac-1);
+                
+                
+                
+                
                 
             end
             
@@ -1089,10 +1146,19 @@ end
 
 toc
 
-    fn=strcat(save_dir,'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
-    disp(['saving to: ' fn]);
-    ls results
-    save(fn,'-v7.3');
+
+try
+    inputname(1);
+catch
+    save_dir=results_dir();
+end
+
+fn=strcat(save_dir,'final_B_', num2str(B), '_copy', int2str(copyNum), '.mat');
+disp(['saving to: ' fn]);
+close all
+
+
+save(fn,'-v7.3');
 
 
 end

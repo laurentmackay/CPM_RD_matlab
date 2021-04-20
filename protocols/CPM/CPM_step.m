@@ -36,8 +36,8 @@ if all(isfinite([lam_a,lam_p]))
     while ~no_holes
         vox_trial = bndry(randi(length(bndry)));
         
-        r=randi(size(jump,2));
-        vox_ref=jump(sub2ind([sz,4],vox_trial,r));
+        drx=randi(size(jump,2));
+        vox_ref=jump(sub2ind([sz,4],vox_trial,drx));
         cell_maskp(vox_trial) = cell_mask(vox_ref);% make a new trial configuration
         
         Per=perim(cell_maskp); % perimeter
@@ -107,11 +107,14 @@ if all(isfinite([lam_a,lam_p]))
             
             if grow
                 dist=max(abs(i0(vox_ref)-i0(inds)),abs(j0(vox_ref)-j0(inds)));
-                %                 dist=sqrt(((i0(vox_ref)-i0(inds)).^2)+(j0(vox_ref)-j0(inds)).^2)*h;
+                di=(i0(vox_ref)-i0)*h;
+                dj=(j0(vox_ref)-j0)*h;
             else
                 dist=max(abs(i0(vox_trial)-i0(inds)),abs(j0(vox_trial)-j0(inds)));
-                %                 dist=sqrt(((i0(vox_trial)-i0(inds)).^2)+(j0(vox_trial)-j0(inds)).^2)*h;
+                di=(i0(vox_trial)-i0)*h;
+                dj=(j0(vox_trial)-j0)*h;
             end
+            
             
             min_dist=5600;
             %             transport_mask=((D~=0).*D/min(D(D~=0))+(D==0).*prod(shape))*min_dist>dist;
