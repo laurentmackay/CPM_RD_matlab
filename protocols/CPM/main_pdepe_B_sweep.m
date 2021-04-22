@@ -16,9 +16,11 @@ clear rhs_fun_tot
 
 
 %% run the PDE for various values of B
-Nrep=20;
+Nrep=5;
 tic;
-B_vals=[linspace(2,2.45,4) linspace(2.5,3,10) linspace(3.1,5,6)];
+% B_vals=[linspace(2,2.45,4) linspace(2.5,3,10) linspace(3.1,5,6)];
+B_vals=linspace(25,40,10);
+
 polarized=cell(length(B_vals),1);
 t_polarized=cell(length(B_vals),1);
 for i=1:length(B_vals)
@@ -49,8 +51,9 @@ Ttot=2e6;
 Xmax=30;
 tspan=linspace(0,Ttot,1e4);
 % tspan=logspace(-5,log10(Ttot),100);
-xmesh=linspace(0,Xmax,2e3);
+xmesh=linspace(0,Xmax,1e3);
 options=odeset('RelTol',1e-5, 'AbsTol', 1e-5, 'InitialStep',1e-6);
+i_rac=find(strcmp(chems,'Rac'));
 
 for j=1:Nrep
     tic;

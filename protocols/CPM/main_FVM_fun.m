@@ -104,7 +104,7 @@ bndrys=[bndry_up(:) bndry_down(:) bndry_l(:) bndry_r(:)];
 
 N_species = 8;
 N_rx = 6;
-D = [0.43        0.02        0.43        0.02        0.02        0.02        0.02        0.02];
+D = [1         0.1           1         0.1         0.1         0.1         0.1         0.1];
 N_slow = 6;
 chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
 
@@ -114,7 +114,7 @@ chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
 
 N_species = 8;
 N_rx = 6;
-D = [0.43        0.02        0.43        0.02        0.02        0.02        0.02        0.02];
+D = [1         0.1           1         0.1         0.1         0.1         0.1         0.1];
 N_slow = 6;
 chems={'Raci','Rac','Rhoi','Rho','Paxi','Pax','RacPAK','GPP'};
 
@@ -137,11 +137,11 @@ Pax_Square = 1;
 
 N_instantaneous=50;
 
-B=5.000000000;
+B=12.000000000;
 I_rho=0.016000000;
 L_rho=0.340000000;
 delta_rho=0.016000000;
-L_R=0.340000000;
+L_R=0.350000000;
 I_R=0.003000000;
 delta_R=0.025000000;
 alpha_R=15.000000000;
@@ -313,10 +313,10 @@ Q_P = B.*(K.^n./(L_K.^n+K.^n));
 
 
 
-lam_a=1*h^4; 
-lam_p_0=0.1;
+lam_a=0.3*h^4; 
+lam_p_0=0.3;
 lam_p=lam_p_0*h^2; 
-J=0*h; 
+J=0.1*h; 
 
 B_0=0.7;
 B_rho=(B_0/0.3)*h^2;

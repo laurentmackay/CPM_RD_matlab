@@ -8,10 +8,10 @@
 %The biophysical nature of cells: potential cell behaviours revealed by analytical and computational studies of cell surface mechanics. 
 %BMC Biophys. 2015;8:8. Published 2015 May 12. doi:10.1186/s13628-015-0022-x
 
-lam_a=0.1*h^4; %energy cost of area change
-lam_p_0=0.1;
+lam_a=0.3*h^4; %energy cost of area change
+lam_p_0=0.3;
 lam_p=lam_p_0*h^2; %energy cost of permiter change
-J=1*h; %energy cost of change in medium contact
+J=0.1*h; %energy cost of change in medium contact
 
 B_0=0.7;
 B_rho=(B_0/0.3)*h^2;%chemical potential rho
