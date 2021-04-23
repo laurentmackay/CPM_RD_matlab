@@ -329,9 +329,7 @@ end
 %this gives you all the slow variables
 is_fast=~any(S_',1)&any(S_fast',1);
 
-if any(ismissing(init(~is_fast)))
-    error(['Please specify some initial condtions for following species: ' strjoin(chems(ismissing(init(~is_fast))),', ')])
-end
+
 
 [rates_naive, rxn_naive] = rate_strings(chems,r,p,rate_constants);
 
@@ -546,7 +544,6 @@ eval(strcat(' assume([', strjoin(f_chems), "],'real')"));
 eval(strcat(' assume([', strjoin(chems), "]>0)"));
 
 
-
 ec0=subs(consrv_eqns_elim,str2sym(elim_fast),cell2sym(sol_fast));
 sol_consrv=eval(['solve( subs(ec0),[' strjoin(elim_con,' ')  '])']);
 if length(elim_con)==1
@@ -569,6 +566,7 @@ consrv_rhs = regexprep(string(consrv_eqns),'^.*==','');
 consrv_rhs_elim = regexprep(string(ec0),'^.*==','');
 
 
+
 slow_init_reps = cellstr(string(init(~is_fast)));
 con_fast = cellfun(@(x) any(strcmp(x,fast_chems)),elim_con);
 
@@ -589,15 +587,18 @@ end
 sol_consrv_elim = cell2sym(struct2cell((solve(consrv_rhs_init,str2sym(consrv_nm)))));
 consrv_rhs_elim = string(sol_consrv_elim);
 
+missing_init = ismissing(init(~is_fast));
+ind_missing= find(missing_init);
+consrv_deps_missing = ~cell2mat(cellfun(@(x) isAlways(diff(consrv_eqns,str2sym(x))),chems(missing_init),'UniformOutput',false));
 
 
 if N_fast>0
-    sol_fast_1 = subs(subs(cell2sym(sol_fast_0)), str2sym(chems(~is_fast)), str2sym(slow_init_reps));
+    sol_fast_1 = subs(subs(cell2sym(sol_fast_0)), str2sym(chems(~missing_init)), str2sym(slow_init_reps(~missing_init)));
     %     sol_fast_1 = subs(subs(sol_fast_1), str2sym(elim_con'), subs(cell2sym(sol_consrv)));
     %     subs(subs(sol_fast_1), str2sym(consrv_nm'), subs(sol_consrv_elim))
     
     
-    fast_init_reps = regexprep(cellstr(string([sol_fast_1; sol_consrv_elim(con_fast)])),slow_refs, slow_init_reps);
+    fast_init_reps = regexprep(cellstr(string([sol_fast_1; sol_consrv_elim(con_fast)])),slow_refs(~missing_init), slow_init_reps(~missing_init));
     fast_init_reps = cellstr(string(subs(str2sym(fast_init_reps))));
     fast_init_reps = regexprep(fast_init_reps, par_refs, par_reps);
     fast_init_reps = cellstr(string(str2sym(fast_init_reps)));
@@ -607,6 +608,17 @@ else
     fast_init_reps = {};
 end
 
+consrv_eqns_init =  subs(consrv_eqns,str2sym([chems(~missing_init) chems(N_slow+1:end) ]),str2sym([slow_init_reps(~missing_init) fast_init_reps']))
+init_sol = solve(consrv_eqns_init(any(consrv_deps_missing,2)),str2sym(chems(missing_init)));
+if nnz(missing_init)>1
+    init_sol=cell2sym(struct2cell(init_sol));
+end
+
+if any(isempty(init_sol))
+    error(['Please specify some initial condtions for following species: ' strjoin(chems(ismissing(init(~is_fast))),', ')])
+end
+init(missing_init)=string(init_sol);
+slow_init_reps{missing_init}=char(string(init_sol));
 
 
 consrv_defs_init = regexprep(consrv_rhs,[slow_refs; fast_refs],[slow_init_reps'; fast_init_reps]');
@@ -618,7 +630,7 @@ consrv_defs = regexprep(string(consrv_eqns),'==','=');
 N_con_user = size(lcon_user,2);
 
 model_pars = [model_pars consrv_nm{1:N_con_user}];
-model_par_vals = [model_par_vals consrv_defs_init{1:N_con_user}];
+model_par_vals = [model_par_vals regexprep(consrv_defs_init{1:N_con_user},par_refs,par_reps)];
 
 par_eqn = str2sym(model_pars');
 par_val_eqn = str2sym(model_par_vals);

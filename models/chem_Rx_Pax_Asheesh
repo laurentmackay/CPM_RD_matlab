@@ -25,7 +25,7 @@ Q_R = (I_R+I_Ks)*(L_rho^m/(L_rho^m+RhoRatio^m));
 Q_rho = I_rho*(L_R^m/(L_R^m +(RacRatio)^m));
 Q_P = B*(K^n/(L_K^n+K^n));
 
-
+Ractot = Rac + Raci + RacPAK
 
 plot(R,RacRatio,RhoRatio,PaxRatio)
 
@@ -38,6 +38,7 @@ param I_rho=0.016, L_rho=0.34, delta_rho=0.016
 param L_R=0.34, I_R=0.003, delta_R=0.025, alpha_R=15, Rtot=7.5
 param delta_P=0.0004, I_K=0.009
 param L_K=5.77
+param Ractot=1
 
 
 param k_X=41.7, k_G=5.71, k_C=5.0
@@ -49,7 +50,7 @@ param Pax_Square = 1.0
 param PAKtot=Rtot*alpha_PAK
 
 % uninduced steady state
-Raci(0) = Rho(0) = Rac_Square 
+Rho(0) = Rac_Square 
 Rac(0) = Rhoi(0) = Pax(0) = 0
 Paxi(0) = Pax_Square
 
