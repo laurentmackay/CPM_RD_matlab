@@ -93,6 +93,7 @@ chems_user_consrv =cf2(@(x) x{2}, user_consrv);
 lcon_user = cf22(@(c,s) strcmp(c,chems)'*s,chems_user_consrv,stoic_user_consrv);
 lcon_user = cellfun(@(x) sum(cell2mat(x),2),lcon_user,'UniformOutput',false);
 is_valid_consrv = cellfun(@(x) is_in_span(x,lcon), lcon_user);
+% is_non_redundant = cellfun(@(x) ~is_in_span(x,lcon_user), num2cell(lcon,1))
 
 inds=find(is_possible_consrv);
 user_consrv_defs = model_defs(inds(is_valid_consrv));
@@ -274,10 +275,10 @@ pair_inds = arrayfun(@(i) strcmp(chems,fast_pair{i})',1:length(fast_pair),'Unifo
 fast_inds = arrayfun(@(i) strcmp(chems,fast_chems{i})',1:length(fast_chems),'UniformOutput',false);
 
 
-S_tot = [S_ S_fast];
-
-lcon = null(S_tot','r');
-lcon=rref(lcon')';
+% S_tot = [S_ S_fast];
+% 
+% lcon = null(S_tot','r');
+% lcon=rref(lcon')';
 
 N_con=size(lcon,2);
 
@@ -609,7 +610,7 @@ else
 end
 
 consrv_eqns_init =  subs(consrv_eqns,str2sym([chems(~missing_init) chems(N_slow+1:end) ]),str2sym([slow_init_reps(~missing_init) fast_init_reps']))
-init_sol = solve(consrv_eqns_init(any(consrv_deps_missing,2)),str2sym(chems(missing_init)));
+init_sol = solve(subs(consrv_eqns_init(any(consrv_deps_missing,2)),str2sym(model_pars_tot),str2sym(model_par_vals_tot)),str2sym(chems(missing_init)));
 if nnz(missing_init)>1
     init_sol=cell2sym(struct2cell(init_sol));
 end
@@ -618,7 +619,9 @@ if any(isempty(init_sol))
     error(['Please specify some initial condtions for following species: ' strjoin(chems(ismissing(init(~is_fast))),', ')])
 end
 init(missing_init)=string(init_sol);
-slow_init_reps{missing_init}=char(string(init_sol));
+fast_init_reps = cellstr(string(subs(str2sym(fast_init_reps),str2sym(chems),str2sym(init))));
+init(is_fast) = fast_init_reps;
+slow_init_reps(missing_init)=cellstr(string(init_sol));
 
 
 consrv_defs_init = regexprep(consrv_rhs,[slow_refs; fast_refs],[slow_init_reps'; fast_init_reps]');
