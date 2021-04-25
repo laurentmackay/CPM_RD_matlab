@@ -609,7 +609,7 @@ else
     fast_init_reps = {};
 end
 
-consrv_eqns_init =  subs(consrv_eqns,str2sym([chems(~missing_init) chems(N_slow+1:end) ]),str2sym([slow_init_reps(~missing_init) fast_init_reps']))
+consrv_eqns_init =  subs(consrv_eqns,str2sym([chems(~missing_init) chems(N_slow+1:end) ]),str2sym([slow_init_reps(~missing_init) fast_init_reps']));
 init_sol = solve(subs(consrv_eqns_init(any(consrv_deps_missing,2)),str2sym(model_pars_tot),str2sym(model_par_vals_tot)),str2sym(chems(missing_init)));
 if nnz(missing_init)>1
     init_sol=cell2sym(struct2cell(init_sol));
@@ -633,7 +633,7 @@ consrv_defs = regexprep(string(consrv_eqns),'==','=');
 N_con_user = size(lcon_user,2);
 
 model_pars = [model_pars consrv_nm{1:N_con_user}];
-model_par_vals = [model_par_vals regexprep(consrv_defs_init{1:N_con_user},par_refs,par_reps)];
+model_par_vals = [model_par_vals regexprep(consrv_defs_init(1:N_con_user),par_refs,par_reps)'];
 
 par_eqn = str2sym(model_pars');
 par_val_eqn = str2sym(model_par_vals);
