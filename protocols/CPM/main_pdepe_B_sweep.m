@@ -19,7 +19,7 @@ clear rhs_fun_tot
 Nrep=5;
 tic;
 % B_vals=[linspace(2,2.45,4) linspace(2.5,3,10) linspace(3.1,5,6)];
-B_vals=linspace(25,40,10);
+B_vals=linspace(2,0.2,10);
 
 polarized=cell(length(B_vals),1);
 t_polarized=cell(length(B_vals),1);
