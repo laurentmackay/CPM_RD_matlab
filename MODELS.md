@@ -78,7 +78,7 @@ kB = 1/(1+A1^2)
 Variable definitions may reference other variable definitions, but note that any variable name referenced in a variable definition must have already been defined in the file. That is, we will not sort out the order of variable definitions for the user, nor will we notify the user when a model is defined in an inconsistent manner.
 
 ### Parameter Values
-We have borrowed heavily from xppaut for our parameter specification paradigm. Any line starting with "par" or "param" denotes a line of parameter value declarations. For example, in the isomerization example considered above we could specify parameters values using:
+We have borrowed heavily from xppaut for our parameter specification paradigm. Any line starting with "p" (e.g., "par" or "param") denotes a line of parameter value declarations. For example, in the isomerization example considered above we could specify parameters values using:
 ```
 par delta_A=0.1, delta_B=2
 ```
