@@ -1578,7 +1578,7 @@ if ~isempty(LPA_globals)
     
     
     warning ('off','symbolic:solve:SolutionsDependOnConditions');
-    c = struct2array(solve(ec0, LPA_reps));
+    c = struct2cell(solve(ec0, LPA_reps));
     sol_LPA_globals = [c{:}];
     warning ('on','symbolic:solve:SolutionsDependOnConditions');
     
