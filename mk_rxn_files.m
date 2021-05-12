@@ -1563,7 +1563,8 @@ if ~isempty(LPA_globals)
     
     
     warning ('off','symbolic:solve:SolutionsDependOnConditions');
-    sol_LPA_globals = struct2array(solve(ec0, LPA_reps));
+    c = struct2array(solve(ec0, LPA_reps));
+    sol_LPA_globals = [c{:}];
     warning ('on','symbolic:solve:SolutionsDependOnConditions');
     
     sol_LPA_globals(ic0) = subs(sol_LPA_globals(ic0), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')));
