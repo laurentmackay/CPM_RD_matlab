@@ -71,8 +71,8 @@ For example, we may model mutual inhibition between two molecules (`A` and `B`) 
 A0 <-> A1; kA, delta_A
 B0 <-> B1; kB, delta_B
 
-kA = 1/(1+B^2)
-kB = 1/(1+A^2)
+kA = 1/(1+B1^2)
+kB = 1/(1+A1^2)
 ```
 
 Variable definitions may reference other variable definitions, but note that any variable name referenced in a variable definition must have already been defined in the file. That is, we will not sort out the order of variable definitions for the user, nor will we notify the user when a model is defined in an inconsistent manner.
