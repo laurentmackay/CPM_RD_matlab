@@ -32,7 +32,15 @@ lcon=rref(lcon')';
 
 init=getInitialConditions(f,chems);
 
+[aux_vars,aux_dyn]=getAuxSystem(f);
 
+init_aux=getInitialConditions(f,aux_vars);
+if any(ismissing(init_aux))
+    error(['Please specify initial conditions for the following auxiliary variables: ' strjoin(aux_vars(ismissing(init_aux)))])
+end
+
+
+aux_ref=nameref(aux_vars);
 
 vars=getInitialized(f,true);
 chems=regexprep(chems,':','');
@@ -57,14 +65,17 @@ name=['([a-zA-Z][a-zA-Z_0-9]*)'];
 
 
 
+cf2=@(f,x)  cellfun( @(y) cellfun(@(z) f(z),y,'UniformOutput',0),x,'UniformOutput',0);
+cf22=@(f,x,xx)  cellfun( @(y,yy) cellfun(@(z,zz) f(z,zz),y,yy,'UniformOutput',0),x,xx,'UniformOutput',0);
+
 
 
 %figure out which quantities are spatially variable
 ass=cellfun(@(x) ['(?<![a-zA-Z_0-9])' x '(?:[ \t\f]*)?=([^\n\r\;]+)'],vars,'UniformOutput',0);
 
 
-par_defs = regexp(str,'(?:\n|^)(?:p|par|param)[ \t\f]([^\n]+)','tokens');
-str = regexprep(str,'(?:\n|^)(?:p|par|param)[ \t\f]([^\n]+)','');
+par_defs = regexp(str,'(?:\n|^)(?:p[^ \t\f\r\n]+)[ \t\f]([^\n]+)','tokens');
+str = regexprep(str,'(?:\n|^)(?:p[^ \t\f\r\n]+)[ \t\f]([^\n]+)','');
 
 model_defs = regexp(str,ass,'match');
 model_defs = [model_defs{:}];
@@ -79,14 +90,20 @@ chem_name=strcat('(?:',strjoin(chems,'|'),')');
 
 chem_set = ['((?:' empty_or_num chem_name  whitespace '[+])*+(?:' empty_or_num chem_name  '))' whitespace ];
 
-possible_consrv = regexp(model_defs,['\=' whitespace chem_set whitespace '$'],'match');
-is_possible_consrv = ~cellfun(@isempty,possible_consrv);
-possible_consrv = [possible_consrv{:}];
+if ~isempty(model_defs)
+    possible_consrv = regexp(model_defs,['\=' whitespace chem_set whitespace '$'],'match');
+    is_possible_consrv = ~cellfun(@isempty,possible_consrv);
+    possible_consrv = [possible_consrv{:}];
+else
+    is_possible_consrv=[];
+    possible_consrv={};
+end
 
-cf2=@(f,x)  cellfun( @(y) cellfun(@(z) f(z),y,'UniformOutput',0),x,'UniformOutput',0);
-cf22=@(f,x,xx)  cellfun( @(y,yy) cellfun(@(z,zz) f(z,zz),y,yy,'UniformOutput',0),x,xx,'UniformOutput',0);
-
-user_consrv = regexp(possible_consrv,['(' empty_or_num ')' name ],'tokens');
+if ~isempty(possible_consrv)
+    user_consrv = regexp(possible_consrv,['(' empty_or_num ')' name ],'tokens');
+else
+    user_consrv={};
+end
 stoic_user_consrv =cf2(@(x) empty2one(str2double(x{1})), user_consrv);
 chems_user_consrv =cf2(@(x) x{2}, user_consrv);
 
@@ -130,7 +147,7 @@ lcon_user = cell2mat(lcon_user(is_valid_consrv));
 
 
 if ~isempty(model_defs)
-    model_split = regexp(model_defs,[name '[ \t\f]*=([^=]+)'],'tokens');
+    model_split = regexp(model_defs,[name '[ \t\f]*=(.+)$'],'tokens');
     model_split=[model_split{:}];
     model_pars = cellfun(@(x) x{2}, model_split, 'UniformOutput', false);
     model_pars = regexp(model_pars,name,'tokens');
@@ -144,9 +161,13 @@ end
 
 
 
-rate_con_vars = regexp(rate_constants,name,'tokens');
-rate_con_vars = [rate_con_vars{:}];
-rate_con_vars = [rate_con_vars{:}];
+% rate_con_vars = regexp(rate_constants,name,'tokens');
+% rate_con_vars = [rate_con_vars{:}];
+% if ~isempty(rate_con_vars)
+%     rate_con_vars = [rate_con_vars{:}];
+% else
+%     rate_con_vars = {};
+% end
 
 fast_params = regexp(fast_affinity,name,'tokens');
 fast_params = [fast_params{:}];
@@ -160,11 +181,16 @@ model_var_defs = cellfun(@(x) x{2}, model_split, 'UniformOutput', false);
 
 rate_constant_pars= regexp(rate_constants,name,'tokens');
 rate_constant_pars=[rate_constant_pars{:}];
-rate_constant_pars=[rate_constant_pars{:}];
+if ~isempty(rate_constant_pars)
+    rate_constant_pars=unique([rate_constant_pars{:}],'stable');
+else
+    rate_constant_pars={}
+end
 
+model_pars_implicit = setdiff(unique(model_pars,'stable'),[model_vars chems]);
 model_pars = unique([model_pars fast_params rate_constant_pars],'stable');
 model_pars = setdiff(model_pars, [model_vars chems],'stable');
-model_par_vals = cellstr(repmat('0.0',1,length(model_pars)));
+model_par_vals = cellstr(repmat("0.0",1,length(model_pars)));
 
 
 
@@ -199,25 +225,70 @@ if ~isempty(par_defs)
     end
     vars=setdiff(vars,[pars consrv_nm],'stable');
     
+    model_pars_implicit = setdiff(model_pars_implicit,pars, 'stable');
     
+else
+    pars={};
+    par_vals={};
 end
 
+
+
 %% re-ordering model_pars to the same order that parameter values are specified in
+
+
 [model_pars_tot, ia, ib] = union(pars,model_pars,'stable');
 model_par_vals_tot = [par_vals(ia) model_par_vals(ib)];
-model_pars = intersect(model_pars_tot,model_pars,'stable');
+[model_pars,  i_tot] = intersect(model_pars_tot,model_pars,'stable');
+model_par_vals=model_par_vals_tot(i_tot);
+
 if size(model_pars,1)~=1
     model_pars=model_pars';
 end
 
 if ~isempty(pars)
-    i_par = cellfun(@(p) find(strcmp(p,model_pars),1),pars,'UniformOutput',0);
-    matched = cellfun(@(x) ~isempty(x) ,i_par);
-    unknown = setdiff(1:length(model_pars),[i_par{:}]);
-    if ~isempty(unknown)
-        error(['Please provide values for the following parameters: ' strjoin(model_pars(unknown),', ')])
+    if  isempty(par_default)
+        i_par = cellfun(@(p) find(strcmp(p,setdiff(model_pars,model_pars_implicit,'stable')),1),pars,'UniformOutput',0);
+        matched = cellfun(@(x) ~isempty(x) ,i_par);
+        unknown = setdiff(1:length(model_pars),[i_par{:}]);
+        if ~isempty(unknown)
+            error(['Please provide values for the following parameters: ' strjoin(model_pars(unknown),', ')])
+        end
+        model_par_vals([i_par{:}]) = par_vals(matched);
     end
-    model_par_vals([i_par{:}]) = par_vals(matched);
+    
+    i_par = cellfun(@(p) find(strcmp(p,model_pars_implicit),1),pars,'UniformOutput',0);
+    matched = cellfun(@(x) ~isempty(x) ,i_par);
+    unknown = setdiff(1:length(model_pars_implicit),[i_par{:}]);
+    
+    [model_pars i_known] = setdiff(model_pars, model_pars_implicit(unknown),'stable');
+    model_par_vals = model_par_vals(i_known);
+    
+    unknown=unknown(~cellfun(@(x) exist(x,'file')~=0 || exist(x,'builtin')~=0,model_pars_implicit(unknown)));
+    
+    model_pars_implicit=model_pars_implicit(unknown);
+    
+    contains_implicit = false(size(model_defs));
+    prev_implicit = ~contains_implicit;
+    while any(prev_implicit~=contains_implicit)
+        prev_implicit=contains_implicit;
+        implicit_refs=nameref([model_pars_implicit model_vars(contains_implicit)]);
+        contains_implicit = cellfun(@(def) regexp(def,implicit_refs),model_defs,'UniformOutput',false);
+        contains_implicit=[contains_implicit{:}];
+        contains_implicit = arrayfun(@(i) ~isempty([contains_implicit{:,i}]),1:size(contains_implicit,2));
+        
+    end
+    
+    model_defs_implicit = model_defs(contains_implicit);
+    
+    model_defs=model_defs(~contains_implicit);
+    model_vars=model_vars(~contains_implicit);
+    model_var_defs=model_var_defs(~contains_implicit);
+    
+    if ~isempty(unknown)
+        warning(['No explicit definition of the quantities: ' strjoin(model_pars_implicit,', ')])
+    end
+    
 end
 
 
@@ -267,7 +338,7 @@ spatial_ref=cellfun(@(x) ref(x),spatial_vars,'UniformOutput',0);
 
 model_pars=model_pars(~cellfun(@isempty,model_pars));
 
-sym_names = unique([model_pars model_vars chems],'stable');
+sym_names = unique([model_pars model_pars_implicit model_vars chems],'stable');
 sym_str= strjoin(strcat(sym_names,"=sym('",sym_names,"','real');"),newline);
 
 
@@ -276,7 +347,7 @@ fast_inds = arrayfun(@(i) strcmp(chems,fast_chems{i})',1:length(fast_chems),'Uni
 
 
 % S_tot = [S_ S_fast];
-% 
+%
 % lcon = null(S_tot','r');
 % lcon=rref(lcon')';
 
@@ -373,9 +444,13 @@ for i=1:N_con
 end
 
 consrv_nm = [consrv_nm strcat('cnsrv_',string(1:N_con-size(lcon_user,2)))] ;
-eval(['syms ' char(strjoin(consrv_nm,' '))])
 
-eval(['assume([ ' char(strjoin(consrv_nm,', ')) ']>0)'])
+
+if ~isempty(consrv_nm)
+    eval(['syms ' char(strjoin(consrv_nm,' '))]);
+    eval(['assume([ ' char(strjoin(consrv_nm,', ')) ']>0)']);
+end
+
 consrv_eqns = eval(['[' char(strjoin(strcat(consrv_nm,'==',con_str),';')) ']']);
 
 
@@ -453,7 +528,9 @@ end
 
 p_elim = cellfun(@(pe) intersect(pe,chems(~is_fast),'stable'),p_elim_con,'UniformOutput',0);
 p_elim = p_elim_con;
-eqns = sym2cell(consrv_eqns);
+if ~isempty(consrv_eqns)
+    eqns = sym2cell(consrv_eqns);
+end
 
 while length(elim_con)~=N_con
     e=p_elim{1}{1};
@@ -493,12 +570,18 @@ if ~isempty(fast_chems)
         sol_fast_0 = {sol_fast_0};
     end
 else
+    sol_fast_0={};
     elim_defs={};
     
 end
 
 %SOLVE THE CONSERVATION EQUATIONS
-sol_consrv=eval(['solve( consrv_eqns_elim,[' strjoin(elim_con,' ')  '])']);
+if ~isempty(consrv_eqns_elim)
+    sol_consrv=solve(consrv_eqns_elim, str2sym(elim_con));
+else
+    sol_consrv=struct();
+end
+% sol_consrv=eval(['solve( consrv_eqns_elim,[' strjoin(elim_con,' ')  '])']);
 if length(elim_con)==1
     %     elim_defs =  strcat(elim_con{1},'=',string(sol_consrv));
     sol_rhs =  {sol_consrv'};
@@ -540,17 +623,23 @@ f_chems = cellfun(@(c) ['f_' c], chems, 'UniformOutput', false);
 
 
 eval([ ' syms ' strjoin(f_chems,' ') ';']);
-eval([ 'assume([' strjoin([[model_vars']' model_pars]) ']>0)']);
+assume(str2sym([[model_vars']' model_pars  model_pars_implicit]),'real');
+% eval([ 'assume([' strjoin([[model_vars']' model_pars]) "],'real')"]);
 eval(strcat(' assume([', strjoin(f_chems), "],'real')"));
 eval(strcat(' assume([', strjoin(chems), "]>0)"));
 
 
 ec0=subs(consrv_eqns_elim,str2sym(elim_fast),cell2sym(sol_fast));
-sol_consrv=eval(['solve( subs(ec0),[' strjoin(elim_con,' ')  '])']);
+if ~isempty(consrv_eqns_elim)
+    sol_consrv=eval(['solve( subs(ec0),[' strjoin(elim_con,' ')  '])']);
+else
+    sol_consrv=struct();
+end
 if length(elim_con)==1
     %     elim_defs =  strcat(elim_con{1},'=',string(sol_consrv));
     sol_rhs(N_fast_eqn+1:end) =  {sol_consrv'};
     consrv_subs =  simplify(sol_consrv,'Steps',100);
+    sol_consrv=sym2cell(simplify(sol_consrv,'Steps',100));
 else
     %     elim_defs = cellfun(@(e) strcat(e,'=',string(sol_consrv.(e))),elim_con)';
     sol_rhs(N_fast_eqn+1:end) = struct2cell(sol_consrv);
@@ -572,8 +661,12 @@ slow_init_reps = cellstr(string(init(~is_fast)));
 con_fast = cellfun(@(x) any(strcmp(x,fast_chems)),elim_con);
 
 
+if length(sol_consrv)>1
+    consrv_rhs_init = subs(str2sym(consrv_rhs_elim), str2sym(elim_con'), cell2sym(sol_consrv));
+else
+    consrv_rhs_init = subs(str2sym(consrv_rhs_elim), str2sym(elim_con'), sol_consrv);
+end
 
-consrv_rhs_init = subs(str2sym(consrv_rhs_elim), str2sym(elim_con'), cell2sym(sol_consrv));
 
 for i=1:length(consrv_eqns)
     curr_sym  = str2sym(consrv_nm(i));
@@ -585,8 +678,17 @@ for i=1:length(consrv_eqns)
     end
 end
 
-sol_consrv_elim = cell2sym(struct2cell((solve(consrv_rhs_init,str2sym(consrv_nm)))));
-consrv_rhs_elim = string(sol_consrv_elim);
+if length(consrv_nm)>1
+    sol_consrv_elim = cell2sym(struct2cell((solve(consrv_rhs_init,str2sym(consrv_nm)))));
+else
+    if ~isempty(consrv_eqns_elim)
+        sol_consrv_elim = solve(consrv_rhs_init,str2sym(consrv_nm));
+    else
+        sol_consrv_elim=cell2sym({});
+    end
+end
+%
+% consrv_rhs_elim = string(sol_consrv_elim);
 
 missing_init = ismissing(init(~is_fast));
 ind_missing= find(missing_init);
@@ -609,19 +711,44 @@ else
     fast_init_reps = {};
 end
 
-consrv_eqns_init =  subs(consrv_eqns,str2sym([chems(~missing_init) chems(N_slow+1:end) ]),str2sym([slow_init_reps(~missing_init) fast_init_reps']));
-init_sol = solve(subs(consrv_eqns_init(any(consrv_deps_missing,2)),str2sym(model_pars_tot),str2sym(model_par_vals_tot)),str2sym(chems(missing_init)));
-if nnz(missing_init)>1
-    init_sol=cell2sym(struct2cell(init_sol));
+if nnz(missing_init)>0
+    
+    if nnz(missing_init)>size(consrv_eqns,1) || ~all(any(consrv_deps_missing,1))
+
+        error(['Undetermined system of initial conditions:' newline int2str(nnz(missing_init)) ' unspecified initial condition(s), with only ' int2str(nnz(any(consrv_deps_missing,2))) ' relevant conservation equation(s) detected and ' int2str(nnz(~missing_init)) ' initial conditions provided.'])
+    end
+    
+    consrv_eqns_init =  subs(consrv_eqns,str2sym([chems(~missing_init) chems(N_slow+1:end) ]),str2sym([slow_init_reps(~missing_init) fast_init_reps']));
+    consrv_eqns_init = subs(consrv_eqns_init(any(consrv_deps_missing,2)),str2sym(model_pars_tot),str2sym(model_par_vals_tot));
+%     init_sol=cell2sym(cell(1,nnz(missing_init)));
+    chems_missing_init = str2sym(chems(missing_init));
+%     for i_=1:length(chems_missing_init)
+%         init_sol(i_) = solve(consrv_eqns_init,chems_missing_init(i_));
+%         if ~isempty(init_sol(i_))
+%             consrv_eqns_init = subs(consrv_eqns_init,chems_missing_init(i_), init_sol(i_))
+%         else
+%             error(['Could not determine an intial condition for the following species:' sym2str(chems_missing_init(i_))])
+%         end
+%     end
+    
+    init_sol =  solve(consrv_eqns_init,chems_missing_init);
+    if nnz(missing_init)>1
+        init_sol=cell2sym(struct2cell(init_sol));
+    end
+    
+    init(missing_init)=string(init_sol);
+    fast_init_reps = cellstr(string(subs(str2sym(fast_init_reps),str2sym(chems),str2sym(init))));
+    init(is_fast) = fast_init_reps;
+    slow_init_reps(missing_init)=cellstr(string(init_sol));
+    
+    
+    if any(isempty(init_sol))
+        error(['Please specify some initial condtions for following species: ' strjoin(chems(ismissing(init(~is_fast))),', ')])
+    end
+    
+
 end
 
-if any(isempty(init_sol))
-    error(['Please specify some initial condtions for following species: ' strjoin(chems(ismissing(init(~is_fast))),', ')])
-end
-init(missing_init)=string(init_sol);
-fast_init_reps = cellstr(string(subs(str2sym(fast_init_reps),str2sym(chems),str2sym(init))));
-init(is_fast) = fast_init_reps;
-slow_init_reps(missing_init)=cellstr(string(init_sol));
 
 
 consrv_defs_init = regexprep(consrv_rhs,[slow_refs; fast_refs],[slow_init_reps'; fast_init_reps]');
@@ -913,7 +1040,11 @@ for i=1:size(S_,2)
     inds = r(:,i)>0;
     terms = strcat(chems(inds),cellstr(repmat('^',[nnz(inds),1]))',cellstr(string(r(r(:,i)>0,i)))');
     terms = regexprep(terms,'\^1$',''); %remove exponent 1's from rate computation
-    rate_str = [ rate_constants{i} '*' strjoin(terms,'*')];
+    if isempty(terms)
+        rate_str=rate_constants{i};
+    else
+        rate_str = [ rate_constants{i} '*' strjoin(terms,'*')];
+    end
     %     if any(S_cat(:,i))
     %         rate_str = [ rate_str '.*' strjoin(chems(S_cat(:,i)),'.*') ];
     %     end
@@ -1126,6 +1257,77 @@ fclose(fid);
 
 clear eval_Rx
 
+V=getTransportVelocity(f0,chems);
+model_vars_implicit = regexprep(model_defs_implicit,'^[ \t\f]*([^= \t\f]+)[ \t\f]*=.+$','$1');
+implicit_refs=nameref([model_pars_implicit model_vars_implicit]);
+V_contains_implicit = cellfun(@(def) regexp(def,implicit_refs),V,'UniformOutput',false);
+V_contains_implicit = cellfun(@(x)any(cellfun(@(y) ~isempty(y),x)),V_contains_implicit);
+
+
+chem_rep_FVM=arrayfun(@(i) ['$<pre>u\(:,' num2str(i) '\)$<post>'],1:length(chems),'UniformOutput',0);
+if ~isempty(aux_vars)
+    aux_rep=arrayfun(@(i) ['u_aux\(' num2str(i) '\)'],1:length(aux_vars),'UniformOutput',0);
+else
+    aux_rep={};
+end
+ref2=@(x) ['(?<pre>[' code '\n]|^)(?<var>' x ')(?<addr>\([^\n\)]\)|)(?<post>[' code '\n]|$)'];
+chem_ref2=cellfun(@(x) ref(x),chems,'UniformOutput',0);
+
+
+if ~isempty(model_defs_implicit)
+    model_body_implicit = [strjoin(model_defs_implicit',[';' newline]) ';'];
+else
+    model_body_implicit='';
+end
+
+if any(V_contains_implicit)
+    model_body_implicit = [ model_body_implicit newline  newline 'V=[' strjoin(V) '];'];
+end
+
+model_body_implicit = regexprep(model_body_implicit,chem_ref ,chem_rep_FVM);% reshape the chemical names
+model_body_implicit = regexprep(model_body_implicit,aux_ref ,aux_rep);
+addr_ref=arrayfun(@(i) ['u\(:,' int2str(i) '\)\('],1:length(chems),'UniformOutput',0);
+
+addr_start = regexp(model_body_implicit,addr_ref,'start');
+addr_start_0 = [addr_start{:}];
+addr_start = arrayfun(@(i) [addr_start{i}]+length(addr_ref{i})-4,1:length(addr_ref),'UniformOutput',false);
+addr_start = [addr_start{:}];
+
+addr_stop=find_closing_parenthesis(model_body_implicit,addr_start);
+addr = arrayfun(@(i,j) model_body_implicit(i:j),addr_start+1,addr_stop-1,'UniformOutput',false);
+
+for i=1:length(addr_start_0)
+    rep=addr{i};
+    start=addr_start_0(i);
+    model_body_implicit=replaceBetween(model_body_implicit,start+2,start+2,rep);
+    addr_start_0 = addr_start_0 + length(rep) - 1;
+end
+
+model_body_implicit = regexprep(model_body_implicit,strcat('\)\(',addr,'\)'),'\)');
+
+if any(~isfinite(addr_stop))
+    error(strcat("Invalid indexing statement in:\n",model_body_implicit))
+end
+
+model_body_implicit = elementwise_operations(model_body_implicit);
+fid=fopen(strcat(save_dir,filesep,'eval_model_implicit.m'),'w');
+fwrite(fid,model_body_implicit,'char');
+fclose(fid);
+clear eval_model_implicit
+
+
+f_aux = regexprep(aux_dyn,aux_ref ,aux_rep);
+
+
+fid=fopen(strcat(save_dir,filesep,'eval_aux_model.m'),'w');
+aux_body=[strjoin(strcat(aux_vars,'=',regexprep(aux_rep,'\','')), [';' newline]) [';' newline] newline 'f_aux=[' strjoin(f_aux,[',...' newline]) '];'];
+
+fwrite(fid,aux_body,'char');
+fclose(fid);
+clear eval_aux_model
+
+
+
 if simp
     rxn_body_slow = [strjoin([model_defs'; rates_slow'; sigma__reps'; sigma2__reps';],[';' newline])...
         ';' newline newline ['Rx = [' char(strjoin(string(f_tot(~is_fast)),[',...' newline])) '];']];
@@ -1147,9 +1349,13 @@ fclose(fid);
 
 clear eval_Rx_slow
 
-project_body = strcat(chems(is_fast),'=',cellstr(string(Gamma')));
-project_body = regexprep(project_body,chem_ref ,chem_rep_FVM);
-project_body =  elementwise_operations([strjoin(project_body,[';' newline]) ';']);
+if numel(Gamma)>0
+    project_body = strcat(chems(is_fast),'=',cellstr(string(Gamma')));
+    project_body = regexprep(project_body,chem_ref ,chem_rep_FVM);
+    project_body =  elementwise_operations([strjoin(project_body,[';' newline]) ';']);
+else
+    project_body='';
+end
 
 fid=fopen(strcat(save_dir,filesep,'project_fast.m'),'w');
 fwrite(fid,project_body,'char');
@@ -1164,8 +1370,17 @@ if ~isempty(model_defs)
 else
     model_body='';
 end
+
+if ~any(V_contains_implicit)
+    model_body = [ model_body newline  newline 'V=[' strjoin(V) '];'];
+end
+
+
+
+
 chem_rep_full=arrayfun(@(i) ['$<pre>x\(:,:,' num2str(i) '\)$<post>'],1:length(chems),'UniformOutput',0);%this only works for 2d
 model_body = regexprep(model_body,chem_ref ,chem_rep_full);% reshape the chemical names
+model_body = regexprep(model_body,aux_ref ,aux_rep);
 model_body = elementwise_operations(model_body);
 fid=fopen(strcat(save_dir,filesep,'eval_model.m'),'w');
 fwrite(fid,model_body,'char');
@@ -1400,278 +1615,142 @@ fclose(fid);
 
 clear rhs_fun model_ic model_params
 
-is_ode = ~is_elim_con0 & ~is_fast;
-
-% ic_ode=init_vals(~is_fast);
-ic_ode=init_vals(is_ode);
-tol=1e-14;
-fprintf(['Integrating to find fixed point (abstol = ' num2str(tol) ')...']);
-t0=tic();
-T_vec=0;
-while ~all(abs(rhs_fun(0,ic_ode'))<tol)
-    [T_vec,Y_vec] = ode15s(@ rhs_fun,T_vec(end)+[0 1e3],ic_ode,odeset('NonNegative',1:length(ic_ode)));
-    ic_ode = Y_vec(end,:);
-end
+clear initialize_chem_params
 
 
-fp=init;
-fp(~is_elim_con0 & ~is_fast)=num2str(ic_ode',12);
-sol_consrv_ic = subs(sol_consrv, str2sym(chems(is_ode)), ic_ode);
-fp(is_elim_con0) = subs(str2sym(elim_con)',str2sym(elim_con)' ,subs(subs(sol_consrv_ic),consrv_nm_eqn,consrv_val_eqn));
-fp(is_elim_con0) = regexprep(fp(is_elim_con0), par_refs, par_reps);
-fp(is_elim_con0) = regexprep(fp(is_elim_con0),  nameref(chems(is_ode)), string(ic_ode));
-fp(is_fast) = regexprep(string(subs(cell2sym(sol_fast))),nameref(chems(~is_fast)),fp(~is_fast));
-fp(is_fast) = regexprep(fp(is_fast), par_refs, par_reps);
-fp = eval(strcat('[',strjoin(fp),']'));
-t1=toc(t0);
-fprintf(['Done (' num2str(t1) ' seconds elapsed, final time = ' num2str(T_vec(end)) ')' newline]);
+model_vars_implicit = regexprep(model_defs_implicit,'^([^= \t\f]+)[ \t\f]*+=.+$','$1');
+warning ('off','symbolic:sym:isAlways:TruthUnknown');
+self_contained  = all(cell2mat(cellfun(@(c) isAlways(diff(f_slow, str2sym(c))==0), model_vars_implicit , 'UniformOutput', false)));
+warning ('on','symbolic:sym:isAlways:TruthUnknown');
 
-fid=fopen(strcat(save_dir,filesep,'model_fp.m'),'w');
-fwrite(fid,['fp = [' num2str(fp,12) '];'],'char');
-fclose(fid);
-
-init_relaxed = ic_ode;
-disp(strjoin(strcat(chems(is_ode),'=',string(init_relaxed)),', '));
-disp(strjoin(strcat(chems(~is_ode),'=',string(fp(~is_ode))),', '));
-
-warning ('off','symbolic:solve:SolutionsDependOnConditions');
-
-consrv_eqn_fast = subs(consrv_eqns, [str2sym(fast_chems); consrv_nm_eqn], [cell2sym(sol_fast_0); consrv_val_eqn]);
-
-init_induced = getInitialConditions(f0,chems,'induced');
-is_induced = ~ismissing(init_induced);
-N_induced = nnz(is_induced & ~is_fast);
-if any(is_induced)
-    if N_induced<N_slow
-        consrv_eqn_induced = subs(subs(consrv_eqn_fast),str2sym(chems(is_induced)), str2sym(init_induced(is_induced)));
-        if N_slow-N_induced>length(consrv_eqn_induced )
-            error(['Please specify more initial conditions for induced region: ' num2str(N_slow-N_induced-length(consrv_eqn_induced )) ' more needed' ])
-        end
-        
-        i_eqn = any(~cell2mat(cellfun(@(c) isAlways(diff(consrv_eqn_induced, str2sym(c))), chems(~is_induced & ~is_fast) , 'UniformOutput', false)),2);
-        eqns_reduced = subs(consrv_eqn_induced(i_eqn),str2sym(model_pars), str2sym(model_par_vals));
-        sol_init_induced = struct2cell(solve(eqns_reduced, str2sym(chems(~is_induced & ~is_fast))));
-        
-        if any(cellfun(@length, sol_init_induced)==0)
-            error(['Failed to solve for atleast one of the following species in the induced region: ' strjoin(chems(~is_induced & ~is_fast))])
-        end
-        
-        sol_init_induced = cell2sym(sol_init_induced);
-        
-        init_induced(~is_induced & ~is_fast) = subs(sol_init_induced,str2sym(model_pars), str2sym(model_par_vals));
+if self_contained
+    
+    is_ode = ~is_elim_con0 & ~is_fast;
+    
+    % ic_ode=init_vals(~is_fast);
+    ic_ode=init_vals(is_ode);
+    tol=1e-14;
+    fprintf(['Integrating to find fixed point (abstol = ' num2str(tol) ')...']);
+    t0=tic();
+    T_vec=0;
+    while ~all(abs(rhs_fun(0,ic_ode'))<tol) && T_vec(end)<2e4
+        [T_vec,Y_vec] = ode15s(@ rhs_fun,T_vec(end)+[0 1e3],ic_ode,odeset('NonNegative',1:length(ic_ode)));
+        ic_ode = Y_vec(end,:);
     end
-    init_induced(is_fast)=subs(subs(subs(subs(cell2sym(sol_fast_0)),str2sym(chems(is_induced)), str2sym(init_induced(is_induced))),str2sym(chems(is_induced)),str2sym(init_induced(is_induced))),str2sym(model_pars), str2sym(model_par_vals));
-    
-else
-    init_induced=string([]);
-end
-
-
-warning ('on','symbolic:solve:SolutionsDependOnConditions');
-
-fid=fopen(strcat(save_dir,filesep,'induced_ic.m'),'w');
-fwrite(fid,strcat('ic = [', strjoin(init_induced), '];'),'char');
-fclose(fid);
-
-
-clear induced_ic
-
-u_read = cellfun(@(c,i) [c '=U(' int2str(i) ')'],chems(is_ode),num2cell(1:nnz(is_ode)),'UniformOutput',false);
-
-if length(model_pars) > 10
-    valid_ind = true(1,min(length(model_pars)+1,36));
-    valid_ind(11) = false;
-else
-    valid_ind = true(1,length(model_pars));
-end
-% valid_ind(24) = false;
-par_read = cellfun(@(p,i) [p '=PAR(' int2str(i) ')'],model_pars(1:nnz(valid_ind)),num2cell(find(valid_ind)),'UniformOutput',false);
-par_read = [par_read ...
-    cellfun(@(p,v) [p '=' v],model_pars(nnz(valid_ind)+1:end),model_par_vals(nnz(valid_ind)+1:end),'UniformOutput',false)];
-
-par_assgn = cellfun(@(v,i,j) ['PAR(' int2str(i) ')=' v ' !' model_pars{j} ],model_par_vals(1:nnz(valid_ind)),num2cell(find(valid_ind)), num2cell(1:nnz(valid_ind)),'UniformOutput',false);
-u_assgn = cellfun(@(v,i) ['U(' int2str(i) ')=' v],cellstr(num2str(init_relaxed',12))',num2cell(1:nnz(~is_elim_con)),'UniformOutput',false);
-
-F_assgn = arrayfun(@(f,i)[  'F(' int2str(i) ')=' char(string(f))],f_mix_ode(~is_elim_con),(1:nnz(~is_elim_con))','UniformOutput',false);
-
-
-% i_00 = setdiff(i_0,find(is_elim_con0));
-
-func_str=[strjoin(u_read,newline) newline newline strjoin(par_read,newline) newline newline...
-    strjoin(consrv_assgn,newline) newline elim_con_defs newline newline newline strjoin(model_defs, newline)...
-    newline newline strjoin(predefs, newline) newline newline char(strjoin(strcat(string(f__0(i_0)),'=',string(f_slow)),newline))...
-    newline newline strjoin(F_assgn, newline)];
-func_str = fortran_subroutine('FUNC','NDIM,U,ICP,PAR,IJAC,F,DFDU,DFDP',...
-    ['IMPLICIT NONE' newline 'INTEGER NDIM, IJAC, ICP(*)' newline ...
-    'DOUBLE PRECISION U(NDIM), PAR(*), F(NDIM), DFDU(*), DFDP(*)'],...
-    unique([model_pars, chems(~is_elim) cellstr(consrv_nm), model_vars, string(m1_gamma), cellstr(string(f__0(i_0)))],'stable'),...
-    func_str);
-
-
-stpnt_str = fortran_subroutine('STPNT','NDIM,U,PAR,T',...
-    ['IMPLICIT NONE' newline 'INTEGER NDIM' newline ...
-    'DOUBLE PRECISION U(NDIM), PAR(*), T'],{},...
-    [ strjoin(par_assgn,newline) newline newline strjoin(u_assgn,newline)]);
-
-auto_str = [ func_str stpnt_str fortran_subroutine('BCND') fortran_subroutine('ICND') fortran_subroutine('FOPT') fortran_subroutine('PVLS')  ];
-auto_str = breaklines(auto_str,80,'&');
-auto_str = strrep(auto_str,"^","**");
-
-fid=fopen(strcat(save_dir,filesep,f,'.f90'),'w');
-fwrite(fid,auto_str,'char');
-fclose(fid);
-
-fid=fopen(strcat(save_dir,filesep,'c.',f),'w');
-fwrite(fid,...
-    ['NDIM=   ' int2str(length(ic_ode)) ', NPAR=   ' int2str(length(valid_ind)) ', IPS =   1, IRS =   0, ILP =   1' newline ...
-    'parnames = {'  char(strjoin(strcat(int2str(find(valid_ind)'),": '",model_pars(1:nnz(valid_ind))',"'"),','))  '}' newline ...
-    'unames = {' char(strjoin(strcat(int2str((1:nnz(~is_elim_con0 & ~is_fast))'),": '",chems(~is_elim_con0 & ~is_fast)',"'"),','))  '}' newline...
-    'ICP =  [1]' newline ...
-    'NTST=  50, NCOL=   4, IAD =   3, ISP =   2, ISW = 1, IPLT= 0, NBC= 0, NINT= 0' newline...
-    'NMX= 10000000, NPR=  10000, MXBF=  10, IID =   2, ITMX= 8, ITNW= 5, NWTN= 3, JAC= 0' newline...
-    'EPSL= 1e-7, EPSU = 1e-7, EPSS = 1e-05' newline ...
-    'DS  =   0.001, DSMIN= 0.0000001, DSMAX=   0.05, IADS=   1' newline ...
-    'THL =  {11: 0.0}, THU =  {}' newline ...
-    'UZSTOP={}' newline ...
-    'UZR={}']...
-    ,'char');
-fclose(fid);
-
-
-
-
-%
-% LPA_locals={'Rac','Rho','Pax'};
-
-
-LPA_globals = regexp(str,['(?:\n|^)LPA_global\(([ \t\f]*' name '[ \t\f]*[\,])*' name '(?=\))'],'tokens');
-LPA_globals = [LPA_globals{:}];
-if ~isempty(LPA_globals)
-    LPA_globals = regexprep(LPA_globals,'[ \t\f]*[\,]','');
-end
-
-LPA_globals = intersect(LPA_globals,chems,'stable');
-
-
-if length(LPA_globals)>length(consrv_eqns)
-    error('More global LPA variables than can be solved for using the conservation of matter')
-end
-
-
-% LPA_locals = intersect(LPA_locals,chems);
-
-%
-%
-
-model_vars = regexprep(model_defs, [name '[ \t\f]*=.+'], '$1');
-
-if ~isempty(LPA_globals)
-    
-    warning ('off','symbolic:sym:isAlways:TruthUnknown');
-    ic0=any(~cell2mat(cellfun(@(c) isAlways(diff(ec0,str2sym(c))), LPA_globals, 'UniformOutput', false)'));
-    warning ('on','symbolic:sym:isAlways:TruthUnknown');
-    
-    LPA_reps = [LPA_globals elim_con(~ic0)];
-    LPA_locals = setdiff(chems(~is_fast),LPA_reps,'stable');
-    LPA_reps = str2sym(LPA_reps);
     
     
+    fp=init;
+    fp(~is_elim_con0 & ~is_fast)=num2str(ic_ode',12);
+    sol_consrv_ic = subs(sol_consrv, str2sym(chems(is_ode)), ic_ode);
+    fp(is_elim_con0) = subs(str2sym(elim_con)',str2sym(elim_con)' ,subs(subs(sol_consrv_ic),consrv_nm_eqn,consrv_val_eqn));
+    fp(is_elim_con0) = regexprep(fp(is_elim_con0), par_refs, par_reps);
+    fp(is_elim_con0) = regexprep(fp(is_elim_con0),  nameref(chems(is_ode)), string(ic_ode));
+    fp(is_fast) = regexprep(string(subs(cell2sym(sol_fast))),nameref(chems(~is_fast)),fp(~is_fast));
+    fp(is_fast) = regexprep(fp(is_fast), par_refs, par_reps);
+    fp = eval(strcat('[',strjoin(fp),']'));
+    t1=toc(t0);
+    fprintf(['Done (' num2str(t1) ' seconds elapsed, final time = ' num2str(T_vec(end)) ')' newline]);
+    
+    fid=fopen(strcat(save_dir,filesep,'model_fp.m'),'w');
+    fwrite(fid,['fp = [' num2str(fp,12) '];'],'char');
+    fclose(fid);
+    
+    init_relaxed = ic_ode;
+    disp(strjoin(strcat(chems(is_ode),'=',string(init_relaxed)),', '));
+    disp(strjoin(strcat(chems(~is_ode),'=',string(fp(~is_ode))),', '));
     
     warning ('off','symbolic:solve:SolutionsDependOnConditions');
-    c = struct2cell(solve(ec0, LPA_reps));
-    sol_LPA_globals = [c{:}];
+    
+    consrv_eqn_fast = subs(consrv_eqns, [str2sym(fast_chems); consrv_nm_eqn], [cell2sym(sol_fast_0); consrv_val_eqn]);
+    
+    init_induced = getInitialConditions(f0,chems,'induced');
+    is_induced = ~ismissing(init_induced);
+    N_induced = nnz(is_induced & ~is_fast);
+    if any(is_induced)
+        if N_induced<N_slow
+            consrv_eqn_induced = subs(subs(consrv_eqn_fast),str2sym(chems(is_induced)), str2sym(init_induced(is_induced)));
+            if N_slow-N_induced>length(consrv_eqn_induced )
+                error(['Please specify more initial conditions for induced region: ' num2str(N_slow-N_induced-length(consrv_eqn_induced )) ' more needed' ])
+            end
+            
+            i_eqn = any(~cell2mat(cellfun(@(c) isAlways(diff(consrv_eqn_induced, str2sym(c))), chems(~is_induced & ~is_fast) , 'UniformOutput', false)),2);
+            eqns_reduced = subs(consrv_eqn_induced(i_eqn),str2sym(model_pars), str2sym(model_par_vals));
+            sol_init_induced = struct2cell(solve(eqns_reduced, str2sym(chems(~is_induced & ~is_fast))));
+            
+            if any(cellfun(@length, sol_init_induced)==0)
+                error(['Failed to solve for atleast one of the following species in the induced region: ' strjoin(chems(~is_induced & ~is_fast))])
+            end
+            
+            sol_init_induced = cell2sym(sol_init_induced);
+            
+            init_induced(~is_induced & ~is_fast) = subs(sol_init_induced,str2sym(model_pars), str2sym(model_par_vals));
+        end
+        init_induced(is_fast)=subs(subs(subs(subs(cell2sym(sol_fast_0)),str2sym(chems(is_induced)), str2sym(init_induced(is_induced))),str2sym(chems(is_induced)),str2sym(init_induced(is_induced))),str2sym(model_pars), str2sym(model_par_vals));
+        
+    else
+        init_induced=string([]);
+    end
+    
+    
     warning ('on','symbolic:solve:SolutionsDependOnConditions');
     
-    sol_LPA_globals(ic0) = subs(sol_LPA_globals(ic0), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')));
-    f_mix_LPA = subs(f_mix_explicit, LPA_reps, sol_LPA_globals);
-    % f_mix_LPA = subs(f_mix_explicit, str2sym(elim_con'), subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
-    is_local = cellfun( @(x) any(strcmp(x,LPA_locals)), chems);
-    is_local = is_local(~is_fast);
-    
-    offsets=cumsum(is_local+1);
-    offsets_global = offsets(~is_local);
-    
-    f_tot_LPA( offsets_global ) = subs(f_mix_LPA(~is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')) );
-    
-    
-    
-    offsets_local=[offsets(is_local)-1; offsets(is_local)];
-    % offset=offsets(:);
-    model_defs_LPA = subs(str2sym(model_defs), LPA_reps, sol_LPA_globals);
-    model_defs_LPA  = regexprep(cellstr(string(model_defs_LPA)),'==','=');
-    
-    
-    
-    f_tot_LPA(offsets_local(1:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_local')));
-    f_tot_LPA(offsets_local(2:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')));
-    
-    model_refs=[nameref(model_vars); nameref(LPA_locals)];
-    model_defs_plus = regexprep(model_defs_LPA, model_refs, '$1_local');
-    model_defs_plus = subs(str2sym(model_defs_plus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
-    model_defs_plus = regexprep(cellstr(string(model_defs_plus)),'==','=');
-    
-    model_defs_minus = regexprep(model_defs_LPA, model_refs, '$1_global');
-    model_defs_minus = subs(str2sym(model_defs_minus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
-    model_defs_minus = regexprep(cellstr(string(model_defs_minus)),'==','=');
-    
-    
-    
-    model_vars_LPA = [strcat(model_vars,'_local') strcat(model_vars,'_global')];
-    
-    F_assgn_LPA = arrayfun(@(f,i)[  'F(' int2str(i) ')=' char(string(f))],f_tot_LPA(offsets_local(:)),(1:nnz(is_local)*2),'UniformOutput',false);
-    
-    % LPA_locals_tot={strcat(LPA_locals,'_plus'); strcat(LPA_locals,{'_minus'})}
-    u_LPA(offsets_local(1,:))=strcat(LPA_locals,'_local');
-    u_LPA(offsets_local(2,:))=strcat(LPA_locals,'_global');
-    u_LPA(offsets_global)=chems(~is_local);
-    
-    u_read_LPA= cellfun(@(c,i) [c '=U(' int2str(i) ')'],u_LPA(offsets_local(:)),num2cell(1:numel(u_LPA(offsets_local))),'UniformOutput',false);
-    
-    % u_assgn_LPA(offsets_local(1,:)')=strcat("U(", int2str(offsets_local(1,:)'),')=',num2str(fp(is_local)'));
-    % u_assgn_LPA(offsets_local(2,:))=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
-    % u_assgn_LPA(offsets_global)=strcat("U(",int2str(offsets_global'),')=',num2str(fp(~is_local)'));
-    
-    % u_assgn_LPA(1:2:end)=strcat("U(", int2str(offsets_local(1,:)'),')=',num2str(fp(is_local)'));
-    % u_assgn_LPA(2:2:end)=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
-    
-    u_assgn_LPA=strcat("U(", int2str((1:nnz(is_local)*2)'),')=',num2str(repelem(fp(is_local),2)'));
-    % u_assgn_LPA(2:2:end)=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
-    % u_assgn_LPA(offsets_global)=strcat("U(",int2str(offsets_global'),')=',num2str(fp(~is_local)'));
-    
-    % u_assgn = cellfun(@(v,i) ['U(' int2str(i) ')=' v],cellstr(num2str(init_relaxed',12))',num2cell(1:nnz(~is_elim_con)),'UniformOutput',false);
-    
-    
-    func_str_LPA=[strjoin(u_read_LPA,newline) newline newline strjoin(par_read,newline) newline newline...
-        strjoin(consrv_assgn,newline)  newline newline newline strjoin([model_defs_plus, {newline}, model_defs_minus], newline)...
-        newline newline strjoin(F_assgn_LPA, newline)];
-    
-    func_str_LPA = fortran_subroutine('FUNC','NDIM,U,ICP,PAR,IJAC,F,DFDU,DFDP',...
-        ['IMPLICIT NONE' newline 'INTEGER NDIM, IJAC, ICP(*)' newline ...
-        'DOUBLE PRECISION U(NDIM), PAR(*), F(NDIM), DFDU(*), DFDP(*)'],...
-        unique([model_pars, u_LPA(offsets_local(:)) cellstr(consrv_nm), model_vars_LPA, string(m1_gamma)],'stable'),...
-        func_str_LPA);
-    
-    
-    
-    stpnt_str_LPA = fortran_subroutine('STPNT','NDIM,U,PAR,T',...
-        ['IMPLICIT NONE' newline 'INTEGER NDIM' newline ...
-        'DOUBLE PRECISION U(NDIM), PAR(*), T'],{},...
-        [ strjoin(par_assgn,newline) newline newline char(strjoin(u_assgn_LPA,newline))]);
-    
-    auto_str_LPA = [ func_str_LPA stpnt_str_LPA fortran_subroutine('BCND') fortran_subroutine('ICND') fortran_subroutine('FOPT') fortran_subroutine('PVLS')  ];
-    auto_str_LPA = breaklines(auto_str_LPA,80,'&');
-    auto_str_LPA = strrep(auto_str_LPA,"^","**");
-    
-    fid=fopen(strcat(save_dir,filesep,f,'_LPA.f90'),'w');
-    fwrite(fid,auto_str_LPA,'char');
+    fid=fopen(strcat(save_dir,filesep,'induced_ic.m'),'w');
+    fwrite(fid,strcat('ic = [', strjoin(init_induced), '];'),'char');
     fclose(fid);
     
     
-    fid=fopen(strcat(save_dir,filesep,'c.',f,'_LPA'),'w');
+    clear induced_ic
+    
+    u_read = cellfun(@(c,i) [c '=U(' int2str(i) ')'],chems(is_ode),num2cell(1:nnz(is_ode)),'UniformOutput',false);
+    
+    if length(model_pars) > 10
+        valid_ind = true(1,min(length(model_pars)+1,36));
+        valid_ind(11) = false;
+    else
+        valid_ind = true(1,length(model_pars));
+    end
+    % valid_ind(24) = false;
+    par_read = cellfun(@(p,i) [p '=PAR(' int2str(i) ')'],model_pars(1:nnz(valid_ind)),num2cell(find(valid_ind)),'UniformOutput',false);
+    par_read = [par_read ...
+        cellfun(@(p,v) [p '=' v],model_pars(nnz(valid_ind)+1:end),model_par_vals(nnz(valid_ind)+1:end),'UniformOutput',false)];
+    
+    par_assgn = cellfun(@(v,i,j) ['PAR(' int2str(i) ')=' v ' !' model_pars{j} ],model_par_vals(1:nnz(valid_ind)),num2cell(find(valid_ind)), num2cell(1:nnz(valid_ind)),'UniformOutput',false);
+    u_assgn = cellfun(@(v,i) ['U(' int2str(i) ')=' v],cellstr(num2str(init_relaxed',12))',num2cell(1:nnz(~is_elim_con)),'UniformOutput',false);
+    
+    F_assgn = arrayfun(@(f,i)[  'F(' int2str(i) ')=' char(string(f))],f_mix_ode(~is_elim_con),(1:nnz(~is_elim_con))','UniformOutput',false);
+    
+    
+    % i_00 = setdiff(i_0,find(is_elim_con0));
+    
+    func_str=[strjoin(u_read,newline) newline newline strjoin(par_read,newline) newline newline...
+        strjoin(consrv_assgn,newline) newline elim_con_defs newline newline newline strjoin(model_defs, newline)...
+        newline newline strjoin(predefs, newline) newline newline char(strjoin(strcat(string(f__0(i_0)),'=',string(f_slow)),newline))...
+        newline newline strjoin(F_assgn, newline)];
+    func_str = fortran_subroutine('FUNC','NDIM,U,ICP,PAR,IJAC,F,DFDU,DFDP',...
+        ['IMPLICIT NONE' newline 'INTEGER NDIM, IJAC, ICP(*)' newline ...
+        'DOUBLE PRECISION U(NDIM), PAR(*), F(NDIM), DFDU(*), DFDP(*)'],...
+        unique([model_pars, chems(~is_elim) cellstr(consrv_nm), model_vars, string(m1_gamma), cellstr(string(f__0(i_0)))],'stable'),...
+        func_str);
+    
+    
+    stpnt_str = fortran_subroutine('STPNT','NDIM,U,PAR,T',...
+        ['IMPLICIT NONE' newline 'INTEGER NDIM' newline ...
+        'DOUBLE PRECISION U(NDIM), PAR(*), T'],{},...
+        [ strjoin(par_assgn,newline) newline newline strjoin(u_assgn,newline)]);
+    
+    auto_str = [ func_str stpnt_str fortran_subroutine('BCND') fortran_subroutine('ICND') fortran_subroutine('FOPT') fortran_subroutine('PVLS')  ];
+    auto_str = breaklines(auto_str,80,'&');
+    auto_str = strrep(auto_str,"^","**");
+    
+    fid=fopen(strcat(save_dir,filesep,f,'.f90'),'w');
+    fwrite(fid,auto_str,'char');
+    fclose(fid);
+    
+    fid=fopen(strcat(save_dir,filesep,'c.',f),'w');
     fwrite(fid,...
-        ['NDIM=   ' int2str(nnz(is_local)*2) ', NPAR=   ' int2str(length(valid_ind)) ', IPS =   1, IRS =   0, ILP =   1' newline ...
+        ['NDIM=   ' int2str(length(ic_ode)) ', NPAR=   ' int2str(length(valid_ind)) ', IPS =   1, IRS =   0, ILP =   1' newline ...
         'parnames = {'  char(strjoin(strcat(int2str(find(valid_ind)'),": '",model_pars(1:nnz(valid_ind))',"'"),','))  '}' newline ...
-        'unames = {' char(strjoin(strcat(int2str((1:numel(offsets_local))'),": '",u_LPA(offsets_local(:))',"'"),','))  '}' newline...
+        'unames = {' char(strjoin(strcat(int2str((1:nnz(~is_elim_con0 & ~is_fast))'),": '",chems(~is_elim_con0 & ~is_fast)',"'"),','))  '}' newline...
         'ICP =  [1]' newline ...
         'NTST=  50, NCOL=   4, IAD =   3, ISP =   2, ISW = 1, IPLT= 0, NBC= 0, NINT= 0' newline...
         'NMX= 10000000, NPR=  10000, MXBF=  10, IID =   2, ITMX= 8, ITNW= 5, NWTN= 3, JAC= 0' newline...
@@ -1682,6 +1761,153 @@ if ~isempty(LPA_globals)
         'UZR={}']...
         ,'char');
     fclose(fid);
+    
+    
+    
+    
+    %
+    % LPA_locals={'Rac','Rho','Pax'};
+    
+    
+    LPA_globals = regexp(str,['(?:\n|^)LPA_global\(([ \t\f]*' name '[ \t\f]*[\,])*' name '(?=\))'],'tokens');
+    LPA_globals = [LPA_globals{:}];
+    if ~isempty(LPA_globals)
+        LPA_globals = regexprep(LPA_globals,'[ \t\f]*[\,]','');
+    end
+    
+    LPA_globals = intersect(LPA_globals,chems,'stable');
+    
+    
+    if length(LPA_globals)>length(consrv_eqns)
+        error('More global LPA variables than can be solved for using the conservation of matter')
+    end
+    
+    
+    % LPA_locals = intersect(LPA_locals,chems);
+    
+    %
+    %
+    
+    model_vars = regexprep(model_defs, [name '[ \t\f]*=.+'], '$1');
+    
+    if ~isempty(LPA_globals)
+        
+        warning ('off','symbolic:sym:isAlways:TruthUnknown');
+        ic0=any(~cell2mat(cellfun(@(c) isAlways(diff(ec0,str2sym(c))), LPA_globals, 'UniformOutput', false)'));
+        warning ('on','symbolic:sym:isAlways:TruthUnknown');
+        
+        LPA_reps = [LPA_globals elim_con(~ic0)];
+        LPA_locals = setdiff(chems(~is_fast),LPA_reps,'stable');
+        LPA_reps = str2sym(LPA_reps);
+        
+        
+        
+        warning ('off','symbolic:solve:SolutionsDependOnConditions');
+        c = struct2cell(solve(ec0, LPA_reps));
+        sol_LPA_globals = [c{:}];
+        warning ('on','symbolic:solve:SolutionsDependOnConditions');
+        
+        sol_LPA_globals(ic0) = subs(sol_LPA_globals(ic0), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')));
+        f_mix_LPA = subs(f_mix_explicit, LPA_reps, sol_LPA_globals);
+        % f_mix_LPA = subs(f_mix_explicit, str2sym(elim_con'), subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
+        is_local = cellfun( @(x) any(strcmp(x,LPA_locals)), chems);
+        is_local = is_local(~is_fast);
+        
+        offsets=cumsum(is_local+1);
+        offsets_global = offsets(~is_local);
+        
+        f_tot_LPA( offsets_global ) = subs(f_mix_LPA(~is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')) );
+        
+        
+        
+        offsets_local=[offsets(is_local)-1; offsets(is_local)];
+        % offset=offsets(:);
+        model_defs_LPA = subs(str2sym(model_defs), LPA_reps, sol_LPA_globals);
+        model_defs_LPA  = regexprep(cellstr(string(model_defs_LPA)),'==','=');
+        
+        
+        
+        f_tot_LPA(offsets_local(1:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_local')));
+        f_tot_LPA(offsets_local(2:2:end)) = subs(f_mix_LPA(is_local), str2sym([model_vars LPA_locals]), str2sym(strcat([model_vars LPA_locals], '_global')));
+        
+        model_refs=[nameref(model_vars); nameref(LPA_locals)];
+        model_defs_plus = regexprep(model_defs_LPA, model_refs, '$1_local');
+        model_defs_plus = subs(str2sym(model_defs_plus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
+        model_defs_plus = regexprep(cellstr(string(model_defs_plus)),'==','=');
+        
+        model_defs_minus = regexprep(model_defs_LPA, model_refs, '$1_global');
+        model_defs_minus = subs(str2sym(model_defs_minus), str2sym(elim_con'),  subs(sol_consrv,str2sym(LPA_locals), str2sym(strcat(LPA_locals, '_global'))));
+        model_defs_minus = regexprep(cellstr(string(model_defs_minus)),'==','=');
+        
+        
+        
+        model_vars_LPA = [strcat(model_vars,'_local') strcat(model_vars,'_global')];
+        
+        F_assgn_LPA = arrayfun(@(f,i)[  'F(' int2str(i) ')=' char(string(f))],f_tot_LPA(offsets_local(:)),(1:nnz(is_local)*2),'UniformOutput',false);
+        
+        % LPA_locals_tot={strcat(LPA_locals,'_plus'); strcat(LPA_locals,{'_minus'})}
+        u_LPA(offsets_local(1,:))=strcat(LPA_locals,'_local');
+        u_LPA(offsets_local(2,:))=strcat(LPA_locals,'_global');
+        u_LPA(offsets_global)=chems(~is_local);
+        
+        u_read_LPA= cellfun(@(c,i) [c '=U(' int2str(i) ')'],u_LPA(offsets_local(:)),num2cell(1:numel(u_LPA(offsets_local))),'UniformOutput',false);
+        
+        % u_assgn_LPA(offsets_local(1,:)')=strcat("U(", int2str(offsets_local(1,:)'),')=',num2str(fp(is_local)'));
+        % u_assgn_LPA(offsets_local(2,:))=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
+        % u_assgn_LPA(offsets_global)=strcat("U(",int2str(offsets_global'),')=',num2str(fp(~is_local)'));
+        
+        % u_assgn_LPA(1:2:end)=strcat("U(", int2str(offsets_local(1,:)'),')=',num2str(fp(is_local)'));
+        % u_assgn_LPA(2:2:end)=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
+        
+        u_assgn_LPA=strcat("U(", int2str((1:nnz(is_local)*2)'),')=',num2str(repelem(fp(is_local),2)'));
+        % u_assgn_LPA(2:2:end)=strcat("U(", int2str(offsets_local(2,:)'),')=',num2str(fp(is_local)'));
+        % u_assgn_LPA(offsets_global)=strcat("U(",int2str(offsets_global'),')=',num2str(fp(~is_local)'));
+        
+        % u_assgn = cellfun(@(v,i) ['U(' int2str(i) ')=' v],cellstr(num2str(init_relaxed',12))',num2cell(1:nnz(~is_elim_con)),'UniformOutput',false);
+        
+        
+        func_str_LPA=[strjoin(u_read_LPA,newline) newline newline strjoin(par_read,newline) newline newline...
+            strjoin(consrv_assgn,newline)  newline newline newline strjoin([model_defs_plus, {newline}, model_defs_minus], newline)...
+            newline newline strjoin(F_assgn_LPA, newline)];
+        
+        func_str_LPA = fortran_subroutine('FUNC','NDIM,U,ICP,PAR,IJAC,F,DFDU,DFDP',...
+            ['IMPLICIT NONE' newline 'INTEGER NDIM, IJAC, ICP(*)' newline ...
+            'DOUBLE PRECISION U(NDIM), PAR(*), F(NDIM), DFDU(*), DFDP(*)'],...
+            unique([model_pars, u_LPA(offsets_local(:)) cellstr(consrv_nm), model_vars_LPA, string(m1_gamma)],'stable'),...
+            func_str_LPA);
+        
+        
+        
+        stpnt_str_LPA = fortran_subroutine('STPNT','NDIM,U,PAR,T',...
+            ['IMPLICIT NONE' newline 'INTEGER NDIM' newline ...
+            'DOUBLE PRECISION U(NDIM), PAR(*), T'],{},...
+            [ strjoin(par_assgn,newline) newline newline char(strjoin(u_assgn_LPA,newline))]);
+        
+        auto_str_LPA = [ func_str_LPA stpnt_str_LPA fortran_subroutine('BCND') fortran_subroutine('ICND') fortran_subroutine('FOPT') fortran_subroutine('PVLS')  ];
+        auto_str_LPA = breaklines(auto_str_LPA,80,'&');
+        auto_str_LPA = strrep(auto_str_LPA,"^","**");
+        
+        fid=fopen(strcat(save_dir,filesep,f,'_LPA.f90'),'w');
+        fwrite(fid,auto_str_LPA,'char');
+        fclose(fid);
+        
+        
+        fid=fopen(strcat(save_dir,filesep,'c.',f,'_LPA'),'w');
+        fwrite(fid,...
+            ['NDIM=   ' int2str(nnz(is_local)*2) ', NPAR=   ' int2str(length(valid_ind)) ', IPS =   1, IRS =   0, ILP =   1' newline ...
+            'parnames = {'  char(strjoin(strcat(int2str(find(valid_ind)'),": '",model_pars(1:nnz(valid_ind))',"'"),','))  '}' newline ...
+            'unames = {' char(strjoin(strcat(int2str((1:numel(offsets_local))'),": '",u_LPA(offsets_local(:))',"'"),','))  '}' newline...
+            'ICP =  [1]' newline ...
+            'NTST=  50, NCOL=   4, IAD =   3, ISP =   2, ISW = 1, IPLT= 0, NBC= 0, NINT= 0' newline...
+            'NMX= 10000000, NPR=  10000, MXBF=  10, IID =   2, ITMX= 8, ITNW= 5, NWTN= 3, JAC= 0' newline...
+            'EPSL= 1e-7, EPSU = 1e-7, EPSS = 1e-05' newline ...
+            'DS  =   0.001, DSMIN= 0.0000001, DSMAX=   0.05, IADS=   1' newline ...
+            'THL =  {11: 0.0}, THU =  {}' newline ...
+            'UZSTOP={}' newline ...
+            'UZR={}']...
+            ,'char');
+        fclose(fid);
+    end
 end
 preamble={'if length(vox)>1'...
     '[tmp,tmp2]=meshgrid(ir0,vox);'...
@@ -1741,6 +1967,6 @@ if ~isempty(extra_files)
     
     rmpath(rxn_files_path);
 end
-
+disp(strcat("Done Deploying ",f,"."))
 end
 

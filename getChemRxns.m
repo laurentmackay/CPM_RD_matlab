@@ -44,10 +44,17 @@ function [chems,S,rates,fast_species,fast_pairs,fast_affinity,S_cat, species_fas
             rates=cellfun(@(x) regexp(x(2),chem_set,"split",'once'),rxn_split);
             rates=cellfun(@(x) regexprep(x(end),'[\;\n\r]',''),rates,'UniformOutput',0);
             
-            r_stoic=cf2(@(x)abs(x),lhs_stoic);
-            p_stoic=cf2(@(x)abs(x),rhs_stoic);
-            r_species=lhs_species;
-            p_species=rhs_species;
+            if f_rhs==1
+                r_stoic=cf2(@(x)abs(x),lhs_stoic);
+                p_stoic=cf2(@(x)abs(x),rhs_stoic);
+                r_species=lhs_species;
+                p_species=rhs_species;
+            else
+                r_stoic=cf2(@(x)abs(x),rhs_stoic);
+                p_stoic=cf2(@(x)abs(x),lhs_stoic);
+                r_species=rhs_species;
+                p_species=lhs_species;
+            end
             if strcmp(trans,rvsbl_rxn)
                 
                 rates=cellfun(@(x) strsplit(x{1},','),rates,'UniformOutput',0);
